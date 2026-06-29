@@ -18,7 +18,8 @@ endif()
 
 add_executable(chip8_emu
         src/main.cpp
-        src/CPU.cpp)
+        src/CPU.cpp
+        src/Memory.cpp)
 
 target_include_directories(chip8_emu PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
