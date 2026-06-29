@@ -29,9 +29,11 @@ public:
     [[deprecated("Была тестовой функцией")]] void print();
 
     //Для звука/графики (НАВЕРНО)
-    void set_key_state(uint8_t key, bool pressed);
-    uint8_t get_sound_timer() const;
-    bool is_key_pressed(uint8_t key) const;
+    void set_key_state(uint8_t key, bool state);
+    bool get_key_state(uint8_t key) const;
+    uint8_t set_sound_timer(uint8_t value) const;
+    uint8_t set_delay_timer(uint8_t value) const;
+    uint8_t get_delay_timer() const;
     void tick_timers();
 
     //Для дебага
@@ -40,6 +42,6 @@ public:
     uint16_t get_index() const;
     uint8_t get_stack_pointer() const;
     uint16_t get_stack(uint8_t index) const;
-    uint8_t get_delay_timer() const;
+    //uint8_t get_delay_timer() const;
 };
 #endif //CHIP_8_EMULATOR_CPU_H
