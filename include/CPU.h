@@ -2,27 +2,28 @@
 #define CHIP_8_EMULATOR_CPU_H
 
 #include <cstdint>
+#include <array>
 #include "Memory.h"
 
 class CPU{
 private:
     Memory& memory;
 
-    uint8_t V[16]{}; //регистры
+    std::array<uint8_t,16> V{}; //регистры
     uint16_t index{};
     uint16_t program_counter{};
-    uint16_t stack[16]{};
+    std::array<uint16_t, 16> stack{};
     uint8_t stack_pointer{};
     uint8_t delay_timer{};
     uint8_t sound_timer{};
-    uint8_t keypad[16]{};
+    std::array<uint8_t, 16> keypad{};
     bool waiting_for_key{};
     uint8_t key_register{};
 
     uint16_t fetch();
     void execute(uint16_t opcode);
 public:
-    CPU(Memory& memory_): memory(memory_){}
+    explicit CPU(Memory& memory_): memory(memory_){}
 
     void reset();
     void tick(); // Выполнить одну инструкцию
@@ -31,8 +32,8 @@ public:
     //Для звука/графики (НАВЕРНО)
     void set_key_state(uint8_t key, bool state);
     bool get_key_state(uint8_t key) const;
-    uint8_t set_sound_timer(uint8_t value) const;
-    uint8_t set_delay_timer(uint8_t value) const;
+    void set_sound_timer(uint8_t value);
+    void set_delay_timer(uint8_t value);
     uint8_t get_delay_timer() const;
     void tick_timers();
 

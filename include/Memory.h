@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <string>
+#include <array>
 
 class Memory{
 public:
@@ -19,7 +20,7 @@ public:
     //Dlya MemoryViewer наверно
     const uint8_t* raw() const;
 private:
-    uint8_t data[MEM_SIZE]{};
+    std::array<uint8_t, MEM_SIZE> data{};
     void load_font();
 };
 #endif //CHIP_8_EMULATOR_MEMORY_H
