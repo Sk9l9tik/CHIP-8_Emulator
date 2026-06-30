@@ -21,7 +21,8 @@ add_executable(chip8_emu
         src/CPU.cpp
         src/Memory.cpp
         src/FrameBuffer.cpp
-        src/CHIP_8.cpp)
+        src/CHIP_8.cpp
+)
 
 target_include_directories(chip8_emu PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
