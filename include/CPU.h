@@ -4,10 +4,12 @@
 #include <cstdint>
 #include <array>
 #include "Memory.h"
+#include "FrameBuffer.h"
 
 class CPU{
 private:
     Memory& memory;
+    FrameBuffer& frame_buffer;
 
     std::array<uint8_t,16> V{}; //регистры
     uint16_t index{};
@@ -23,7 +25,7 @@ private:
     uint16_t fetch();
     void execute(uint16_t opcode);
 public:
-    explicit CPU(Memory& memory_): memory(memory_){}
+    explicit CPU(Memory& memory_, FrameBuffer& frame_buffer_);
 
     void reset();
     void tick(); // Выполнить одну инструкцию

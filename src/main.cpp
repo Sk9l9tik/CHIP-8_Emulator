@@ -1,10 +1,8 @@
-#include "CPU.h"
-#include "Memory.h"
+#include "CHIP_8.h"
 #include <iostream>
 
 int main(){
-    Memory memory{};
-    CPU cpu {memory};
-    std::cout << "SAERMO::" << static_cast<int>(cpu.get_stack_pointer()) << '\n';
+    CHIP_8 emulator {};
+    std::cout << "SAERMO::" << static_cast<int>(emulator.get_cpu().get_stack_pointer()) << '\n';
     return 0;
 }

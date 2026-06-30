@@ -4,6 +4,7 @@
 void CPU::print() {std::cout << "Hello World!";}
 uint16_t CPU::fetch() { return 0;}
 void CPU::execute(uint16_t opcode) {}
+CPU::CPU(Memory &memory_, FrameBuffer &frame_buffer_): memory(memory_), frame_buffer(frame_buffer_) {}
 void CPU::reset() {}
 void CPU::tick() {}
 void CPU::set_key_state(uint8_t key, bool pressed) {}
