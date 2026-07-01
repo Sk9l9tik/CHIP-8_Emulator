@@ -29,7 +29,7 @@ public:
 
     void reset();
     void tick(); // Выполнить одну инструкцию
-    [[deprecated("Была тестовой функцией")]] void print();
+    [[deprecated("Deprecated test function")]] void print();
 
     //Для звука/графики (НАВЕРНО)
     void set_key_state(uint8_t key, bool state);
