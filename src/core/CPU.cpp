@@ -1,5 +1,7 @@
 #include <iostream>
-#include "CPU.h"
+
+#include "core/CPU.h"
+
 
 void CPU::print() {std::cout << "Hello World!";}
 uint16_t CPU::fetch() { return 0;}

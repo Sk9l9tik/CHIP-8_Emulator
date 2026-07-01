@@ -1,4 +1,5 @@
-#include "CHIP_8.h"
+#include "core/CHIP_8.h"
+
 
 CHIP_8::CHIP_8(): cpu(memory, frame_buffer) {}
 void CHIP_8::load_ROM(const std::string &path) {

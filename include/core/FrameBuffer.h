@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <array>
 
+
 class FrameBuffer{
 public:
     static constexpr uint8_t WIDTH = 64;

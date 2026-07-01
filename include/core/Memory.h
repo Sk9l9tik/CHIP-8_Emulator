@@ -5,6 +5,7 @@
 #include <string>
 #include <array>
 
+
 class Memory{
 public:
     static constexpr uint16_t ROM_START = 0x200;

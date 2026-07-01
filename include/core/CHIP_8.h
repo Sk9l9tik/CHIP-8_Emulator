@@ -5,6 +5,7 @@
 #include "FrameBuffer.h"
 #include "CPU.h"
 
+
 class CHIP_8{
     CPU cpu;
     Memory memory;

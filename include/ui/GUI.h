@@ -2,7 +2,9 @@
 #define CHIP_8_EMULATOR_GUI_H
 
 #include <SFML/Graphics.hpp>
+
 #include "Widget.h"
+
 
 class GUI{
 public:

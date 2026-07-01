@@ -1,6 +1,8 @@
-#include "Memory.h"
 #include <fstream>
 #include <stdexcept>
+
+#include "core/Memory.h"
+
 
 static const uint8_t FONT_DATA[80] = {
         0xF0, 0x90, 0x90, 0x90, 0xF0, // 0

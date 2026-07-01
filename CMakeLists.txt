@@ -16,12 +16,15 @@ else()
     FetchContent_MakeAvailable(sfml)
 endif()
 
+file(GLOB_RECURSE CORE_SRC src/core/*.cpp)
+file(GLOB_RECURSE DEBUG_SRC src/debug/*.cpp)
+file(GLOB_RECURSE UI_SRC src/ui/*.cpp)
+
 add_executable(chip8_emu
-        src/main.cpp
-        src/CPU.cpp
-        src/Memory.cpp
-        src/FrameBuffer.cpp
-        src/CHIP_8.cpp
+    ${CORE_SRC}
+    ${DEBUG_SRC}
+    ${UI_SRC}
+    src/main.cpp
 )
 
 target_include_directories(chip8_emu PRIVATE ${PROJECT_SOURCE_DIR}/include)

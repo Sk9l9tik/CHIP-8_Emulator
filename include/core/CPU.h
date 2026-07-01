@@ -3,8 +3,10 @@
 
 #include <cstdint>
 #include <array>
-#include "Memory.h"
-#include "FrameBuffer.h"
+
+#include "core/Memory.h"
+#include "core/FrameBuffer.h"
+
 
 class CPU{
 private:
