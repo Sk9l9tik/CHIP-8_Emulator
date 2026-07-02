@@ -23,8 +23,11 @@ void CPU::execute(uint16_t opcode) {
     uint8_t NN = opcode & 0x00FF;
     uint16_t NNN = opcode & 0x0FFF;
 
-    std::ostringstream oss;
-    oss << "Unknown instruction passed at line: 0x" << std::hex << std::uppercase; //TODO: переписать под лямбда-функцию
+    auto throw_unknown = [&](){
+        std::ostringstream oss;
+        oss << "Unknown instruction passed at line: 0x" << std::hex << std::uppercase << program_counter - 2;
+        throw std::runtime_error(oss.str());
+    };
 
     switch(C){
         case 0x0:
@@ -35,8 +38,7 @@ void CPU::execute(uint16_t opcode) {
                 program_counter = stack[stack_pointer];
             }
             else{
-                oss << (program_counter-2);
-                throw std::runtime_error(oss.str());
+                throw_unknown();
             }
             break;
         case 0x1: //JMP NNN
@@ -70,11 +72,41 @@ void CPU::execute(uint16_t opcode) {
                 case 0x1: //OR Vx, Vy (Побитово сложить Vx, Vy, результат в Vx)
                     V.at(X) |= V.at(Y);
                     break;
+                case 0x2: //AND Vx, Vy (Побитово умножить Vx, Vy, результат в Vx)
+                    V.at(X) &= V.at(Y);
+                    break;
+                case 0x3: //XOR Vx, Vy (Сложение по модулю 2 Vx, Vy, результат в Vx)
+                    V.at(X) ^= V.at(Y);
+                    break;
+                case 0x4: //ADD Vx, Vy (Сложение Vx, Vy; Если сумма больше 255, то установка регистра флагов)
+                {
+                    uint8_t sum = V.at(X) + V.at(Y);
+                    V.at(0xF) = (sum > 0xFF) ? 1 : 0;
+                    V.at(X) = sum & 0xFF;
+                    break;
+                }
+                case 0x5: //SUB Vx, Vy (Вычитание Vx, Vy; Если Vx > Vy, то установка регистра флагов)
+                    V.at(0xF) = (V.at(X) > V.at(Y)) ? 1 : 0;
+                    V.at(X) -= V.at(Y);
+                    break;
+                case 0x6: //SHR Vx (Сдвиг Vx вправо на 1; Если число нечётное, то установка регистра флагов)
+                    V.at(0xF) = V.at(X) & 0x1;
+                    V.at(X) >>= 1;
+                    break;
+                case 0x7: //SUBN Vx, Vy (Вычитание Vy, Vx; Если Vy > Vx, то установка регистра флагов. Результат всё равно в Vx)
+                    V.at(0xF) = (V.at(Y) > V.at(X)) ? 1: 0;
+                    V.at(X) = V.at(Y) - V.at(X);
+                    break;
+                case 0xE:
+                    V.at(0xF) = (V.at(X) & 0x80) >> 7u;
+                    V.at(X) <<= 1;
+                    break;
+                default:
+                    throw_unknown();
             }
             break;
         default:
-            oss << (program_counter-2);
-            throw std::runtime_error(oss.str());
+            throw_unknown();
     }
 }
 CPU::CPU(Memory &memory_, FrameBuffer &frame_buffer_): memory(memory_), frame_buffer(frame_buffer_) {
