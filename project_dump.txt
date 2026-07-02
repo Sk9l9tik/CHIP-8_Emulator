@@ -1,0 +1,696 @@
+================================================================================
+FILE: .gitignore
+================================================================================
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Linker files
+*.ilk
+
+# Debugger Files
+*.pdb
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+*.so.*
+
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Build directories
+build/
+Build/
+build-*/
+cmake-build-*/
+
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+install_manifest.txt
+compile_commands.json
+
+
+# Temporary files
+*.tmp
+*.log
+*.bak
+*.swp
+
+# vcpkg
+vcpkg_installed/
+
+# debug information files
+*.dwo
+
+# test output & cache
+Testing/
+.cache/
+
+# IDEA
+.idea/
+
+================================================================================
+FILE: CMakeLists.txt
+================================================================================
+cmake_minimum_required(VERSION 3.31)
+project(CHIP-8_Emulator)
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+include(FetchContent)
+
+find_package(SFML 3 COMPONENTS graphics audio QUIET)
+if(SFML_FOUND)
+    message(STATUS "Using system SFML: ${SFML_DIR}")
+else()
+    FetchContent_Declare(sfml
+            GIT_REPOSITORY https://github.com/SFML/SFML.git
+            GIT_TAG 3.0.2)
+    FetchContent_MakeAvailable(sfml)
+endif()
+
+file(GLOB_RECURSE CORE_SRC src/core/*.cpp)
+file(GLOB_RECURSE DEBUG_SRC src/debug/*.cpp)
+file(GLOB_RECURSE UI_SRC src/ui/*.cpp)
+
+add_executable(chip8_emu
+    ${CORE_SRC}
+    ${DEBUG_SRC}
+    ${UI_SRC}
+    src/main.cpp
+)
+
+target_include_directories(chip8_emu PRIVATE ${PROJECT_SOURCE_DIR}/include)
+
+target_link_libraries(chip8_emu PRIVATE sfml-graphics sfml-audio)
+
+
+================================================================================
+FILE: LICENSE
+================================================================================
+MIT License
+
+Copyright (c) 2026 Alexandr Belosheev
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+================================================================================
+FILE: include/core/CHIP_8.h
+================================================================================
+#ifndef CHIP_8_EMULATOR_CHIP_8_H
+#define CHIP_8_EMULATOR_CHIP_8_H
+
+#include "Memory.h"
+#include "FrameBuffer.h"
+#include "CPU.h"
+
+
+class CHIP_8{
+    CPU cpu;
+    Memory memory;
+    FrameBuffer frame_buffer;
+public:
+    CHIP_8();
+
+    void load_ROM(const std::string& path);
+    void tick();
+    void tick_timers();
+
+    CPU& get_cpu();
+    //read-only приколы. только CPU их может менять, а остальные только читать
+    const FrameBuffer& get_frame_buffer() const;
+    const Memory& get_memory() const;
+};
+
+#endif //CHIP_8_EMULATOR_CHIP_8_H
+
+
+================================================================================
+FILE: include/core/CPU.h
+================================================================================
+#ifndef CHIP_8_EMULATOR_CPU_H
+#define CHIP_8_EMULATOR_CPU_H
+
+#include <cstdint>
+#include <array>
+
+#include "core/Memory.h"
+#include "core/FrameBuffer.h"
+
+
+class CPU{
+private:
+    Memory& memory;
+    FrameBuffer& frame_buffer;
+
+    std::array<uint8_t,16> V{}; //регистры
+    uint16_t index{};
+    uint16_t program_counter{};
+    std::array<uint16_t, 16> stack{};
+    uint8_t stack_pointer{};
+    uint8_t delay_timer{};
+    uint8_t sound_timer{};
+    std::array<uint8_t, 16> keypad{};
+    bool waiting_for_key{};
+    uint8_t key_register{};
+
+    uint16_t fetch();
+    void execute(uint16_t opcode);
+public:
+    explicit CPU(Memory& memory_, FrameBuffer& frame_buffer_);
+
+    void reset();
+    void tick(); // Выполнить одну инструкцию
+    [[deprecated("Deprecated test function")]] void print();
+
+    //Для звука/графики (НАВЕРНО)
+    void set_key_state(uint8_t key, bool state);
+    bool get_key_state(uint8_t key) const;
+    void set_sound_timer(uint8_t value);
+    void set_delay_timer(uint8_t value);
+    uint8_t get_delay_timer() const;
+    void tick_timers();
+
+    //Для дебага
+    uint16_t get_PC() const;
+    uint8_t get_register(uint8_t index) const;
+    uint16_t get_index() const;
+    uint8_t get_stack_pointer() const;
+    uint16_t get_stack(uint8_t index) const;
+    //uint8_t get_delay_timer() const;
+};
+#endif //CHIP_8_EMULATOR_CPU_H
+
+
+================================================================================
+FILE: include/core/FrameBuffer.h
+================================================================================
+#ifndef CHIP_8_EMULATOR_FRAMEBUFFER_H
+#define CHIP_8_EMULATOR_FRAMEBUFFER_H
+
+#include <cstdint>
+#include <array>
+
+
+class FrameBuffer{
+public:
+    static constexpr uint8_t WIDTH = 64;
+    static constexpr uint8_t HEIGHT = 32;
+
+    FrameBuffer();
+
+    void clear_screen();
+    bool draw_sprite(uint8_t x, uint8_t y, const uint8_t* sprite_data, uint8_t height);
+    const std::array<bool, WIDTH*HEIGHT>& get_frame_buffer() const;
+private:
+    std::array<bool, WIDTH*HEIGHT> pixels{};
+};
+
+#endif //CHIP_8_EMULATOR_FRAMEBUFFER_H
+
+
+================================================================================
+FILE: include/core/Memory.h
+================================================================================
+#ifndef CHIP_8_EMULATOR_MEMORY_H
+#define CHIP_8_EMULATOR_MEMORY_H
+
+#include <cstdint>
+#include <string>
+#include <array>
+
+
+class Memory{
+public:
+    static constexpr uint16_t ROM_START = 0x200;
+    static constexpr uint16_t FONT_START = 0x050;
+    static constexpr uint16_t MEM_SIZE = 4096;
+
+    Memory(); //надо будет шрифт зафигарить в 0x050 CHTO
+
+    void load_ROM(const std::string& path);
+    uint8_t read(uint16_t addr) const;
+    void write(uint16_t addr, uint8_t val);
+
+    //Dlya MemoryViewer наверно
+    const uint8_t* raw() const;
+private:
+    std::array<uint8_t, MEM_SIZE> data{};
+    void load_font();
+};
+#endif //CHIP_8_EMULATOR_MEMORY_H
+
+
+================================================================================
+FILE: include/debug/BreakpointManager.h
+================================================================================
+#ifndef CHIP_8_BREAKPOINT_MANAGER_H
+#define CHIP_8_BREAKPOINT_MANAGER_H
+
+#endif //CHIP_8_BREAKPOINT_MANAGER_H
+
+
+================================================================================
+FILE: include/debug/Debugger.h
+================================================================================
+#ifndef CHIP_8_DEBUGGER_H
+#define CHIP_8_DEBUGGER_H
+
+#include "core/CHIP_8.h"
+
+
+class Debugger {
+  CHIP_8& emulator;
+  bool paused{};
+  
+public:
+  Debugger(CHIP_8& emu);
+
+  void pause();
+  void resume();
+  void step(); // 1 instruction
+
+  bool is_paused();
+
+  void update();
+};
+
+#endif //CHIP_8_DEBUGGER_H
+
+
+================================================================================
+FILE: include/ui/GUI.h
+================================================================================
+#ifndef CHIP_8_EMULATOR_GUI_H
+#define CHIP_8_EMULATOR_GUI_H
+
+#include <SFML/Graphics.hpp>
+
+#include "Widget.h"
+
+
+class GUI{
+public:
+
+    GUI(sf::RenderWindow &window, std::string title);
+
+    void add(Widget &widget);
+
+    void render();
+
+    void setup_widgets();
+
+    void update();
+
+    void handle_events();
+
+private:
+    sf::RenderWindow    *sf_window;
+    std::string         title;
+
+    //flags
+
+    bool resizing = false;
+    bool dragging = false;
+
+    //
+};
+
+#endif //CHIP_8_EMULATOR_GUI_H
+
+
+================================================================================
+FILE: include/ui/Widget.h
+================================================================================
+#ifndef CHIP_8_EMULATOR_WIDGET_H
+#define CHIP_8_EMULATOR_WIDGET_H
+
+#include <string>
+#include <vector>
+#include <SFML/Graphics.hpp>
+
+
+class Widget{
+public:
+    int             z_index;
+    sf::Vector2f    size;
+    sf::Vector2f    pos;
+
+    //
+
+    virtual ~Widget() = default;
+
+    virtual void handle_event(const sf::Event& event, const sf::Vector2f& mouse_pos) = 0;
+    virtual void update() = 0;
+    virtual bool render(sf::RenderTarget &target) = 0;
+
+    virtual void set_position(sf::Vector2f pos) = 0;
+    virtual void set_size(sf::Vector2f pos) = 0;
+
+    //
+};
+
+#endif //CHIP_8_EMULATOR_WIDGET_H
+
+
+================================================================================
+FILE: project_dump.txt
+================================================================================
+
+
+================================================================================
+FILE: src/core/CHIP_8.cpp
+================================================================================
+#include "core/CHIP_8.h"
+
+
+CHIP_8::CHIP_8(): cpu(memory, frame_buffer) {}
+void CHIP_8::load_ROM(const std::string &path) {
+    memory.load_ROM(path);
+}
+void CHIP_8::tick() {}
+void CHIP_8::tick_timers() {}
+CPU& CHIP_8::get_cpu() { return cpu;}
+const FrameBuffer& CHIP_8::get_frame_buffer() const { return{};}
+const Memory& CHIP_8::get_memory() const { return memory; }
+
+
+================================================================================
+FILE: src/core/CPU.cpp
+================================================================================
+#include <iostream>
+#include <stdexcept>
+#include <sstream>
+
+#include "core/CPU.h"
+
+
+void CPU::print() {std::cout << "Hello World!";}
+uint16_t CPU::fetch() {
+    uint16_t opcode = (memory.read(program_counter) << 8u) | memory.read(program_counter+1);
+    program_counter += 2;
+    return opcode;
+}
+void CPU::execute(uint16_t opcode) {
+    /*Все инструкции имеют шаблон
+     * CXYN, где C - тип инструкции; X, Y - регистры операндов; N - константа
+     * CXNN, где NN - константа 8 бит
+     * CNNN, где NNN - адрес 12 бит*/
+    uint8_t C = (opcode & 0xF000) >> 12;
+    uint8_t X = (opcode & 0x0F00) >> 8;
+    uint8_t Y = (opcode & 0x00F0) >> 4;
+    uint8_t N = opcode & 0x000F;
+    uint8_t NN = opcode & 0x00FF;
+    uint16_t NNN = opcode & 0x0FFF;
+
+    auto throw_unknown = [&](){
+        std::ostringstream oss;
+        oss << "Unknown instruction passed at line: 0x" << std::hex << std::uppercase << program_counter - 2;
+        throw std::runtime_error(oss.str());
+    };
+
+    switch(C){
+        case 0x0:
+            if(opcode == 0x00E0) //очищение экрана
+                frame_buffer.clear_screen();
+            else if(opcode == 0x00EE){ //возврат из подпроги RET
+                --stack_pointer;
+                program_counter = stack[stack_pointer];
+            }
+            else{
+                throw_unknown();
+            }
+            break;
+        case 0x1: //JMP NNN
+            program_counter = NNN;
+            break;
+        case 0x2: //CALL NNN
+            stack[stack_pointer] = program_counter;
+            ++stack_pointer;
+            program_counter = NNN;
+            break;
+        case 0x3: //SE Vx, NN (Пропуск след. инструкции, если Vx == NN)
+            if(V.at(X) == NN) program_counter += 2;
+            break;
+        case 0x4: //SNE Vx, NN (Пропуск след. инструкции, если Vx != NN)
+            if(V.at(X) != NN) program_counter += 2;
+            break;
+        case 0x5: //SE Vx, Vy (Пропуск след. инструкции, если Vx == Vy)
+            if(V.at(X) == V.at(Y)) program_counter += 2;
+            break;
+        case 0x6: //LD Vx, NN (Загрузить в Vx NN)
+            V.at(X) = NN;
+            break;
+        case 0x7: //ADD Vx, NN (Добавить к Vx NN)
+            V.at(X) += NN;
+            break;
+        case 0x8:
+            switch(N){
+                case 0x0: //LD Vx, Vy (Установить Vx равным Vy)
+                    V.at(X) = V.at(Y);
+                    break;
+                case 0x1: //OR Vx, Vy (Побитово сложить Vx, Vy, результат в Vx)
+                    V.at(X) |= V.at(Y);
+                    break;
+                case 0x2: //AND Vx, Vy (Побитово умножить Vx, Vy, результат в Vx)
+                    V.at(X) &= V.at(Y);
+                    break;
+                case 0x3: //XOR Vx, Vy (Сложение по модулю 2 Vx, Vy, результат в Vx)
+                    V.at(X) ^= V.at(Y);
+                    break;
+                case 0x4: //ADD Vx, Vy (Сложение Vx, Vy; Если сумма больше 255, то установка регистра флагов)
+                {
+                    uint8_t sum = V.at(X) + V.at(Y);
+                    V.at(0xF) = (sum > 0xFF) ? 1 : 0;
+                    V.at(X) = sum & 0xFF;
+                    break;
+                }
+                case 0x5: //SUB Vx, Vy (Вычитание Vx, Vy; Если Vx > Vy, то установка регистра флагов)
+                    V.at(0xF) = (V.at(X) > V.at(Y)) ? 1 : 0;
+                    V.at(X) -= V.at(Y);
+                    break;
+                case 0x6: //SHR Vx (Сдвиг Vx вправо на 1; Если число нечётное, то установка регистра флагов)
+                    V.at(0xF) = V.at(X) & 0x1;
+                    V.at(X) >>= 1;
+                    break;
+                case 0x7: //SUBN Vx, Vy (Вычитание Vy, Vx; Если Vy > Vx, то установка регистра флагов. Результат всё равно в Vx)
+                    V.at(0xF) = (V.at(Y) > V.at(X)) ? 1: 0;
+                    V.at(X) = V.at(Y) - V.at(X);
+                    break;
+                case 0xE:
+                    V.at(0xF) = (V.at(X) & 0x80) >> 7u;
+                    V.at(X) <<= 1;
+                    break;
+                default:
+                    throw_unknown();
+            }
+            break;
+        default:
+            throw_unknown();
+    }
+}
+CPU::CPU(Memory &memory_, FrameBuffer &frame_buffer_): memory(memory_), frame_buffer(frame_buffer_) {
+    reset();
+}
+void CPU::reset() {
+    V.fill(0);
+    index = 0;
+    program_counter = Memory::ROM_START;
+    stack.fill(0);
+    stack_pointer = 0;
+    delay_timer = 0;
+    sound_timer = 0;
+    keypad.fill(0);
+    waiting_for_key = false;
+    key_register = 0;
+    frame_buffer.clear_screen();
+}
+void CPU::tick() {
+    uint16_t opcode = fetch();
+    execute(opcode);
+}
+void CPU::set_key_state(uint8_t key, bool pressed) {}
+bool CPU::get_key_state(uint8_t key) const { return 0;}
+void CPU::set_sound_timer(uint8_t value) {
+    sound_timer = value;
+}
+void CPU::set_delay_timer(uint8_t value) {
+    delay_timer = value;
+}
+uint8_t CPU::get_delay_timer() const { return delay_timer;}
+void CPU::tick_timers() {
+    if(delay_timer > 0) delay_timer--;
+    if(sound_timer > 0) sound_timer--;
+}
+uint16_t CPU::get_PC() const { return program_counter; }
+uint8_t CPU::get_register(uint8_t reg_index) const { return V.at(reg_index); }
+uint16_t CPU::get_index() const { return index;}
+uint8_t CPU::get_stack_pointer() const { return stack_pointer;}
+uint16_t CPU::get_stack(uint8_t stack_index) const { return stack.at(stack_index);}
+
+
+================================================================================
+FILE: src/core/FrameBuffer.cpp
+================================================================================
+#include "core/FrameBuffer.h"
+
+
+FrameBuffer::FrameBuffer(){
+    pixels.fill(false);
+}
+void FrameBuffer::clear_screen() {
+    pixels.fill(false);
+}
+bool FrameBuffer::draw_sprite(uint8_t x, uint8_t y, const uint8_t *sprite_data, uint8_t height) { return false;}
+const std::array<bool, FrameBuffer::WIDTH*FrameBuffer::HEIGHT>& FrameBuffer::get_frame_buffer() const {
+    return pixels;
+}
+
+
+================================================================================
+FILE: src/core/Memory.cpp
+================================================================================
+#include <fstream>
+#include <stdexcept>
+
+#include "core/Memory.h"
+
+
+static const uint8_t FONT_DATA[80] = {
+        0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+        0x20, 0x60, 0x20, 0x20, 0x70, // 1
+        0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+        0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+        0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+        0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+        0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+        0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+        0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+        0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+        0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+        0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+        0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+        0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+        0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+        0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+};
+
+Memory::Memory(){
+    load_font();
+}
+void Memory::load_ROM(const std::string& path) {
+    std::ifstream file(path, std::ios::binary | std::ios::ate);
+    if(!file.is_open()) throw std::runtime_error("Failed to open ROM: " + path);
+
+    std::streamsize file_size = file.tellg();
+    if(file_size > static_cast<std::streamsize>(MEM_SIZE - ROM_START))
+        throw std::runtime_error("ROM too large: " + path);
+
+    file.seekg(0, std::ios::beg);
+    file.read(reinterpret_cast<char*>(data.data() + ROM_START), file_size);
+}
+uint8_t Memory::read(uint16_t addr) const {
+    return data.at(addr);
+}
+void Memory::write(uint16_t addr, uint8_t val) {
+    data.at(addr) = val;
+}
+const uint8_t* Memory::raw() const {
+    return data.data();
+}
+void Memory::load_font() {
+    for(int i = 0; i < 80; ++i)
+        data.at(FONT_START + i) = FONT_DATA[i];
+}
+
+
+================================================================================
+FILE: src/debug/Debugger.cpp
+================================================================================
+#include "debug/Debugger.h"
+
+
+Debugger::Debugger(CHIP_8& emu) : emulator(emu) {}
+
+void Debugger::step(){ emulator.tick(); }
+
+void Debugger::pause() { paused = true; }
+void Debugger::resume() { paused = false; }
+
+bool Debugger::is_paused() { return paused; }
+
+void Debugger::update() { } // 0_o
+
+
+================================================================================
+FILE: src/main.cpp
+================================================================================
+#include <cstdio>
+
+#include <iostream>
+
+#include "core/CHIP_8.h"
+
+#include "debug/Debugger.h"
+
+int main(){
+    CHIP_8 emulator {};
+    Debugger d(emulator);
+    emulator.load_ROM("IBM_Logo.ch8"); //укажите здесь пути до этого прикола свои
+    std::cout << "Font Check\n";
+    for(int i = 0; i < 5; ++i)
+        printf("%04X: %02X\n", 0x050 + i, emulator.get_memory().raw()[0x050+i]);
+
+    for(int i = 0; i < 16; ++i)
+        printf("%04X: %02X\n", 0x200+i, emulator.get_memory().raw()[0x200+i]);
+    emulator.get_cpu().tick();
+    emulator.get_cpu().tick(); //вторая инструкция из этого РОМа пока не реализована если чё
+    return 0;
+}
+
+

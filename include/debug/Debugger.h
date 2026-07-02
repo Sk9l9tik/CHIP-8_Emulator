@@ -1,21 +1,35 @@
 #ifndef CHIP_8_DEBUGGER_H
 #define CHIP_8_DEBUGGER_H
 
-#include <memory>
-
-#include "core/CPU.h"
+#include "core/CHIP_8.h"
+#include "debug/BreakpointManager.h"
 
 
 class Debugger {
-  std::unique_ptr<CPU> cpu;
-  bool paused{};
-  
 public:
-  void pause();
-  void resume();
+  Debugger(CHIP_8& emu);
+
+  void pause() noexcept;
+  void resume() noexcept;
   void step(); // 1 instruction
 
-  bool is_paused();
-};
+  bool is_paused() const noexcept;
 
+  void update();
+
+  //  Breakpoints control
+  void set_breakpoint(uint16_t addr);
+  void remove_breakpoint(uint16_t addr);
+  void toggle_breakpoint(uint16_t addr);
+  bool has_breakpoint(uint16_t addr) const;
+  void clear_breakpoints();
+
+  const BreakpointManager& get_breakpoints() const;
+
+private:
+  CHIP_8& emulator;
+  BreakpointManager breakpoints;
+  bool paused{};
+};
+  
 #endif //CHIP_8_DEBUGGER_H
