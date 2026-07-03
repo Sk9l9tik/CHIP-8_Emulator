@@ -31,24 +31,6 @@ public:
         target.draw(d_sprite);
     }
 
-    //
-
-//    void set_pixel(uint8_t x, uint8_t y, bool state){
-//        pixel_data->get_frame_buffer()[x+y*DISPLAY_WIDTH] = state;
-//    }
-
-    bool get_pixel(uint8_t x, uint8_t y) const {
-        return pixel_data.get_frame_buffer()[x+y*DISPLAY_WIDTH];
-    }
-
-//    void fill(bool state){
-//        std::fill(pixel_data.begin(), pixel_data.end(), state);
-//    }
-//
-//    void clear(){
-//        fill(false);
-//    }
-
     void set_pixel_size(float p_size){
         pixel_size = p_size;
     }

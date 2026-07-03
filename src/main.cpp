@@ -20,6 +20,7 @@ int main(){
     sf::RenderWindow window(sf::VideoMode({640, 320}), "CHIP-8 Emulator");
     GUI gui{&window, &emulator};
 
+
     //
     sf::Clock clock;
     float fps = 0.f;
@@ -31,9 +32,11 @@ int main(){
 
     fps_text.setPosition({static_cast<float>(window.getSize().x)
                              - fps_text.getGlobalBounds().size.x, 0.f});
-
+    //
     Display display{emulator.get_frame_buffer()};
     display.set_size({640, 320});
+
+
 
     gui.add(&display);
 #ifdef CHIP8_DEBUG
@@ -54,7 +57,6 @@ int main(){
 //        printf("%04X: %02X\n", 0x200 + i, emulator.get_memory().raw()[0x200+i]);
 //    emulator.tick();
 //    emulator.tick();
-
     while (window.isOpen())
     {
         while (const std::optional event = window.pollEvent())
