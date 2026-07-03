@@ -32,14 +32,15 @@ void CPU::execute(uint16_t opcode) {
 
     switch(C){
         case 0x0:
-            if(opcode == 0x00E0) //CLS (Очищение экрана)
-                frame_buffer.clear_screen();
-            else if(opcode == 0x00EE){ //Ret (Возврат из подпроги)
-                --stack_pointer;
-                program_counter = stack[stack_pointer];
-            }
-            else{
-                throw_unknown();
+            switch(NN){
+                case 0xE0: //CLS (Очищение экрана)
+                    frame_buffer.clear_screen();
+                    break;
+                case 0xEE: //Ret (Возврат из подпроги)
+                    --stack_pointer;
+                    program_counter = stack.at(stack_pointer);
+                    break;
+                default: throw_unknown();
             }
             break;
         case 0x1: //JMP NNN
@@ -199,7 +200,7 @@ void CPU::reset() {
     frame_buffer.clear_screen();
 }
 void CPU::tick() {
-    if(waiting_for_key) return;
+    if(waiting_for_key) [[unlikely]] return;
     uint16_t opcode = fetch();
     execute(opcode);
 }
@@ -212,20 +213,20 @@ void CPU::set_key_state(uint8_t key, bool pressed) {
     }
 }
 bool CPU::get_key_state(uint8_t key) const { return keypad.at(key);}
-void CPU::set_sound_timer(uint8_t value) {
+void CPU::set_sound_timer(uint8_t value) noexcept {
     sound_timer = value;
 }
-void CPU::set_delay_timer(uint8_t value) {
+void CPU::set_delay_timer(uint8_t value) noexcept {
     delay_timer = value;
 }
-uint8_t CPU::get_delay_timer() const { return delay_timer;}
-uint8_t CPU::get_sound_timer() const { return sound_timer;}
+uint8_t CPU::get_delay_timer() const noexcept { return delay_timer;}
+uint8_t CPU::get_sound_timer() const noexcept { return sound_timer;}
 void CPU::tick_timers() {
     if(delay_timer > 0) delay_timer--;
     if(sound_timer > 0) sound_timer--;
 }
-uint16_t CPU::get_PC() const { return program_counter; }
+uint16_t CPU::get_PC() const noexcept { return program_counter; }
 uint8_t CPU::get_register(uint8_t reg_index) const { return V.at(reg_index); }
-uint16_t CPU::get_index() const { return index;}
-uint8_t CPU::get_stack_pointer() const { return stack_pointer;}
+uint16_t CPU::get_index() const noexcept { return index;}
+uint8_t CPU::get_stack_pointer() const noexcept { return stack_pointer;}
 uint16_t CPU::get_stack(uint8_t stack_index) const { return stack.at(stack_index);}

@@ -13,8 +13,8 @@ public:
     FrameBuffer();
 
     void clear_screen();
-    bool draw_sprite(uint8_t x, uint8_t y, const uint8_t* sprite_data, uint8_t height);
-    const std::array<bool, WIDTH*HEIGHT>& get_frame_buffer() const;
+    [[nodiscard]] bool draw_sprite(uint8_t x, uint8_t y, const uint8_t* sprite_data, uint8_t height);
+    [[nodiscard]] const std::array<bool, WIDTH*HEIGHT>& get_frame_buffer() const;
 private:
     std::array<bool, WIDTH*HEIGHT> pixels{};
 };

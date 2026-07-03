@@ -29,8 +29,8 @@ int main(){
         printf("%04X: %02X\n", 0x050 + i, emulator.get_memory().raw()[0x050+i]);
 
     for(int i = 0; i < 16; ++i)
-        printf("%04X: %02X\n", 0x200+i, emulator.get_memory().raw()[0x200+i]);
-    emulator.get_cpu().tick();
-    emulator.get_cpu().tick(); //вторая инструкция из этого РОМа пока не реализована если чё
+        printf("%04X: %02X\n", 0x200 + i, emulator.get_memory().raw()[0x200+i]);
+    emulator.tick();
+    emulator.tick();
     return 0;
 }

@@ -17,10 +17,10 @@ public:
     void tick();
     void tick_timers();
 
-    CPU& get_cpu();
+    [[nodiscard]] CPU& get_cpu();
     //read-only приколы. только CPU их может менять, а остальные только читать
-    const FrameBuffer& get_frame_buffer() const;
-    const Memory& get_memory() const;
+    [[nodiscard]] const FrameBuffer& get_frame_buffer() const;
+    [[nodiscard]] const Memory& get_memory() const;
 };
 
 #endif //CHIP_8_EMULATOR_CHIP_8_H

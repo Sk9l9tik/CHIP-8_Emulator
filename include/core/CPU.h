@@ -36,18 +36,18 @@ public:
     //Для звука/графики (НАВЕРНО)
     void set_key_state(uint8_t key, bool state);
     bool get_key_state(uint8_t key) const;
-    void set_sound_timer(uint8_t value);
-    void set_delay_timer(uint8_t value);
-    uint8_t get_delay_timer() const;
-    uint8_t get_sound_timer() const;
+    void set_sound_timer(uint8_t value) noexcept;
+    void set_delay_timer(uint8_t value) noexcept;
+    [[nodiscard]] uint8_t get_delay_timer() const noexcept;
+    [[nodiscard]] uint8_t get_sound_timer() const noexcept;
     void tick_timers();
 
     //Для дебага
-    uint16_t get_PC() const;
-    uint8_t get_register(uint8_t index) const;
-    uint16_t get_index() const;
-    uint8_t get_stack_pointer() const;
-    uint16_t get_stack(uint8_t index) const;
+    [[nodiscard]] uint16_t get_PC() const noexcept;
+    [[nodiscard]] uint8_t get_register(uint8_t index) const;
+    [[nodiscard]] uint16_t get_index() const noexcept;
+    [[nodiscard]] uint8_t get_stack_pointer() const noexcept;
+    [[nodiscard]] uint16_t get_stack(uint8_t index) const;
     //uint8_t get_delay_timer() const;
 };
 #endif //CHIP_8_EMULATOR_CPU_H
