@@ -20,6 +20,18 @@ int main(){
     sf::RenderWindow window(sf::VideoMode({640, 320}), "CHIP-8 Emulator");
     GUI gui{&window, &emulator};
 
+    //
+    sf::Clock clock;
+    float fps = 0.f;
+    sf::Font font;
+    if(!font.openFromFile("../assets/Galmuri7.ttf")) return -1;
+
+    sf::Text fps_text(font, std::to_string(300), 16);
+    fps_text.setFillColor(sf::Color::Black);
+
+    fps_text.setPosition({static_cast<float>(window.getSize().x)
+                             - fps_text.getGlobalBounds().size.x, 0.f});
+
     Display display{emulator.get_frame_buffer()};
     display.set_size({640, 320});
 
@@ -52,12 +64,15 @@ int main(){
             gui.handle_event(event);
         }
 
+        float dt = clock.restart().asSeconds();
+        fps = 1.f / dt;
+        fps_text.setString(std::to_string(static_cast<int>(fps)));
         emulator.tick();
 
         window.clear(sf::Color::Black);
         gui.update();
         gui.render();
-
+        window.draw(fps_text);
         window.display();
     }
 
