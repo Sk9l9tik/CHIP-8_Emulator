@@ -25,6 +25,7 @@ add_executable(chip8_emu
     ${DEBUG_SRC}
     ${UI_SRC}
     src/main.cpp
+        include/ui/widgets/Display.h
 )
 
 target_include_directories(chip8_emu PRIVATE ${PROJECT_SOURCE_DIR}/include)
