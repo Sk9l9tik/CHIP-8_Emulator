@@ -40,6 +40,10 @@ void GUI::handle_event(const std::optional<sf::Event> &event) {
             el->update();
         }
     }
+    if(event->is<sf::Event::KeyPressed>() &&
+            event->getIf<sf::Event::KeyPressed>()->scancode == sf::Keyboard::Scancode::Escape){
+        sf_window->close();
+    }
     if(event->is<sf::Event::KeyPressed>() || event->is<sf::Event::KeyReleased>()){
         handle_input(event);
     }
