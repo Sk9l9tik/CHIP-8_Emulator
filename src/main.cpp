@@ -15,11 +15,10 @@
 
 int main(){
     CHIP_8 emulator {};
-    emulator.load_ROM("3-corax+.ch8"); //укажите здесь пути до этого прикола свои
+    emulator.load_ROM("6-keypad.ch8"); //укажите здесь пути до этого прикола свои
 
     sf::RenderWindow window(sf::VideoMode({640, 320}), "CHIP-8 Emulator");
-    window.setFramerateLimit(60);
-    GUI gui{&window};
+    GUI gui{&window, &emulator};
 
     Display display{emulator.get_frame_buffer()};
     display.set_size({640, 320});
@@ -56,7 +55,6 @@ int main(){
         emulator.tick();
 
         window.clear(sf::Color::Black);
-
         gui.update();
         gui.render();
 
