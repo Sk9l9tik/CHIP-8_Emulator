@@ -39,6 +39,7 @@ public:
     void set_sound_timer(uint8_t value);
     void set_delay_timer(uint8_t value);
     uint8_t get_delay_timer() const;
+    uint8_t get_sound_timer() const;
     void tick_timers();
 
     //Для дебага
