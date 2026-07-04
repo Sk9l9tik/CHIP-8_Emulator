@@ -32,6 +32,14 @@ void GUI::handle_input(const std::optional<sf::Event> &event){
     }
 }
 
+void GUI::handle_input(){
+    auto &cpu = emulator->get_cpu();
+
+    for(auto& key : key_scancodes){
+       cpu.set_key_state(key.second, sf::Keyboard::isKeyPressed(key.first));
+    }
+}
+
 void GUI::handle_event(const std::optional<sf::Event> &event) {
     if(const auto& resized = event->getIf<sf::Event::Resized>()){
         sf::FloatRect visible_area({0.f, 0.f}, sf::Vector2f(resized->size));
@@ -44,9 +52,10 @@ void GUI::handle_event(const std::optional<sf::Event> &event) {
             event->getIf<sf::Event::KeyPressed>()->scancode == sf::Keyboard::Scancode::Escape){
         sf_window->close();
     }
-    if(event->is<sf::Event::KeyPressed>() || event->is<sf::Event::KeyReleased>()){
-        handle_input(event);
-    }
+
+//    if(event->is<sf::Event::KeyPressed>() || event->is<sf::Event::KeyReleased>()){
+//        handle_input(event);
+//    }
 
 }
 

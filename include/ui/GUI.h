@@ -59,6 +59,7 @@ public:
     void handle_event(const std::optional<sf::Event> &event);
 
     void handle_input(const std::optional<sf::Event> &event);
+    void handle_input();
 private:
     sf::RenderWindow    *sf_window;
     CHIP_8              *emulator;
