@@ -38,6 +38,9 @@ void GUI::handle_input(){
     for(auto& key : key_scancodes){
        cpu.set_key_state(key.second, sf::Keyboard::isKeyPressed(key.first));
     }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::Escape)){
+        sf_window->close();
+    }
 }
 
 void GUI::handle_event(const std::optional<sf::Event> &event) {
@@ -48,10 +51,7 @@ void GUI::handle_event(const std::optional<sf::Event> &event) {
             el->update();
         }
     }
-    if(event->is<sf::Event::KeyPressed>() &&
-            event->getIf<sf::Event::KeyPressed>()->scancode == sf::Keyboard::Scancode::Escape){
-        sf_window->close();
-    }
+
 
 //    if(event->is<sf::Event::KeyPressed>() || event->is<sf::Event::KeyReleased>()){
 //        handle_input(event);
