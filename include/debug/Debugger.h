@@ -3,6 +3,9 @@
 
 #include "core/CHIP_8.h"
 #include "debug/BreakpointManager.h"
+#include "debug/Disassembler.h"
+
+#include <ios>
 
 
 class Debugger {
@@ -26,9 +29,16 @@ public:
 
   const BreakpointManager& get_breakpoints() const;
 
+  // Disassembler control
+  DisassembledInstruction get_current_instruction() const;
+  std::vector<DisassembledInstruction> disassemble(uint16_t start, uint16_t count) const;
+
+  // void print_disassembled(std::ios_base& (*base)(std::ios_base&), uint16_t start, uint16_t count) const; // 0_-
+
 private:
   CHIP_8& emulator;
   BreakpointManager breakpoints;
+  Disassembler disassembler;
   bool paused{};
 };
   

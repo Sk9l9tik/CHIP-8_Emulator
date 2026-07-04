@@ -28,3 +28,11 @@ bool Debugger::has_breakpoint(uint16_t addr) const { return breakpoints.has(addr
 void Debugger::clear_breakpoints() { breakpoints.clear(); }
 
 const BreakpointManager& Debugger::get_breakpoints() const { return breakpoints; }
+
+
+DisassembledInstruction Debugger::get_current_instruction() const {
+  return Disassembler::current_instruction(emulator.get_memory(), emulator.get_cpu().get_PC());
+}
+std::vector<DisassembledInstruction> Debugger::disassemble(uint16_t start, uint16_t count) const {
+  return Disassembler::disassemble_range(emulator.get_memory(), start, count);
+} 
