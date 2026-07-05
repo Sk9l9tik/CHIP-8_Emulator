@@ -83,7 +83,7 @@ int main(){
                 }
             }
 #endif
-            gui.handle_event(event);
+            gui.handle_event(event, sf::Mouse::getPosition(window));
         }
 
         float dt = clock.restart().asSeconds();

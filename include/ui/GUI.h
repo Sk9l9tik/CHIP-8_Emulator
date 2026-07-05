@@ -56,7 +56,7 @@ public:
 
     void update(sf::Time delta = {});
 
-    void handle_event(const std::optional<sf::Event> &event);
+    void handle_event(const std::optional<sf::Event> &event, const sf::Vector2i& mouse_pos);
 
     void handle_input(const std::optional<sf::Event> &event);
     void handle_input();

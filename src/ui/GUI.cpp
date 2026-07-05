@@ -43,7 +43,7 @@ void GUI::handle_input(){
     }
 }
 
-void GUI::handle_event(const std::optional<sf::Event> &event) {
+void GUI::handle_event(const std::optional<sf::Event> &event, const sf::Vector2i& mouse_pos) {
     if(const auto& resized = event->getIf<sf::Event::Resized>()){
         sf::FloatRect visible_area({0.f, 0.f}, sf::Vector2f(resized->size));
         sf_window->setView(sf::View(visible_area));
@@ -52,6 +52,11 @@ void GUI::handle_event(const std::optional<sf::Event> &event) {
         }
     }
 
+    if(event->is<sf::Event::MouseButtonPressed>()){
+        for(auto& el : widgets){
+            el->handle_event(event, mouse_pos);
+        }
+    }
 
 //    if(event->is<sf::Event::KeyPressed>() || event->is<sf::Event::KeyReleased>()){
 //        handle_input(event);

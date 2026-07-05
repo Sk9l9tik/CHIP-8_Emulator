@@ -11,7 +11,7 @@ public:
 
     virtual ~Widget() = default;
 
-    virtual void handle_event(const std::optional<sf::Event> &event, const sf::Vector2f& mouse_pos) = 0;
+    virtual void handle_event(const std::optional<sf::Event> &event, const sf::Vector2i& mouse_pos) = 0;
     virtual void update() = 0;
     virtual void render(sf::RenderTarget &target) = 0;
 
