@@ -6,6 +6,7 @@
 #include "ui/GUI.h"
 
 #include "ui/widgets/Display.h"
+#include "ui/widgets/Button.h"
 
 #define CHIP8_DEBUG1
 
@@ -17,7 +18,7 @@ int main(){
     CHIP_8 emulator {};
     emulator.load_ROM("6-keypad.ch8");
 
-    sf::RenderWindow window(sf::VideoMode({640, 320}), "CHIP-8 Emulator");
+    sf::RenderWindow window(sf::VideoMode({1280, 960}), "CHIP-8 Emulator");
     GUI gui{&window, &emulator};
     sf::Clock clock;
     float fps = 0.f;
@@ -37,6 +38,11 @@ int main(){
     Display display{emulator.get_frame_buffer()};
     display.set_size({640, 320});
     gui.add(&display);
+
+    auto d_pos = display.get_size();
+    Button btn_test{"Test", {48, 48}, {0, d_pos.y + 20}, font};
+
+    gui.add(&btn_test);
 
 #ifdef CHIP8_DEBUG
     Debugger d(emulator);

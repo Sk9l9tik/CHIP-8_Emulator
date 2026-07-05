@@ -22,11 +22,11 @@ public:
     [[nodiscard]] sf::Vector2f get_size()     const {return size;}
     //
 
-private:
-    sf::Vector2f    size;
-    sf::Vector2f    pos;
-
+protected:
     Widget *parent = nullptr; // 0_o o_0
+
+    sf::Vector2f    pos;
+    sf::Vector2f    size;
 };
 
 #endif //CHIP_8_EMULATOR_WIDGET_H
