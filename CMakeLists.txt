@@ -42,10 +42,14 @@ target_include_directories(chip8_emu PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
 target_link_libraries(chip8_emu PRIVATE sfml-graphics sfml-audio)
 
-file(GLOB_RECURSE TEST_SRC tests/*.cpp)
+file(GLOB_RECURSE TEST_CORE_SRC tests/core/*.cpp)
+file(GLOB_RECURSE TEST_DEBUG_SRC tests/debug/*.cpp)
+file(GLOB_RECURSE TEST_UI_SRC tests/ui/*.cpp)
 
 add_executable(chip8_tests
-    ${TEST_SRC}
+    ${TEST_CORE_SRC}
+    ${TEST_DEBUG_SRC}
+    ${TEST_UI_SRC}
     ${CORE_SRC}
 )
 
