@@ -2,11 +2,12 @@
 #include <iostream>
 
 #include "core/CHIP_8.h"
+#include "core/Memory.h"
 
 #include "ui/GUI.h"
 
-#include "ui/widgets/Display.h"
 #include "ui/widgets/Button.h"
+#include "ui/widgets/Display.h"
 
 #define CHIP8_DEBUG1
 
@@ -49,11 +50,14 @@ int main(){
 
     auto disassembled = d.disassemble(Memory::ROM_START, 20);
     std::cout << "addr\topcode\tmnemonic\n";
-    for(auto&& [addr, opc, mnem] : disassembled) {
-      std::cout << "0x" << std::hex << std::uppercase << addr << "\t" << "0x" << opc << "\t" << mnem << '\n';
-    }  
-  
-    // d.pause(); // cause no-bp is not set
+    // for(auto&& [addr, opc, mnem] : disassembled) {
+    //   std::cout << "0x" << std::hex << std::uppercase << addr << "\t" << "0x" << opc << "\t" << mnem << '\n';
+    // }  
+
+    auto a = d.memory_dump(Memory::ROM_START, Memory::MEM_SIZE);
+
+    std::cout << a << '\n';  
+    d.pause(); // cause no-bp is not set
     // d.set_breakpoint(0x20a);
     // std::cout << "Paused at PC = 0x" << std::hex << emulator.get_cpu().get_PC() << "\n";
 #endif

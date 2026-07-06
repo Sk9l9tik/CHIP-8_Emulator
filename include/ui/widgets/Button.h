@@ -10,7 +10,7 @@ public:
         text = sf::Text(font, btn_text, text_size);
         bounds = sf::FloatRect(pos, size);
 
-        bg_texture.resize({static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y)});
+        bg_texture.resize({static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y)}); // TODO: catch [[nodiscard]]
 
         bg_texture.clear(sf::Color::Transparent);
 

@@ -1,5 +1,8 @@
+#include <iterator>
+
 #include "debug/Debugger.h"
 
+#include "debug/MemoryViewer.h"
 
 Debugger::Debugger(CHIP_8& emu) : emulator(emu) {}
 
@@ -36,3 +39,12 @@ DisassembledInstruction Debugger::get_current_instruction() const {
 std::vector<DisassembledInstruction> Debugger::disassemble(uint16_t start, uint16_t count) const {
   return Disassembler::disassemble_range(emulator.get_memory(), start, count);
 } 
+
+
+std::vector<uint8_t> Debugger::memory_range(uint16_t start, uint16_t length) const {
+  return MemoryViewer::get_range(emulator.get_memory(), start, length);
+}
+
+std::string Debugger::memory_dump(uint16_t start, uint16_t length) const {
+  return MemoryViewer::hex_dump(emulator.get_memory(), start, length);
+}
