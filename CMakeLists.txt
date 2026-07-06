@@ -16,6 +16,16 @@ else()
     FetchContent_MakeAvailable(sfml)
 endif()
 
+find_package(GTest QUIET)
+if(GTest_FOUND)
+    message(STATUS "Using system Gtest: ${GTest_DIR}")
+else()
+    FetchContent_Declare(googletest
+            GIT_REPOSITORY https://github.com/google/googletest.git
+            GIT_TAG v1.17.0)
+    FetchContent_MakeAvailable(googletest)
+endif()
+
 file(GLOB_RECURSE CORE_SRC src/core/*.cpp)
 file(GLOB_RECURSE DEBUG_SRC src/debug/*.cpp)
 file(GLOB_RECURSE UI_SRC src/ui/*.cpp)
@@ -31,3 +41,15 @@ add_executable(chip8_emu
 target_include_directories(chip8_emu PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
 target_link_libraries(chip8_emu PRIVATE sfml-graphics sfml-audio)
+
+file(GLOB_RECURSE TEST_SRC tests/*.cpp)
+
+add_executable(chip8_tests
+    ${TEST_SRC}
+    ${CORE_SRC}
+)
+
+target_include_directories(chip8_tests PRIVATE ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(chip8_tests PRIVATE GTest::gtest GTest::gtest_main)
+
+enable_testing()
