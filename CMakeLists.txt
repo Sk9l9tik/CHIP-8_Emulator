@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(FetchContent)
 
+set(COMPILE_FLAGS -Wall -Wextra -Wpedantic)
+
 find_package(SFML 3 COMPONENTS graphics audio QUIET)
 if(SFML_FOUND)
     message(STATUS "Using system SFML: ${SFML_DIR}")
@@ -39,8 +41,18 @@ add_executable(chip8_emu
 )
 
 target_include_directories(chip8_emu PRIVATE ${PROJECT_SOURCE_DIR}/include)
-
 target_link_libraries(chip8_emu PRIVATE sfml-graphics sfml-audio)
+
+target_compile_options(chip8_emu PRIVATE
+    ${COMPILE_FLAGS}
+    $<$<CONFIG:Debug>:-g -O0 -fsanitize=address,undefined>
+    $<$<CONFIG:Release>:-O3>
+)
+
+target_link_options(chip8_emu PRIVATE
+    $<$<CONFIG:Debug>:-fsanitize=address,undefined>
+)
+
 
 file(GLOB_RECURSE TEST_CORE_SRC tests/core/*.cpp)
 file(GLOB_RECURSE TEST_DEBUG_SRC tests/debug/*.cpp)
