@@ -8,7 +8,7 @@ GUI::GUI(sf::RenderWindow *window, CHIP_8 *emul) {
     emulator = emul;
 }
 
-void GUI::handle_input(const std::optional<sf::Event> &event){
+[[maybe_unused]] void GUI::handle_input(const std::optional<sf::Event> &event){
     auto &cpu = emulator->get_cpu();
 
     // Nevajno...

@@ -5,6 +5,8 @@
 #include "Widget.h"
 #include "core/CHIP_8.h"
 
+// Пока key-mapping такой чисто, потом можно как то удобнее сделать
+
 //static std::unordered_map<sf::Keyboard::Scancode, int> key_scancodes{
 //        { sf::Keyboard::Scancode::Num1, 0xC},
 //        { sf::Keyboard::Scancode::Num2, 0xD},
@@ -58,7 +60,7 @@ public:
 
     void handle_event(const std::optional<sf::Event> &event, const sf::Vector2i& mouse_pos);
 
-    void handle_input(const std::optional<sf::Event> &event);
+    [[maybe_unused]] [[maybe_unused]] void handle_input(const std::optional<sf::Event> &event);
     void handle_input();
 private:
     sf::RenderWindow    *sf_window;
