@@ -5,6 +5,8 @@
 #include "Widget.h"
 #include "core/CHIP_8.h"
 
+
+
 // Пока key-mapping такой чисто, потом можно как то удобнее сделать
 
 //static std::unordered_map<sf::Keyboard::Scancode, int> key_scancodes{

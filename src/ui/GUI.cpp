@@ -1,6 +1,3 @@
-//
-// Created by V on 01.07.2026.
-//
 #include "ui/GUI.h"
 
 GUI::GUI(sf::RenderWindow *window, CHIP_8 *emul) {
@@ -8,7 +5,7 @@ GUI::GUI(sf::RenderWindow *window, CHIP_8 *emul) {
     emulator = emul;
 }
 
-[[maybe_unused]] void GUI::handle_input(const std::optional<sf::Event> &event){
+void GUI::handle_input(const std::optional<sf::Event> &event){
     auto &cpu = emulator->get_cpu();
 
     // Nevajno...
@@ -22,25 +19,32 @@ GUI::GUI(sf::RenderWindow *window, CHIP_8 *emul) {
         if(ep) {
             if(!cpu.get_key_state(it->second)){
                 cpu.set_key_state(it->second, true);
-                //printf("%x pressed\n", it->second);
             }
         }
         else {
             cpu.set_key_state(it->second, false);
-            //printf("%x released\n", it->second);
         }
     }
+
+    // ...
+
+    if(ep) switch(ep->scancode){
+        case sf::Keyboard::Scancode::Escape:
+            sf_window->close();
+            break;
+        default:
+            break;
+    }
+
 }
 
-void GUI::handle_input(){
+[[deprecated("ОНО ОБНУЛЯЕТ KEY_STATE И ВИРТУАЛЬНАЯ КЛАВА НЕ РАБОТАЕТ prikolno vobshem")]] void GUI::handle_input(){
     auto &cpu = emulator->get_cpu();
 
     for(auto& key : key_scancodes){
        cpu.set_key_state(key.second, sf::Keyboard::isKeyPressed(key.first));
     }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Scancode::Escape)){
-        sf_window->close();
-    }
+
 }
 
 void GUI::handle_event(const std::optional<sf::Event> &event, const sf::Vector2i& mouse_pos) {
@@ -52,15 +56,13 @@ void GUI::handle_event(const std::optional<sf::Event> &event, const sf::Vector2i
         }
     }
 
-    if(event->is<sf::Event::MouseButtonPressed>()){
-        for(auto& el : widgets){
-            el->handle_event(event, mouse_pos);
-        }
+    if(event->is<sf::Event::KeyPressed>() || event->is<sf::Event::KeyReleased>()){
+        handle_input(event);
     }
 
-//    if(event->is<sf::Event::KeyPressed>() || event->is<sf::Event::KeyReleased>()){
-//        handle_input(event);
-//    }
+    for(auto& el : widgets){
+        el->handle_event(event, mouse_pos);
+    }
 
 }
 

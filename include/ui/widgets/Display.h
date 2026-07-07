@@ -34,27 +34,26 @@ public:
     void set_pixel_size(float p_size){
         pixel_size = p_size;
     }
-
-
 private:
     void update_texture(){
         d_texture.clear(sf::Color::Black);
 
-        sf::RectangleShape pixel(sf::Vector2f(1.f, 1.f));
+        sf::VertexArray pixels(sf::PrimitiveType::Points, DISPLAY_WIDTH * DISPLAY_HEIGHT);
 
-        for (unsigned int y = 0; y < DISPLAY_HEIGHT; y++) {
-            for (unsigned int x = 0; x < DISPLAY_WIDTH; x++) {
-                pixel.setPosition({static_cast<float>(x), static_cast<float>(y)});
-                pixel.setFillColor(pixel_data.get_frame_buffer()[x + y * DISPLAY_WIDTH] ? sf::Color::Black : sf::Color::White);
-                d_texture.draw(pixel);
-            }
+        for (unsigned int i = 0; i < DISPLAY_WIDTH * DISPLAY_HEIGHT; i++) {
+            pixels[i].position = {
+                    static_cast<float>(i % DISPLAY_WIDTH),
+                    static_cast<float>(i / DISPLAY_WIDTH)
+            };
+            pixels[i].color = pixel_data.get_frame_buffer()[i] ?
+                              sf::Color::Black : sf::Color::White;
         }
 
+        d_texture.draw(pixels);
         d_texture.display();
-
         d_sprite.setTexture(d_texture.getTexture());
-        d_sprite.setPosition({0.f, 0.f}); // Display position
-        d_sprite.setScale({pixel_size, pixel_size}); // )
+        d_sprite.setPosition(pos);
+        d_sprite.setScale({pixel_size, pixel_size});
     }
 
     sf::RenderTexture d_texture{{DISPLAY_WIDTH, DISPLAY_HEIGHT}};
