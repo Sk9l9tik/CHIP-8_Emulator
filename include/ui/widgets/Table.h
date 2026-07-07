@@ -21,6 +21,7 @@ public:
         float x = pos.x + padding.left;
         float y = pos.y + padding.up;
 
+        float pd = 0.f;
         for(uint32_t j = 0; j < rows_c; j++){
             for(uint32_t i = 0; i < cols_c; i++){
                 uint32_t index = i + j * cols_c;
@@ -28,20 +29,22 @@ public:
                     _table[index] = widget;
                     widget->set_position({x, y});
                     widget->set_parent(this);
-                    std::cout << "Widget placed at: (" << x << ", " << y << ")" << std::endl;
                     return true;
                 }
-                x += _table[index]->get_size().x + horizontal_gap;
+                x += _table[index]->get_size().x + horizontal_gap + _table[index]->padding.right;
+
+                pd = std::max(_table[index]->padding.down, pd);
             }
             x = pos.x + padding.left;
-            y += _table[j * cols_c]->get_size().y + vertical_gap;
+
+            y += _table[j * cols_c]->get_size().y + vertical_gap + pd;
         }
         return false;
     }
 
-    bool add_widget(Widget* widget, uint32_t x, uint32_t y, bool rewrite = true) {
-        return false;
-    }; // Set widget to [x+y*cols] cell
+//    bool add_widget(Widget* widget, uint32_t x, uint32_t y, bool rewrite = true) {
+//        return false;
+//    }; // Set widget to [x+y*cols] cell
 
     uint32_t get_cols_c() const {
         return cols_c;

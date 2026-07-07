@@ -166,7 +166,7 @@ int main(){
     CHIP_8 emulator {};
     emulator.load_ROM("6-keypad.ch8");
 
-    sf::RenderWindow window(sf::VideoMode({640, 640+320}), "CHIP-8 Emulator");
+    sf::RenderWindow window(sf::VideoMode({640, 960}), "CHIP-8 Emulator");
     GUI gui{&window, &emulator};
     sf::Clock clock;
     float fps = 0.f;
