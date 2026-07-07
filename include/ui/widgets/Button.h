@@ -25,7 +25,7 @@ public:
     //Test button
     Button(const std::string& btn_text, sf::Vector2f size, sf::Vector2f pos, sf::Font &btn_font) : font(btn_font){
         // TEXT
-        text_size = 16;
+        text_size = size.x/4.f;
         text = sf::Text(font, btn_text, text_size);
         text.setFillColor(sf::Color::Black);
 
@@ -115,6 +115,7 @@ public:
         } catch (std::exception& e){
             background.setTexture(textures.at(State::Normal).getTexture());
         }
+
     }
 
     void render(sf::RenderTarget &target) override {
@@ -132,10 +133,29 @@ public:
         bounds.size = _size;
     }
 
-    bool load_texture(std::string path, State _state){
+    bool load_texture(const std::string& path, State _state){
+        sf::Texture texture;
+        if (!texture.loadFromFile(path)) {
+            return false;
+        }
+        sf::Vector2u textureSize = texture.getSize();
+        sf::Vector2f buttonSize = bounds.size;
 
+        sf::Sprite sprite(texture);
+        sprite.setScale({
+            buttonSize.x / static_cast<float>(textureSize.x),
+            buttonSize.y / static_cast<float>(textureSize.y)
+        });
 
-        return false;
+        if (!textures[_state].resize(static_cast<sf::Vector2u>(buttonSize))) {
+            return false;
+        }
+
+        textures[_state].clear(sf::Color::Transparent);
+        textures[_state].draw(sprite);
+        textures[_state].display();
+
+        return true;
     }
 
     void lock()   { state = State::Locked; }
@@ -152,6 +172,9 @@ public:
         on_release = func;
     }
 
+    void set_string(const std::string &_text){
+        text.setString(_text);
+    }
 private:
     enum class Type{
         Undefined,

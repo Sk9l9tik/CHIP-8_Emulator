@@ -189,8 +189,12 @@ int main(){
 
 
     auto d_pos = display.get_size();
-    Button btn_test{"0", {48, 48}, {0, d_pos.y + 20}, font};
+    Button btn_test{"0", {128, 128}, {0, d_pos.y + 20}, font};
 
+    btn_test.load_texture("../assets/sprites/KBButton_Default.png", Button::State::Normal);
+    btn_test.load_texture("../assets/sprites/KBButton_Hovered.png", Button::State::Hovered);
+    btn_test.load_texture("../assets/sprites/KBButton_Locked.png", Button::State::Locked);
+    btn_test.load_texture("../assets/sprites/KBButton_Pressed.png", Button::State::Pressed);
     // ниче лучше не придумал
     btn_test.set_on_click([&emulator](){
         emulator.get_cpu().set_key_state(0x0, true);
@@ -215,6 +219,9 @@ int main(){
     // d.set_breakpoint(0x20a);
     // std::cout << "Paused at PC = 0x" << std::hex << emulator.get_cpu().get_PC() << "\n";
 #endif
+
+    // \/\/\/
+    window.requestFocus();
 
     while (window.isOpen())
     {
