@@ -8,6 +8,7 @@
 
 #include "ui/widgets/Button.h"
 #include "ui/widgets/Display.h"
+#include "ui/widgets/Table.h"
 
 #define CHIP8_DEBUG1
 
@@ -165,7 +166,7 @@ int main(){
     CHIP_8 emulator {};
     emulator.load_ROM("6-keypad.ch8");
 
-    sf::RenderWindow window(sf::VideoMode({640, 640}), "CHIP-8 Emulator");
+    sf::RenderWindow window(sf::VideoMode({640, 640+320}), "CHIP-8 Emulator");
     GUI gui{&window, &emulator};
     sf::Clock clock;
     float fps = 0.f;
@@ -181,28 +182,53 @@ int main(){
     fps_text.setPosition({static_cast<float>(window.getSize().x)
                              - fps_text.getGlobalBounds().size.x, 0.f});
 
-
     Display display{emulator.get_frame_buffer()};
     display.set_size({640, 320});
+    display.set_colors(0xFFCC00FF, 0x996600FF);
 
     gui.add(&display);
 
-
     auto d_pos = display.get_size();
-    Button btn_test{"0", {128, 128}, {0, d_pos.y + 20}, font};
 
-    btn_test.load_texture("../assets/sprites/KBButton_Default.png", Button::State::Normal);
-    btn_test.load_texture("../assets/sprites/KBButton_Hovered.png", Button::State::Hovered);
-    btn_test.load_texture("../assets/sprites/KBButton_Locked.png", Button::State::Locked);
-    btn_test.load_texture("../assets/sprites/KBButton_Pressed.png", Button::State::Pressed);
-    // ниче лучше не придумал
-    btn_test.set_on_click([&emulator](){
-        emulator.get_cpu().set_key_state(0x0, true);
-    });
-    btn_test.set_on_release([&emulator](){
-        emulator.get_cpu().set_key_state(0x0, false);
-    });
-    gui.add(&btn_test);
+    Table keyboard{4,4};
+    keyboard.set_position({0, d_pos.y});
+    keyboard.set_size({640, 640});
+    keyboard.vertical_gap = 21;
+    keyboard.horizontal_gap = 21;
+    keyboard.padding = {32};
+    std::vector<Button> keys;
+    keys.reserve(16);
+
+    for(int i = 0; i < 16; i++){
+        const char hex_chars[] = "0123456789ABCDEF";
+        keys.push_back(Button{
+            std::string(1,hex_chars[i]),
+            {0,0},
+            {0,0},
+            font
+        });
+
+        keys[i].set_size({128, 128});
+        // как то надо будет переделать конечно всю систему загрузки текстурок,
+        // а то 16 одинаковых наборов выходит по итогу
+        keys[i].load_texture("../assets/sprites/KBButton_Default.png", Button::State::Normal);
+        keys[i].load_texture("../assets/sprites/KBButton_Hovered.png", Button::State::Hovered);
+        keys[i].load_texture("../assets/sprites/KBButton_Locked.png", Button::State::Locked);
+        keys[i].load_texture("../assets/sprites/KBButton_Pressed.png", Button::State::Pressed);
+
+        keys[i].set_on_click([&emulator, i](){
+            emulator.get_cpu().set_key_state(i, true);
+        });
+        keys[i].set_on_release([&emulator, i](){
+            emulator.get_cpu().set_key_state(i, false);
+        });
+    }
+
+    for(auto& k : keys){
+        keyboard.add_widget(&k);
+    }
+
+    gui.add(&keyboard);
 #ifdef CHIP8_DEBUG
     Debugger d(emulator);
 
@@ -253,7 +279,7 @@ int main(){
                 }
             }
 #endif
-            SAERMO_logger(event);
+//            SAERMO_logger(event);
             gui.handle_event(event, sf::Mouse::getPosition(window));
         }
 

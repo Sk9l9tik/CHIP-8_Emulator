@@ -4,14 +4,6 @@
 #include <functional>
 #include "ui/Widget.h"
 
-/* Чистить и рефакторить весь бред который я тут написал я буду только тогда
- * когда все это каким то образом начнет работать
- *
- * этот прикол готов дай бог на половину есче
- * кто тут TODO
- * писать будет - в рот нассу
- * */
-
 class Button : public Widget{
 public:
     enum class State{
@@ -21,9 +13,12 @@ public:
         Hovered,
         Pressed,
     };
-
     //Test button
     Button(const std::string& btn_text, sf::Vector2f size, sf::Vector2f pos, sf::Font &btn_font) : font(btn_font){
+        if(size.x == 0 || size.y == 0){
+            size = {1,1};
+        }
+
         // TEXT
         text_size = size.x/4.f;
         text = sf::Text(font, btn_text, text_size);
@@ -65,15 +60,34 @@ public:
         background.setScale({1,1});
 
         // TEXT CENTERING
-        sf::FloatRect textBounds = text.getLocalBounds();
-        text.setOrigin({textBounds.size.x / 2.f, textBounds.size.y / 2.f});
+        sf::FloatRect text_bounds = text.getLocalBounds();
+        text.setOrigin({text_bounds.size.x / 2.f, text_bounds.size.y / 2.f});
 
-        sf::FloatRect spriteBounds = background.getGlobalBounds();
-        text.setPosition({spriteBounds.position.x + spriteBounds.size.x / 2.f,
-                          spriteBounds.position.y + spriteBounds.size.y / 2.f - 2});
+        sf::FloatRect sprite_bounds = background.getGlobalBounds();
+        text.setPosition({
+            sprite_bounds.position.x + sprite_bounds.size.x / 2.f,
+            sprite_bounds.position.y + sprite_bounds.size.y / 2.f - 2
+        });
 
         //
         state = State::Normal;
+    }
+
+    Button(const Button& other)
+        : Widget(other),
+        state(other.state),
+        bounds(other.bounds),
+        font(other.font),
+        text_size(other.text_size),
+        on_click(other.on_click),
+        on_release(other.on_release)
+    {
+
+        text = other.text;
+        text.setFont(font);
+
+        background = other.background;
+        background.setTexture(textures[state].getTexture(), true);
     }
 
     ~Button() override = default; // idc
@@ -111,11 +125,14 @@ public:
 
     void update() override {
         try{
-            background.setTexture(textures.at(state).getTexture());
+            background.setTexture(textures.at(state).getTexture(), true);
         } catch (std::exception& e){
-            background.setTexture(textures.at(State::Normal).getTexture());
+            try {
+                background.setTexture(textures.at(State::Normal).getTexture(), true);
+            } catch (std::exception& e){
+                throw std::runtime_error("Button have no textures.");
+            }
         }
-
     }
 
     void render(sf::RenderTarget &target) override {
@@ -126,11 +143,38 @@ public:
     void set_position(sf::Vector2f _pos) override {
         pos = _pos;
         bounds.position = _pos;
+        background.setPosition(_pos);
+
+        center_text();
     }
 
     void set_size(sf::Vector2f _size) override {
         size = _size;
         bounds.size = _size;
+
+        text.setCharacterSize(_size.x/4.f);
+        center_text();
+    }
+
+    bool load_texture(const sf::Texture& texture, State _state){
+        sf::Vector2u texture_size = texture.getSize();
+        sf::Vector2f button_size = bounds.size;
+
+        sf::Sprite sprite(texture);
+        sprite.setScale({
+            button_size.x / static_cast<float>(texture_size.x),
+            button_size.y / static_cast<float>(texture_size.y)
+        });
+
+        if (!textures[_state].resize(static_cast<sf::Vector2u>(button_size))) {
+            return false;
+        }
+
+        textures[_state].clear(sf::Color::Transparent);
+        textures[_state].draw(sprite);
+        textures[_state].display();
+
+        return true;
     }
 
     bool load_texture(const std::string& path, State _state){
@@ -138,16 +182,16 @@ public:
         if (!texture.loadFromFile(path)) {
             return false;
         }
-        sf::Vector2u textureSize = texture.getSize();
-        sf::Vector2f buttonSize = bounds.size;
+        sf::Vector2u texture_size = texture.getSize();
+        sf::Vector2f button_size = bounds.size;
 
         sf::Sprite sprite(texture);
         sprite.setScale({
-            buttonSize.x / static_cast<float>(textureSize.x),
-            buttonSize.y / static_cast<float>(textureSize.y)
+            button_size.x / static_cast<float>(texture_size.x),
+            button_size.y / static_cast<float>(texture_size.y)
         });
 
-        if (!textures[_state].resize(static_cast<sf::Vector2u>(buttonSize))) {
+        if (!textures[_state].resize(static_cast<sf::Vector2u>(button_size))) {
             return false;
         }
 
@@ -175,16 +219,20 @@ public:
     void set_string(const std::string &_text){
         text.setString(_text);
     }
+
+
 private:
-    enum class Type{
-        Undefined,
-        Simple,
-        Breakpoint,
-        Textured
-    }; // maybe useless [[0_0]]
+    void center_text(){
+        sf::FloatRect text_bounds = text.getLocalBounds();
+        text.setOrigin({text_bounds.size.x / 2.f, text_bounds.size.y / 2.f});
+
+        text.setPosition({
+            bounds.position.x + bounds.size.x / 2.f,
+            bounds.position.y + bounds.size.y / 2.f - 4.f
+        });
+    }
 
     State state = State::Undefined;
-    Type type   = Type::Undefined;
 
     sf::FloatRect bounds;
 

@@ -5,8 +5,19 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 
+struct Padding{
+    float up;
+    float right;
+    float down;
+    float left;
+
+    Padding(float u, float r, float d, float l) : up(u), right(r), down(d), left(l) {};
+    Padding(float x) : up(x), right(x), down(x), left(x) {};
+};
+
 class Widget{
 public:
+    Padding padding = {0,0,0,0};
     //
 
     virtual ~Widget() = default;
@@ -17,10 +28,12 @@ public:
 
     virtual void set_position(sf::Vector2f _pos)  {pos = _pos;}
     virtual void set_size    (sf::Vector2f _size) {size = _size;}
+    virtual void set_parent  (Widget* p)          {parent = p;}
 
     [[nodiscard]] sf::Vector2f get_position() const {return pos;}
     [[nodiscard]] sf::Vector2f get_size()     const {return size;}
     //
+
 
 protected:
     Widget *parent = nullptr; // 0_o o_0
