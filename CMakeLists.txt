@@ -43,16 +43,30 @@ add_executable(chip8_emu
 target_include_directories(chip8_emu PRIVATE ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(chip8_emu PRIVATE sfml-graphics sfml-audio)
 
+#target_compile_options(chip8_emu PRIVATE
+#    ${COMPILE_FLAGS}
+#    $<$<CONFIG:Debug>:-g -O0 -fsanitize=address,undefined>
+#    $<$<CONFIG:Release>:-O3>
+#)
+#
+#target_link_options(chip8_emu PRIVATE
+#    $<$<CONFIG:Debug>:-fsanitize=address,undefined>
+#)
+
+# Rabota? No
+# SAERMO? YES
 target_compile_options(chip8_emu PRIVATE
-    ${COMPILE_FLAGS}
-    $<$<CONFIG:Debug>:-g -O0 -fsanitize=address,undefined>
-    $<$<CONFIG:Release>:-O3>
+        ${COMPILE_FLAGS}
+        $<$<AND:$<CONFIG:Debug>,$<CXX_COMPILER_ID:GNU>,$<NOT:$<PLATFORM_ID:Windows>>>:-g -O0 -fsanitize=address,undefined>
+        $<$<AND:$<CONFIG:Debug>,$<CXX_COMPILER_ID:Clang>,$<NOT:$<PLATFORM_ID:Windows>>>:-g -O0 -fsanitize=address,undefined>
+        $<$<CONFIG:Debug>:-g -O0>
+        $<$<CONFIG:Release>:-O3>
 )
 
 target_link_options(chip8_emu PRIVATE
-    $<$<CONFIG:Debug>:-fsanitize=address,undefined>
+        $<$<AND:$<CONFIG:Debug>,$<CXX_COMPILER_ID:GNU>,$<NOT:$<PLATFORM_ID:Windows>>>:-fsanitize=address,undefined>
+        $<$<AND:$<CONFIG:Debug>,$<CXX_COMPILER_ID:Clang>,$<NOT:$<PLATFORM_ID:Windows>>>:-fsanitize=address,undefined>
 )
-
 
 file(GLOB_RECURSE TEST_CORE_SRC tests/core/*.cpp)
 file(GLOB_RECURSE TEST_DEBUG_SRC tests/debug/*.cpp)
