@@ -54,7 +54,7 @@ target_link_libraries(chip8_emu PRIVATE sfml-graphics sfml-audio)
 #)
 
 # Rabota? No
-# SAERMO? YES
+# SAERMO? YES do slez
 target_compile_options(chip8_emu PRIVATE
         ${COMPILE_FLAGS}
         $<$<AND:$<CONFIG:Debug>,$<CXX_COMPILER_ID:GNU>,$<NOT:$<PLATFORM_ID:Windows>>>:-g -O0 -fsanitize=address,undefined>
