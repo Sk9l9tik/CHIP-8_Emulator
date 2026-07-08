@@ -2,6 +2,7 @@
 
 #include "debug/Debugger.h"
 
+#include "debug/CPUViewer.h"
 #include "debug/MemoryViewer.h"
 
 Debugger::Debugger(CHIP_8& emu) : emulator(emu) {}
@@ -47,4 +48,8 @@ std::vector<uint8_t> Debugger::memory_range(uint16_t start, uint16_t length) con
 
 std::string Debugger::memory_dump(uint16_t start, uint16_t length) const {
   return MemoryViewer::hex_dump(emulator.get_memory(), start, length);
+}
+
+CPUState Debugger::get_cpu_state() const {
+  return CPUViewer::snapshot(emulator.get_cpu()); 
 }
