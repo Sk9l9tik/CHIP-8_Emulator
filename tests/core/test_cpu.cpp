@@ -53,3 +53,116 @@ TEST(CPU, ResetSetsVRegistersToZeroPCToROMStartSPAndIndexAndSTandDTToZero){
     EXPECT_EQ(cpu.get_delay_timer(), 0);
     EXPECT_EQ(cpu.get_sound_timer(), 0);
 }
+
+//чёт поздновато я додумался до такого прикола
+
+class CPU_Test : public ::testing::Test{
+protected:
+    Memory mem{};
+    FrameBuffer fb{};
+    CPU cpu{mem, fb};
+
+    void SetUp() override{ //конченные camel-case придётся весь в этом стиле писать
+        cpu.reset();
+    }
+
+    void loadOpcode(uint16_t opcode, uint16_t address = 0x200){
+        mem.write(address, (opcode >> 8) & 0xFF);
+        mem.write(address + 1, opcode & 0xFF);
+    }
+
+    void executeOpcode(uint16_t opcode){
+        loadOpcode(opcode);
+        cpu.reset();
+        cpu.tick();
+    }
+};
+
+TEST_F(CPU_Test, FrameBufferIsClearedAfterCLS){
+    uint8_t sprite_data[] {0xFF, 0xFF};
+    static_cast<void>(fb.draw_sprite(0, 0, sprite_data, 1));
+
+    EXPECT_TRUE(fb.get_frame_buffer().at(0));
+
+    executeOpcode(0x00E0);
+    EXPECT_FALSE(fb.get_frame_buffer().at(0));
+}
+
+TEST_F(CPU_Test,CALLSavesPCIncreasesSPSetsPCToNNN_RETSetsPCtoStackTopAndDecreasesSP){
+    executeOpcode(0x23FF);
+    EXPECT_EQ(cpu.get_PC(), 0x03ff);
+    uint16_t return_pos {cpu.get_stack(cpu.get_stack_pointer()-1)};
+    EXPECT_EQ(cpu.get_stack_pointer(), 1);
+
+    loadOpcode(0x00EE, 0x03ff);
+    cpu.tick();
+    EXPECT_EQ(cpu.get_PC(), return_pos);
+    EXPECT_EQ(cpu.get_stack_pointer(), 0);
+}
+
+TEST_F(CPU_Test, JMPSetsPCToNNN){
+    executeOpcode(0x1233);
+    EXPECT_EQ(cpu.get_PC(), 0x233);
+}
+
+TEST_F(CPU_Test, LDVxSetsVx_SESkipsInstructionIfVxEqualsNNElseDoesntSkip){
+    loadOpcode(0x6078, 0x200);
+    cpu.tick();
+
+    EXPECT_EQ(cpu.get_register(0), 0x78);
+
+    loadOpcode(0x3078, 0x202);
+    cpu.tick();
+    EXPECT_EQ(cpu.get_PC(), 0x206);
+
+    loadOpcode(0x3079,0x206);
+    cpu.tick();
+    EXPECT_EQ(cpu.get_PC(), 0x208);
+}
+
+TEST_F(CPU_Test, SNESkipsInstructionIfVxDoesntEqualNNElseSkips){
+    loadOpcode(0x6078, 0x200);
+    cpu.tick();
+
+    loadOpcode(0x4078, 0x202);
+    cpu.tick();
+    EXPECT_EQ(cpu.get_PC(), 0x204);
+
+    loadOpcode(0x4079, 0x204);
+    cpu.tick();
+    EXPECT_EQ(cpu.get_PC(), 0x208);
+}
+
+TEST_F(CPU_Test, SESkipsInstructionIfVxEqualsVyElseDoesntSkip){
+    loadOpcode(0x6078, 0x200);
+    loadOpcode(0x6178, 0x202);
+    loadOpcode(0x6279, 0x204);
+
+    cpu.tick();
+    cpu.tick();
+    cpu.tick();
+
+    loadOpcode(0x5010, 0x206);
+    cpu.tick();
+
+    EXPECT_EQ(cpu.get_PC(), 0x20A);
+
+    loadOpcode(0x5020, 0x20A);
+    cpu.tick();
+    EXPECT_EQ(cpu.get_PC(), 0x20C);
+}
+
+TEST_F(CPU_Test, ADDIncreasesVxByNNAndSetsVfOnCarry){
+    loadOpcode(0x6078, 0x200);
+    cpu.tick();
+
+    loadOpcode(0x7078, 0x202);
+    cpu.tick();
+
+    EXPECT_EQ(cpu.get_register(0), 0xF0);
+    loadOpcode(0x7010, 0x204);
+    cpu.tick();
+
+    EXPECT_EQ(cpu.get_register(0), 0x00);
+    EXPECT_NE(cpu.get_register(15), 0x1);
+}
