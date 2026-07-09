@@ -66,9 +66,15 @@ protected:
         cpu.reset();
     }
 
-    void loadOpcode(uint16_t opcode, uint16_t address = 0x200){
+    [[deprecated("Use loadOpcodeAndExecute")]] void loadOpcode(uint16_t opcode, uint16_t address = 0x200){
         mem.write(address, (opcode >> 8) & 0xFF);
         mem.write(address + 1, opcode & 0xFF);
+    }
+
+    void loadOpcodeAndExecute(uint16_t opcode, uint16_t address = 0x200){
+        mem.write(address, (opcode >> 8) & 0xFF);
+        mem.write(address + 1, opcode & 0xFF);
+        cpu.tick();
     }
 
     void executeOpcode(uint16_t opcode){
@@ -120,7 +126,7 @@ TEST_F(CPU_Test, LDVxSetsVx_SESkipsInstructionIfVxEqualsNNElseDoesntSkip){
     EXPECT_EQ(cpu.get_PC(), 0x208);
 }
 
-TEST_F(CPU_Test, SNESkipsInstructionIfVxDoesntEqualNNElseSkips){
+TEST_F(CPU_Test, SNESkipsInstructionIfVxDoesntEqualNNElseDoesntSkip){
     loadOpcode(0x6078, 0x200);
     cpu.tick();
 
@@ -165,4 +171,164 @@ TEST_F(CPU_Test, ADDIncreasesVxByNNAndSetsVfOnCarry){
 
     EXPECT_EQ(cpu.get_register(0), 0x00);
     EXPECT_NE(cpu.get_register(15), 0x1);
+}
+
+TEST_F(CPU_Test, LDVxVySetsVxToVy){
+    loadOpcode(0x6178, 0x200);
+    cpu.tick();
+
+    loadOpcode(0x8010, 0x202);
+    cpu.tick();
+
+    EXPECT_EQ(cpu.get_register(0), cpu.get_register(1));
+}
+
+TEST_F(CPU_Test, ORVxVySetsVxToVxORVy){
+    loadOpcodeAndExecute(0x6101, 0x200);
+
+    loadOpcodeAndExecute(0x6080, 0x202);
+
+    uint8_t Vx = cpu.get_register(0);
+
+    loadOpcodeAndExecute(0x8011, 0x204);
+
+    EXPECT_EQ(cpu.get_register(0), Vx | cpu.get_register(1));
+}
+
+TEST_F(CPU_Test, ANDVxVySetsVxToVxANDVy){
+    loadOpcodeAndExecute(0x601F, 0x200);
+    loadOpcodeAndExecute(0x61F0, 0x202);
+
+    uint8_t Vx = cpu.get_register(0);
+
+    loadOpcodeAndExecute(0x8012, 0x204);
+    EXPECT_EQ(cpu.get_register(0), Vx & cpu.get_register(1));
+}
+
+TEST_F(CPU_Test, XORVxVySetsVxToVxXORVy){
+    loadOpcodeAndExecute(0x60F0, 0x200);
+    loadOpcodeAndExecute(0x610F, 0x202);
+
+    uint8_t Vx = cpu.get_register(0);
+
+    loadOpcodeAndExecute(0x8013, 0x204);
+
+    EXPECT_EQ(cpu.get_register(0), Vx ^ cpu.get_register(1));
+}
+
+TEST_F(CPU_Test, ADDVxVyWithoutCarryJustIncreasesVxByVy_WithCarryAlsoSetsVfIfVxGetsAboveFF){
+    loadOpcodeAndExecute(0x6078, 0x200);
+    loadOpcodeAndExecute(0x6178, 0x202);
+
+    uint8_t Vx = cpu.get_register(0);
+
+    loadOpcodeAndExecute(0x8014, 0x204);
+
+    EXPECT_EQ(cpu.get_register(0), Vx + cpu.get_register(1));
+
+    Vx = cpu.get_register(0);
+
+    loadOpcodeAndExecute(0x8014, 0x206);
+
+    EXPECT_EQ(cpu.get_register(0), static_cast<uint8_t>(Vx + cpu.get_register(1)));
+    EXPECT_EQ(cpu.get_register(15), 1);
+}
+
+TEST_F(CPU_Test, SUBVxVyDecresesVxByVyAndSetsVfIfVxIsGreaterThanVy){
+    loadOpcodeAndExecute(0x6078,0x200);
+    loadOpcodeAndExecute(0x6177, 0x202);
+
+    uint8_t Vx = cpu.get_register(0);
+
+    loadOpcodeAndExecute(0x8015, 0x204);
+
+    EXPECT_EQ(cpu.get_register(0), Vx - cpu.get_register(1));
+    EXPECT_EQ(cpu.get_register(15), 1);
+
+    Vx = cpu.get_register(0);
+
+    loadOpcodeAndExecute(0x8015, 0x206);
+
+    EXPECT_EQ(cpu.get_register(0), static_cast<uint8_t>(Vx - cpu.get_register(1)));
+    EXPECT_EQ(cpu.get_register(15), 0);
+}
+
+TEST_F(CPU_Test, SHRBitShiftsVxToRight_SetsVfIfLeastSignificantBitIsSet){
+    loadOpcodeAndExecute(0x6002, 0x200);
+
+    uint8_t Vx = cpu.get_register(0);
+
+    loadOpcodeAndExecute(0x8016, 0x202);
+
+    EXPECT_EQ(cpu.get_register(0), Vx >> 1);
+    EXPECT_EQ(cpu.get_register(15), 0);
+
+    Vx = cpu.get_register(0);
+
+    loadOpcodeAndExecute(0x8016, 0x204);
+
+    EXPECT_EQ(cpu.get_register(0), static_cast<uint8_t>(Vx >> 1));
+    EXPECT_EQ(cpu.get_register(15), 1);
+}
+
+TEST_F(CPU_Test, SUBVxVySetsVxToDifferenceBetweenVyAndVx_SetsVfIfVyIsGreaterThanVx){
+    loadOpcodeAndExecute(0x6001, 0x200);
+    loadOpcodeAndExecute(0x61FF, 0x202);
+
+    uint8_t Vx = cpu.get_register(0);
+
+    loadOpcodeAndExecute(0x8017, 0x204);
+
+    EXPECT_EQ(cpu.get_register(0), static_cast<uint8_t>(cpu.get_register(1) - Vx));
+    EXPECT_EQ(cpu.get_register(15), 1);
+
+    Vx = cpu.get_register(0);
+
+    loadOpcodeAndExecute(0x6101, 0x206);
+    loadOpcodeAndExecute(0x8017, 0x208);
+
+    EXPECT_EQ(cpu.get_register(0), static_cast<uint8_t>(cpu.get_register(1) - Vx));
+    EXPECT_EQ(cpu.get_register(15), 0);
+
+}
+
+TEST_F(CPU_Test, SHLBitShiftsVxToLeft_SetsVfIfMostSignificantBitIsSet){
+    loadOpcodeAndExecute(0x6040, 0x200);
+
+    uint8_t Vx = cpu.get_register(0);
+
+    loadOpcodeAndExecute(0x801E, 0x202);
+
+    EXPECT_EQ(cpu.get_register(0), Vx << 1);
+    EXPECT_EQ(cpu.get_register(15), 0);
+
+    Vx = cpu.get_register(0);
+
+    loadOpcodeAndExecute(0x801E, 0x204);
+
+    EXPECT_EQ(cpu.get_register(0), static_cast<uint8_t>(Vx << 1));
+    EXPECT_EQ(cpu.get_register(15), 1);
+}
+
+TEST_F(CPU_Test, SNESkipsInstructionIfVxDoesntEqualVyElseDoesntSkip){
+    loadOpcodeAndExecute(0x6078, 0x200);
+    loadOpcodeAndExecute(0x6178, 0x202);
+    loadOpcodeAndExecute(0x9010, 0x204);
+
+    EXPECT_EQ(cpu.get_PC(), 0x206);
+
+    loadOpcodeAndExecute(0x6079, 0x206);
+    loadOpcodeAndExecute(0x9010, 0x208);
+    EXPECT_EQ(cpu.get_PC(), 0x20C);
+}
+
+TEST_F(CPU_Test, LDSetsIToNNN){
+    loadOpcodeAndExecute(0xA333, 0x200);
+    EXPECT_EQ(cpu.get_index(), 0x333);
+}
+
+TEST_F(CPU_Test, RNDGeneratesAValueInUint8Range){
+    loadOpcodeAndExecute(0xC0FF, 0x200);
+
+    EXPECT_TRUE(std::in_range<uint8_t>(cpu.get_register(0)));
 }
