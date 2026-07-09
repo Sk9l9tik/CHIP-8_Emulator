@@ -164,11 +164,27 @@ void SAERMO_logger(const std::optional<sf::Event>& event)
     }
 }
 
-int main(){
-    CHIP_8 emulator {};
-    emulator.load_ROM("Tetris_.ch8");
+int main(int argc, char* argv[]){
 
-    sf::RenderWindow window(sf::VideoMode({640, 960}), "CHIP-8 Emulator");
+    if(argc < 2){
+        std::cerr << "Usage: " << argv[0] << " <path_to_rom>\n";
+        std::cerr << "Example: " << argv[0] << " Testris_.ch8";
+        return -1;
+    }
+
+    std::string rom_path {argv[1]};
+
+    CHIP_8 emulator {};
+
+    try{
+        emulator.load_ROM(rom_path);
+        std::cout << "Loaded ROM: " << rom_path << '\n';
+    } catch(const std::exception& e){
+        std::cerr << "Failed to load ROM: "<< e.what() << '\n';
+        return -1;
+    }
+
+    sf::RenderWindow window(sf::VideoMode({640, 960}), "CHIP-8 Emulator - " + rom_path);
     window.setFramerateLimit(60);
     GUI gui{&window, &emulator};
     sf::Font font;
