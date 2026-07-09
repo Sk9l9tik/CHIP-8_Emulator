@@ -24,7 +24,7 @@ public:
         }
 
         // TEXT
-        text_size = static_cast<uint32_t>(size.x/4.f);
+        text_size = static_cast<uint32_t>(size.x/8.f);
         text = sf::Text(font, btn_text, text_size);
         text.setFillColor(sf::Color::Black);
 
@@ -263,10 +263,10 @@ private:
     sf::Text text = {font,"",0};
     uint32_t text_size;
 
-    std::function<void()> on_click;
-    std::function<void()> on_release;
-    std::function<void()> on_mouse_entered;
-    std::function<void()> on_mouse_exited;
+    std::function<void()> on_click          = [](){};
+    std::function<void()> on_release        = [](){};
+    std::function<void()> on_mouse_entered  = [](){};
+    std::function<void()> on_mouse_exited   = [](){};
 };
 
 #endif //CHIP_8_EMULATOR_BUTTON_H
