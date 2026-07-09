@@ -111,8 +111,10 @@ public:
             const bool hover = bounds.contains(static_cast<sf::Vector2f>(ev->position));
             if( hover && state != State::Hovered && state != State::Pressed){
                 state = State::Hovered;
+                on_mouse_entered();
             } else if(!hover && state == State::Hovered) {
                 state = State::Normal;
+                on_mouse_exited();
             }
         }
 
@@ -226,6 +228,14 @@ public:
         on_release = std::move(func);
     }
 
+    void set_on_mouse_entered(std::function<void()> func){
+        on_mouse_entered = std::move(func);
+    }
+
+    void set_on_mouse_exited(std::function<void()> func){
+        on_mouse_exited = std::move(func);
+    }
+
     void set_string(const std::string &_text){
         text.setString(_text);
     }
@@ -256,6 +266,8 @@ private:
 
     std::function<void()> on_click;
     std::function<void()> on_release;
+    std::function<void()> on_mouse_entered;
+    std::function<void()> on_mouse_exited;
 };
 
 #endif //CHIP_8_EMULATOR_BUTTON_H
