@@ -150,9 +150,8 @@ inline void SAERMO_logger(const std::optional<sf::Event>& event) {
 }
 
 #ifdef _WIN32
-  #include <windows.h>
-#elif __LINUX__
-  #include <ios>
+#include <windows.h>
+#else  
 
 #endif
 }
