@@ -167,7 +167,7 @@ void SAERMO_logger(const std::optional<sf::Event>& event)
 
 int main(){
     CHIP_8 emulator {};
-    emulator.load_ROM("7-beep.ch8");
+    emulator.load_ROM("Tetris_.ch8");
 
     sf::RenderWindow window(sf::VideoMode({640, 960}), "CHIP-8 Emulator");
     window.setFramerateLimit(60);
@@ -275,12 +275,16 @@ int main(){
     sf::Time cpu_accumulator = sf::Time::Zero;
     sf::Time cpu_last_time = cpu_clock.getElapsedTime();
 
+//    sf::Clock timer_clock;
+    const sf::Time CLOCK_TIME = sf::seconds(1.0f / 60.f);
+    sf::Time timer_accumulator = sf::Time::Zero;
+//    sf::Time last_time = timer_clock.getElapsedTime();
+
     // \/\/\/
     window.requestFocus();
 
     while (window.isOpen())
     {
-        emulator.tick_timers();
         // Текущее время работы CPU
         sf::Time curr = cpu_clock.getElapsedTime();
         // Разница с прошлым временем работы, т.е.
@@ -290,6 +294,7 @@ int main(){
         cpu_last_time = curr;
         // накопитель
         cpu_accumulator+=delta;
+        timer_accumulator+=delta;
         //
 
         while (const std::optional event = window.pollEvent())
@@ -365,15 +370,21 @@ int main(){
             gui.handle_event(event, sf::Mouse::getPosition(window));
         }
 
-    while(cpu_accumulator >= CPU_TICK_TIME) {
+        while(cpu_accumulator >= CPU_TICK_TIME) {
 #ifdef CHIP8_DEBUG
-        d.update();
-        if(d.is_paused() == false || true){}
+            d.update();
+            if(d.is_paused() == false || true){}
 #else
-        emulator.tick();
+            emulator.tick();
 #endif
-        cpu_accumulator -= CPU_TICK_TIME;
-    }
+            cpu_accumulator -= CPU_TICK_TIME;
+        }
+
+        while(timer_accumulator >= CLOCK_TIME){
+            emulator.tick_timers();
+            timer_accumulator -= CLOCK_TIME;
+        }
+
         window.clear(sf::Color::Black);
         gui.update();
         gui.render();
