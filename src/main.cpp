@@ -25,13 +25,18 @@
 
 int main(int argc, char* argv[]){
 
+    std::string rom_path{};
+
     if(argc < 2){
         std::cerr << "Usage: " << argv[0] << " <path_to_rom>\n";
-        std::cerr << "Example: " << argv[0] << " Testris_.ch8";
-        return -1;
+        std::cerr << "Example: " << argv[0] << " Tetris_.ch8";
+        rom_path = "Tetris_.ch8";
+        // return -1;
+    }
+    else {
+        rom_path = argv[1];
     }
 
-    std::string rom_path {argv[1]};
 
     CHIP_8 emulator {};
 
