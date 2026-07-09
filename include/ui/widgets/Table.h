@@ -57,7 +57,7 @@ public:
         return rows_c;
     }
 
-    void handle_event(const std::optional<sf::Event> &event, const sf::Vector2i &mouse_pos) override {
+    void handle_event(const std::optional<sf::Event> &event, [[maybe_unused]] const sf::Vector2i &mouse_pos) override {
         for(auto& el: _table){
             if(el != nullptr)
                 el->handle_event(event, mouse_pos);
