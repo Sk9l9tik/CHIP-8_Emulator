@@ -38,15 +38,6 @@ void GUI::handle_input(const std::optional<sf::Event> &event){
 
 }
 
-[[deprecated("ОНО ОБНУЛЯЕТ KEY_STATE И ВИРТУАЛЬНАЯ КЛАВА НЕ РАБОТАЕТ prikolno vobshem")]] void GUI::handle_input(){
-    auto &cpu = emulator->get_cpu();
-
-    for(auto& key : key_scancodes){
-       cpu.set_key_state(key.second, sf::Keyboard::isKeyPressed(key.first));
-    }
-
-}
-
 void GUI::handle_event(const std::optional<sf::Event> &event, const sf::Vector2i& mouse_pos) {
     if(const auto& resized = event->getIf<sf::Event::Resized>()){
         sf::FloatRect visible_area({0.f, 0.f}, sf::Vector2f(resized->size));

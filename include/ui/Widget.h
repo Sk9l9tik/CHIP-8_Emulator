@@ -17,8 +17,7 @@ struct Padding{
 
 class Widget{
 public:
-    Padding padding = {0,0,0,0};
-    //
+    Padding padding = {0};
 
     virtual ~Widget() = default;
 
@@ -32,11 +31,9 @@ public:
 
     [[nodiscard]] sf::Vector2f get_position() const {return pos;}
     [[nodiscard]] sf::Vector2f get_size()     const {return size;}
-    //
-
 
 protected:
-    Widget *parent = nullptr; // 0_o o_0
+    Widget *parent = nullptr;
 
     sf::Vector2f    pos;
     sf::Vector2f    size;

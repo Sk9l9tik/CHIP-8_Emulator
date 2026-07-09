@@ -15,6 +15,9 @@ public:
 
     Table(uint32_t cols, uint32_t rows) : cols_c(cols), rows_c(rows){
         _table.resize(cols*rows);
+
+        background.setSize(size);
+        set_bg_color(0x333333FF);
     }
 
     bool add_widget(Widget* widget) {
@@ -62,6 +65,8 @@ public:
     }
 
     void update() override {
+        background.setSize(size);
+
         for(auto& el: _table){
             if(el != nullptr)
                 el->update();
@@ -69,6 +74,16 @@ public:
     }
 
     void render(sf::RenderTarget &target) override {
+        sf::RenderTexture bg_texture(static_cast<sf::Vector2u>(size));
+        bg_texture.clear(sf::Color::Transparent);
+        bg_texture.draw(background);
+        bg_texture.display();
+
+        sf::Sprite bg_sprite(bg_texture.getTexture());
+        bg_sprite.setPosition(pos);
+
+        target.draw(bg_sprite);
+
         for (auto& el : _table) {
             if(el != nullptr)
                 el->render(target);
@@ -81,7 +96,12 @@ public:
         _table.clear(); // *...
     };
 
+    void set_bg_color(uint32_t color){
+        background.setFillColor(static_cast<sf::Color>(color));
+    }
+
 private:
+    sf::RectangleShape background;
     uint32_t cols_c;
     uint32_t rows_c;
 

@@ -164,23 +164,17 @@ void SAERMO_logger(const std::optional<sf::Event>& event)
 
 int main(){
     CHIP_8 emulator {};
-    emulator.load_ROM("6-keypad.ch8");
+    emulator.load_ROM("RNG_test.ch8");
 
     sf::RenderWindow window(sf::VideoMode({640, 960}), "CHIP-8 Emulator");
+    window.setFramerateLimit(60);
     GUI gui{&window, &emulator};
-    sf::Clock clock;
-    float fps = 0.f;
     sf::Font font;
     if(!font.openFromFile("../assets/fonts/Galmuri7.ttf")) {
         if (!font.openFromFile("../../assets/fonts/Galmuri7.ttf")) {
             return -1;
         };
     }
-
-    sf::Text fps_text(font, std::to_string(300), 16);
-    fps_text.setFillColor(sf::Color::Black);
-    fps_text.setPosition({static_cast<float>(window.getSize().x)
-                             - fps_text.getGlobalBounds().size.x, 0.f});
 
     Display display{emulator.get_frame_buffer()};
     display.set_size({640, 320});
@@ -201,7 +195,7 @@ int main(){
 
     for(int i = 0; i < 16; i++){
         const char hex_chars[] = "0123456789ABCDEF";
-        keys.push_back(Button{
+        keys.emplace_back(Button{
             std::string(1,hex_chars[i]),
             {0,0},
             {0,0},
@@ -245,11 +239,28 @@ int main(){
     // std::cout << "Paused at PC = 0x" << std::hex << emulator.get_cpu().get_PC() << "\n";
 #endif
 
+    sf::Clock cpu_clock;
+    const float CPU_HZ = 700.0f; // Частота проца
+    const sf::Time CPU_TICK_TIME = sf::seconds(1.0f / CPU_HZ);
+    sf::Time cpu_accumulator = sf::Time::Zero;
+    sf::Time cpu_last_time = cpu_clock.getElapsedTime();
+
     // \/\/\/
     window.requestFocus();
 
     while (window.isOpen())
     {
+        // Текущее время работы CPU
+        sf::Time curr = cpu_clock.getElapsedTime();
+        // Разница с прошлым временем работы, т.е.
+        // время прошедшее с последнего кадра
+        sf::Time delta = curr - cpu_last_time;
+        // сохраняем для след. кадра
+        cpu_last_time = curr;
+        // накопитель
+        cpu_accumulator+=delta;
+        //
+
         while (const std::optional event = window.pollEvent())
         {
             if (event->is<sf::Event::Closed>())
@@ -319,25 +330,22 @@ int main(){
                 }
         }
 #endif
-//            SAERMO_logger(event);
+            //SAERMO_logger(event);
             gui.handle_event(event, sf::Mouse::getPosition(window));
         }
 
-        float dt = clock.restart().asSeconds();
-        fps = 1.f / dt;
-        fps_text.setString(std::to_string(static_cast<int>(fps)));
-
-
+    while(cpu_accumulator >= CPU_TICK_TIME) {
 #ifdef CHIP8_DEBUG
         d.update();
         if(d.is_paused() == false || true){}
 #else
         emulator.tick();
 #endif
+        cpu_accumulator -= CPU_TICK_TIME;
+    }
         window.clear(sf::Color::Black);
         gui.update();
         gui.render();
-        window.draw(fps_text);
         window.display();
     }
 

@@ -2,6 +2,7 @@
 #define CHIP_8_EMULATOR_BUTTON_H
 
 #include <functional>
+#include <utility>
 #include "ui/Widget.h"
 
 class Button : public Widget{
@@ -13,14 +14,17 @@ public:
         Hovered,
         Pressed,
     };
-    //Test button
+
+    /* Default ugly button constructor
+     * To make it look better, you need to set 4 textures for all main states
+     * */
     Button(const std::string& btn_text, sf::Vector2f size, sf::Vector2f pos, sf::Font &btn_font) : font(btn_font){
         if(size.x == 0 || size.y == 0){
             size = {1,1};
         }
 
         // TEXT
-        text_size = size.x/4.f;
+        text_size = static_cast<uint32_t>(size.x/4.f);
         text = sf::Text(font, btn_text, text_size);
         text.setFillColor(sf::Color::Black);
 
@@ -73,6 +77,9 @@ public:
         state = State::Normal;
     }
 
+
+    /* Copy-constructor
+     * */
     Button(const Button& other)
         : Widget(other),
         state(other.state),
@@ -82,16 +89,19 @@ public:
         on_click(other.on_click),
         on_release(other.on_release)
     {
-
         text = other.text;
         text.setFont(font);
+        text.setFillColor(other.text.getFillColor());
 
         background = other.background;
         background.setTexture(textures[state].getTexture(), true);
     }
 
-    ~Button() override = default; // idc
+    // Zachem ya na angliyskom pishy voobshe
+    ~Button() override = default;
 
+    /* Handles mouse events
+     * */
     void handle_event(const std::optional<sf::Event> &event, const sf::Vector2i &mouse_pos) override {
         // Lock check
         if(is_locked()) return;
@@ -152,7 +162,7 @@ public:
         size = _size;
         bounds.size = _size;
 
-        text.setCharacterSize(_size.x/4.f);
+        text.setCharacterSize(static_cast<uint32_t>(_size.x/4.f));
         center_text();
     }
 
@@ -209,11 +219,11 @@ public:
 
     //xd
     void set_on_click(std::function<void()> func) {
-        on_click = func;
+        on_click = std::move(func);
     }
 
     void set_on_release(std::function<void()> func) {
-        on_release = func;
+        on_release = std::move(func);
     }
 
     void set_string(const std::string &_text){

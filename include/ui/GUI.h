@@ -49,8 +49,7 @@ static std::unordered_map<sf::Keyboard::Scancode, int> key_scancodes{
 
 class GUI{
 public:
-
-    GUI(sf::RenderWindow *window, CHIP_8 *emul);
+    GUI(sf::RenderWindow *window, CHIP_8 *emulator);
 
     void add(Widget *widget);
 
@@ -62,8 +61,7 @@ public:
 
     void handle_event(const std::optional<sf::Event> &event, const sf::Vector2i& mouse_pos);
 
-    [[maybe_unused]] void handle_input(const std::optional<sf::Event> &event);
-    void handle_input();
+    void handle_input(const std::optional<sf::Event> &event);
 private:
     sf::RenderWindow    *sf_window;
     CHIP_8              *emulator;
