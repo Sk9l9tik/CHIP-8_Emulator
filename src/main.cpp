@@ -1,5 +1,8 @@
 #include <ios>
 #include <iostream>
+#include <cmath>
+
+#include <SFML/Audio.hpp>
 
 #include "core/CHIP_8.h"
 #include "core/Memory.h"
@@ -164,7 +167,7 @@ void SAERMO_logger(const std::optional<sf::Event>& event)
 
 int main(){
     CHIP_8 emulator {};
-    emulator.load_ROM("RNG_test.ch8");
+    emulator.load_ROM("7-beep.ch8");
 
     sf::RenderWindow window(sf::VideoMode({640, 960}), "CHIP-8 Emulator");
     window.setFramerateLimit(60);
@@ -175,6 +178,34 @@ int main(){
             return -1;
         };
     }
+
+    // SOUND
+    system("chcp 65001 > nul");
+    const unsigned SAMPLE_RATE = 44100;
+    const unsigned DURATION_SECONDS = 1;
+    const std::size_t SAMPLE_COUNT = SAMPLE_RATE * DURATION_SECONDS;
+    const float FREQUENCY = 440.0f;
+    const std::int16_t AMPLITUDE = 30000;
+
+    std::vector<std::int16_t> samples(SAMPLE_COUNT);
+    for (std::size_t i = 0; i < SAMPLE_COUNT; ++i) {
+        double time = static_cast<double>(i) / SAMPLE_RATE;
+        double value = AMPLITUDE * std::sin(2.0 * 3.141592653589793 * FREQUENCY * time);
+        samples[i] = static_cast<std::int16_t>(value);
+    }
+
+    sf::SoundBuffer buffer;
+    std::vector<sf::SoundChannel> channelMap = { sf::SoundChannel::Mono };
+
+    if (!buffer.loadFromSamples(samples.data(), samples.size(), 1, SAMPLE_RATE, channelMap)) {
+        std::cerr << "Sound system error: Otshlefuy" << std::endl;
+        return -1;
+    }
+
+    sf::Sound sound(buffer);
+    sound.setLooping(true);
+    sound.setVolume(10);
+    // SOUND END
 
     Display display{emulator.get_frame_buffer()};
     display.set_size({640, 320});
@@ -346,6 +377,17 @@ int main(){
         window.clear(sf::Color::Black);
         gui.update();
         gui.render();
+
+        if(emulator.get_cpu().get_sound_timer() > 0){
+            if (sound.getStatus() != sf::Sound::Status::Playing) {
+                sound.play();
+            }
+        } else {
+            if (sound.getStatus() == sf::Sound::Status::Playing) {
+                sound.stop();
+            }
+        }
+
         window.display();
     }
 
