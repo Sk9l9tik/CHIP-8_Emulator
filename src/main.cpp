@@ -180,17 +180,16 @@ int main(){
     }
 
     // SOUND
-    system("chcp 65001 > nul");
     const unsigned SAMPLE_RATE = 44100;
     const unsigned DURATION_SECONDS = 1;
     const std::size_t SAMPLE_COUNT = SAMPLE_RATE * DURATION_SECONDS;
-    const float FREQUENCY = 440.0f;
+    const float FREQUENCY = 440.f;
     const std::int16_t AMPLITUDE = 30000;
 
     std::vector<std::int16_t> samples(SAMPLE_COUNT);
     for (std::size_t i = 0; i < SAMPLE_COUNT; ++i) {
         double time = static_cast<double>(i) / SAMPLE_RATE;
-        double value = AMPLITUDE * std::sin(2.0 * 3.141592653589793 * FREQUENCY * time);
+        double value = AMPLITUDE * std::sin(2.0 * M_PI * FREQUENCY * time);
         samples[i] = static_cast<std::int16_t>(value);
     }
 
@@ -281,6 +280,7 @@ int main(){
 
     while (window.isOpen())
     {
+        emulator.tick_timers();
         // Текущее время работы CPU
         sf::Time curr = cpu_clock.getElapsedTime();
         // Разница с прошлым временем работы, т.е.
