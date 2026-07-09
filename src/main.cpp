@@ -208,7 +208,7 @@ int main(){
 
     Display display{emulator.get_frame_buffer()};
     display.set_size({640, 320});
-    display.set_colors(0xCBD5CFFF, 0x181825FF);
+    display.set_colors(0xA796E8FF, 0x181825FF);
 
     gui.add(&display);
 
