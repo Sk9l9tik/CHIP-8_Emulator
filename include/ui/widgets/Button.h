@@ -240,7 +240,6 @@ public:
         text.setString(_text);
     }
 
-
 private:
     void center_text(){
         sf::FloatRect text_bounds = text.getLocalBounds();
