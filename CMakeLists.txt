@@ -75,10 +75,16 @@ add_executable(chip8_tests
     ${TEST_CORE_SRC}
     ${TEST_DEBUG_SRC}
     ${TEST_UI_SRC}
+
     ${CORE_SRC}
+    ${DEBUG_SRC}
+    # ${UI_SRC}
 )
 
 target_include_directories(chip8_tests PRIVATE ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(chip8_tests PRIVATE GTest::gtest GTest::gtest_main)
 
 enable_testing()
+
+include(GoogleTest)
+gtest_discover_tests(chip8_tests)
