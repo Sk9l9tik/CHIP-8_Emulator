@@ -366,6 +366,7 @@ int main(){
         }
 #endif
             //SAERMO_logger(event);
+
             gui.handle_event(event, sf::Mouse::getPosition(window));
         }
 
