@@ -28,6 +28,19 @@ else()
     FetchContent_MakeAvailable(googletest)
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_package(nfd QUIET)
+    if(NOT nfd_FOUND)
+        include(FetchContent)
+        FetchContent_Declare(
+            nfd
+            GIT_REPOSITORY https://github.com/btzy/nativefiledialog-extended.git
+            GIT_TAG v1.2.1
+        )
+        FetchContent_MakeAvailable(nfd)
+    endif()
+endif()
+
 file(GLOB_RECURSE CORE_SRC src/core/*.cpp)
 file(GLOB_RECURSE DEBUG_SRC src/debug/*.cpp)
 file(GLOB_RECURSE UI_SRC src/ui/*.cpp)
@@ -41,6 +54,12 @@ add_executable(chip8_emu
 
 target_include_directories(chip8_emu PRIVATE ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(chip8_emu PRIVATE sfml-graphics sfml-audio)
+
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  target_link_libraries(chip8_emu PRIVATE nfd)
+  target_compile_definitions(chip8_emu PRIVATE HAVE_NFD)
+endif()
 
 #target_compile_options(chip8_emu PRIVATE
 #    ${COMPILE_FLAGS}

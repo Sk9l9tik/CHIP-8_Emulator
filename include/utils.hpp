@@ -4,9 +4,14 @@
 // Весь winapi в namespace utils был 0_o
 #if defined(_WIN32)
 #include <windows.h>
+#else
 #endif
 
 #include <iostream>
+
+#ifdef HAVE_NFD
+#include <nfd.hpp>
+#endif
 
 #include <SFML/Graphics.hpp>
 
@@ -155,7 +160,7 @@ inline void SAERMO_logger(const std::optional<sf::Event>& event) {
 }
 
 // Centers text in bounds
-void center_text(sf::Text &text, sf::FloatRect bounds){
+inline void center_text(sf::Text &text, sf::FloatRect bounds){
     sf::FloatRect text_bounds = text.getLocalBounds();
     text.setOrigin({text_bounds.size.x / 2.f, text_bounds.size.y / 2.f});
 
@@ -166,7 +171,7 @@ void center_text(sf::Text &text, sf::FloatRect bounds){
 }
 
 #ifdef _WIN32
-std::wstring show_file_dialog_w(HWND hwnd) {
+inline std::wstring show_file_dialog_w(HWND hwnd) {
     OPENFILENAMEW ofn = {0};
     wchar_t szFile[260] = {0};
 
@@ -186,7 +191,7 @@ std::wstring show_file_dialog_w(HWND hwnd) {
     return {};
 }
 
-std::string show_file_dialog(HWND hwnd) {
+inline std::string show_file_dialog(HWND hwnd) {
     OPENFILENAMEA ofn = {0};
     char szFile[260] = {0};
 
@@ -205,6 +210,19 @@ std::string show_file_dialog(HWND hwnd) {
     return {};
 }
 #else  
+
+inline std::string show_file_dialog() {
+    NFD::Guard nfdGuard;
+    NFD::UniquePath outPath;
+
+    nfdfilteritem_t filters[1] = {{"CHIP-8 ROMs", "ch8,c8,rom"}};
+    nfdresult_t result = NFD::OpenDialog(outPath, filters, 1);
+
+    if (result == NFD_OKAY) {
+        return std::string(outPath.get());
+    }
+    return {};
+}
 
 #endif
 }

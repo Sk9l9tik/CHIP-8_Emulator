@@ -1,8 +1,8 @@
 #include <SFML/Audio.hpp>
 #include <cmath>
 
-#include <iostream>
 #include <filesystem>
+#include <iostream>
 
 #include "utils.hpp"
 
@@ -21,6 +21,7 @@
 #ifdef CHIP8_DEBUG
 #include "debug/Debugger.h"
 #endif
+
 
 int main(int argc, char* argv[]){
     std::string rom_path{};
@@ -50,9 +51,10 @@ int main(int argc, char* argv[]){
 
     GUI gui{&window, &emulator};
     sf::Font font;
-    if(!font.openFromFile("../assets/fonts/Galmuri7.ttf")) {
-        return -1;
-    }
+    if (!font.openFromFile("../assets/fonts/Galmuri7.ttf")) 
+      if(!font.openFromFile("../../assets/fonts/Galmuri7.ttf"))
+          return -1;
+
     font.setSmooth(false);
 
     // SOUND
@@ -129,11 +131,16 @@ int main(int argc, char* argv[]){
 
     gui.add(&keyboard);
 
-#ifdef _WIN32
     Button open_file{"Open ROM", {150, 80}, {d_pos.x + 10, 0}, font};
     open_file.set_text_size(18);
     open_file.set_on_click([&window, &emulator](){
+
+    #ifdef _WIN32
         auto path = utils::show_file_dialog(window.getNativeHandle());
+    #else
+        auto path = utils::show_file_dialog();
+    #endif
+        std::cout << path << '\n';
 
         if(path.ends_with(".ch8") && std::filesystem::exists(path)) {
             emulator.get_cpu().reset();
@@ -141,7 +148,6 @@ int main(int argc, char* argv[]){
         }
     });
     gui.add(&open_file);
-#endif
 
     Toggle test{"", {50.f, 50.f}, {d_pos.x +10, 90}, font};
     sf::CircleShape btn_c(50.f/4.f, 30);
