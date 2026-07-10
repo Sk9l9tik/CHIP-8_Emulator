@@ -36,13 +36,14 @@ public:
 
         //Is released
         if(const auto& ev = event->getIf<sf::Event::MouseButtonPressed>()){
-            if(state == State::Pressed && ev->button == sf::Mouse::Button::Left){
+            if(state == State::Pressed && ev->button == sf::Mouse::Button::Left
+               && bounds.contains(static_cast<sf::Vector2f>(ev->position)))
+            {
                 state = bounds.contains(static_cast<sf::Vector2f>(ev->position)) ? State::Hovered : State::Normal;
                 on_release();
             }
         }
     }
-private:
 };
 
 #endif //CHIP_8_EMULATOR_TOGGLE_H
