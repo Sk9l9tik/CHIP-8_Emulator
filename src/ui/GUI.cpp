@@ -83,7 +83,7 @@ sf::Vector2f GUI::get_size() {
 
     for(auto& el : widgets){
         width = std::max(width, el->get_size().x + el->get_position().x);
-        height = std::max(width, el->get_size().y + el->get_position().y);
+        height = std::max(height, el->get_size().y + el->get_position().y);
     }
 
     auto m_size = sf::VideoMode::getDesktopMode().size;

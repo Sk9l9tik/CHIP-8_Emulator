@@ -13,14 +13,12 @@ public:
         d_texture.display();
 
         update_texture();
-
-        //d_sprite.setTexture(d_texture.getTexture());
     }
 
     ~Display() override = default;
 
     void handle_event([[maybe_unused]] const std::optional<sf::Event> &event, [[maybe_unused]] const sf::Vector2i &mouse_pos) override {
-        // ну неважно в принципе
+        // MB: check resized event
     }
 
     void update() override {
@@ -31,7 +29,7 @@ public:
         target.draw(d_sprite);
     }
 
-    void set_pixel_size(float p_size){
+    [[maybe_unused]] void set_pixel_size(float p_size){
         pixel_size = p_size;
     }
 

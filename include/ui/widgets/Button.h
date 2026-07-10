@@ -20,12 +20,9 @@ public:
      * */
     Button(const std::string& btn_text, sf::Vector2f _size, sf::Vector2f _pos, sf::Font &btn_font) : font(btn_font)
     {
-        if(_size.x == 0 || _size.y == 0)
-            size = {1,1};
-        else
-            size = _size;
+        size = (_size.x == 0 || _size.y == 0) ? sf::Vector2f{64.f,64.f} : _size;
         pos = _pos;
-        // TEXT
+        // DEFAULT TEXT SETTINGS
         text_size = static_cast<uint32_t>(size.x/8.f);
         text = sf::Text(font, btn_text, text_size);
         text.setFillColor(sf::Color::Black);
@@ -95,11 +92,11 @@ public:
         text.setFont(font);
         text.setFillColor(other.text.getFillColor());
 
+
         background = other.background;
         background.setTexture(textures[state].getTexture(), true);
     }
 
-    // Zachem ya na angliyskom pishy voobshe
     ~Button() override = default;
 
     /* Handles mouse events
@@ -165,6 +162,7 @@ public:
     void set_size(sf::Vector2f _size) override {
         size = _size;
         bounds.size = _size;
+        // UPDATE TEXTURES
 
         text.setCharacterSize(static_cast<uint32_t>(_size.x/4.f));
         center_text();
@@ -244,9 +242,8 @@ public:
         on_mouse_exited = std::move(func);
     }
 
-    void set_string(const std::string &_text){
-        text.setString(_text);
-        center_text();
+    sf::Text& get_text(){
+        return text;
     }
 
 protected:

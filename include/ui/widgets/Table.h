@@ -64,7 +64,7 @@ public:
     }
 
     void update() override {
-        background.setSize(size);
+        if(background.getSize() != size) background.setSize(size);
 
         for(auto& el: _table){
             if(el != nullptr)
@@ -98,7 +98,6 @@ public:
     void set_bg_color(uint32_t color){
         background.setFillColor(static_cast<sf::Color>(color));
     }
-
 private:
     sf::RectangleShape background;
     uint32_t cols_c;
