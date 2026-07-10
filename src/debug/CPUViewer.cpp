@@ -18,5 +18,8 @@ CPUState CPUViewer::snapshot(const CPU& cpu) {
   for (int i = 0; i < 16; ++i)
       state.stack[i] = cpu.get_stack(i);
 
+  for (int i = 0; i < 16; ++i)
+    state.keypad[i] = cpu.get_key_state(i) ? 1 : 0;
+
   return state;
 }
