@@ -46,14 +46,7 @@ int main(int argc, char* argv[]){
     }
 
 
-    sf::RenderWindow window(
-            sf::VideoMode({640, 960}),
-            "CHIP-8 Emulator - " + rom_path,
-            sf::Style::Default,
-            sf::State::Windowed);
-
-    window.setFramerateLimit(60);
-
+    sf::RenderWindow window;
 
     GUI gui{&window, &emulator};
     sf::Font font;
@@ -213,7 +206,12 @@ int main(int argc, char* argv[]){
     sf::Time timer_accumulator = sf::Time::Zero;
 //    sf::Time last_time = timer_clock.getElapsedTime();
 
-
+    window.create(
+            sf::VideoMode(static_cast<sf::Vector2u>(gui.get_size())),
+                    "CHIP-8 Emulator - " + rom_path,
+                    sf::Style::Default,
+                    sf::State::Windowed);
+    window.setFramerateLimit(60);
 
     // \/\/\/
     window.requestFocus();

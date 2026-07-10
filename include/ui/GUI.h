@@ -62,6 +62,8 @@ public:
     void handle_event(const std::optional<sf::Event> &event, [[maybe_unused]] const sf::Vector2i& mouse_pos);
 
     void handle_input(const std::optional<sf::Event> &event);
+
+    sf::Vector2f get_size();
 private:
     sf::RenderWindow    *sf_window;
     CHIP_8              *emulator;

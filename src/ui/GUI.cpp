@@ -77,3 +77,19 @@ void GUI::add(Widget *widget) {
 void GUI::setup_widgets() {
 
 }
+
+sf::Vector2f GUI::get_size() {
+    float width = 0, height = 0;
+
+    for(auto& el : widgets){
+        width = std::max(width, el->get_size().x + el->get_position().x);
+        height = std::max(width, el->get_size().y + el->get_position().y);
+    }
+
+    auto m_size = sf::VideoMode::getDesktopMode().size;
+
+    if(width > static_cast<float>(m_size.x)) width = static_cast<float>(m_size.x);
+    if(height > static_cast<float>(m_size.y)) width = static_cast<float>(m_size.y);
+
+    return {width, height};
+}
