@@ -5,13 +5,13 @@
 #if defined(_WIN32)
 #include <windows.h>
 #else
-#endif
-
-#include <iostream>
 
 #ifdef HAVE_NFD
 #include <nfd.hpp>
 #endif
+#endif
+
+#include <iostream>
 
 #include <SFML/Graphics.hpp>
 
