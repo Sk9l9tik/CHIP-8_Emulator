@@ -14,6 +14,7 @@
 #include "ui/widgets/Button.h"
 #include "ui/widgets/Display.h"
 #include "ui/widgets/Table.h"
+#include "ui/widgets/Toggle.h"
 
 #define CHIP8_DEBUG1
 
@@ -37,26 +38,32 @@ int main(int argc, char* argv[]){
         rom_path = argv[1];
     }
 
-
     CHIP_8 emulator {};
 
     try{
         emulator.load_ROM(rom_path);
-        std::cout << "Loaded ROM: " << rom_path << '\n';
+        //std::cout << "Loaded ROM: " << rom_path << '\n';
     } catch(const std::exception& e){
         std::cerr << "Failed to load ROM: "<< e.what() << '\n';
         return -1;
     }
 
-    sf::RenderWindow window(sf::VideoMode({640, 960}), "CHIP-8 Emulator - " + rom_path);
+
+    sf::RenderWindow window(
+            sf::VideoMode({640, 960}),
+            "CHIP-8 Emulator - " + rom_path,
+            sf::Style::Default,
+            sf::State::Windowed);
+
     window.setFramerateLimit(60);
+
+
     GUI gui{&window, &emulator};
     sf::Font font;
     if(!font.openFromFile("../assets/fonts/Galmuri7.ttf")) {
-        if (!font.openFromFile("../../assets/fonts/Galmuri7.ttf")) {
-            return -1;
-        };
+        return -1;
     }
+    font.setSmooth(false);
 
     // SOUND
     const unsigned SAMPLE_RATE = 44100;
@@ -134,6 +141,7 @@ int main(int argc, char* argv[]){
 
 #ifdef _WIN32
     Button open_file{"Open ROM", {150, 80}, {d_pos.x + 10, 0}, font};
+    open_file.set_text_size(18);
     open_file.set_on_click([&window, &emulator](){
         auto path = utils::show_file_dialog(window.getNativeHandle());
 
@@ -144,6 +152,43 @@ int main(int argc, char* argv[]){
     });
     gui.add(&open_file);
 #endif
+
+    Toggle test{"", {50.f, 50.f}, {d_pos.x +10, 90}, font};
+    sf::CircleShape btn_c(50.f/4.f, 30);
+
+    btn_c.setFillColor(sf::Color::Red);
+    btn_c.setPosition({test.get_size().x / 4.f, test.get_size().y / 4.f});
+
+    sf::RenderTexture t(static_cast<sf::Vector2u>(test.get_size()));
+    t.clear(sf::Color::Transparent);
+    t.draw(btn_c);
+    t.display();
+
+    test.load_texture(t.getTexture(), Button::State::Pressed);
+
+    btn_c.setFillColor({255,0,0,180});
+    t.clear(sf::Color::Transparent);
+    t.draw(btn_c);
+    t.display();
+
+    test.load_texture(t.getTexture(), Button::State::Hovered);
+
+    sf::Text text(font, "123", 16);
+    text.setFillColor(sf::Color::White);
+    utils::center_text(text, {{}, {50.f, 50.f}});
+    t.clear(sf::Color::Transparent);
+    t.draw(text);
+    t.display();
+
+    test.load_texture(t.getTexture(), Button::State::Normal);
+
+    test.set_on_click([](){
+        printf("ON\n");
+    });
+    test.set_on_release([](){
+        printf("OFF\n");
+    });
+    gui.add(&test);
 
 #ifdef CHIP8_DEBUG
     Debugger d(emulator);
@@ -171,6 +216,8 @@ int main(int argc, char* argv[]){
     const sf::Time CLOCK_TIME = sf::seconds(1.0f / 60.f);
     sf::Time timer_accumulator = sf::Time::Zero;
 //    sf::Time last_time = timer_clock.getElapsedTime();
+
+
 
     // \/\/\/
     window.requestFocus();

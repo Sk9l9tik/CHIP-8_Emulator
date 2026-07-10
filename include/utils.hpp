@@ -154,6 +154,17 @@ inline void SAERMO_logger(const std::optional<sf::Event>& event) {
     }
 }
 
+// Centers text in bounds
+void center_text(sf::Text &text, sf::FloatRect bounds){
+    sf::FloatRect text_bounds = text.getLocalBounds();
+    text.setOrigin({text_bounds.size.x / 2.f, text_bounds.size.y / 2.f});
+
+    text.setPosition({
+        bounds.position.x + bounds.size.x / 2.f,
+        bounds.position.y + bounds.size.y / 2.f - 4.f
+    });
+}
+
 #ifdef _WIN32
 std::wstring show_file_dialog_w(HWND hwnd) {
     OPENFILENAMEW ofn = {0};

@@ -18,11 +18,13 @@ public:
     /* Default ugly button constructor
      * To make it look better, you need to set 4 textures for all main states
      * */
-    Button(const std::string& btn_text, sf::Vector2f size, sf::Vector2f pos, sf::Font &btn_font) : font(btn_font){
-        if(size.x == 0 || size.y == 0){
+    Button(const std::string& btn_text, sf::Vector2f _size, sf::Vector2f _pos, sf::Font &btn_font) : font(btn_font)
+    {
+        if(_size.x == 0 || _size.y == 0)
             size = {1,1};
-        }
-
+        else
+            size = _size;
+        pos = _pos;
         // TEXT
         text_size = static_cast<uint32_t>(size.x/8.f);
         text = sf::Text(font, btn_text, text_size);
@@ -168,6 +170,11 @@ public:
         center_text();
     }
 
+    void set_text_size(uint32_t size){
+        text.setCharacterSize(size);
+        center_text();
+    }
+
     bool load_texture(const sf::Texture& texture, State _state){
         sf::Vector2u texture_size = texture.getSize();
         sf::Vector2f button_size = bounds.size;
@@ -202,6 +209,7 @@ public:
             button_size.x / static_cast<float>(texture_size.x),
             button_size.y / static_cast<float>(texture_size.y)
         });
+
 
         if (!textures[_state].resize(static_cast<sf::Vector2u>(button_size))) {
             return false;
@@ -238,9 +246,10 @@ public:
 
     void set_string(const std::string &_text){
         text.setString(_text);
+        center_text();
     }
 
-private:
+protected:
     void center_text(){
         sf::FloatRect text_bounds = text.getLocalBounds();
         text.setOrigin({text_bounds.size.x / 2.f, text_bounds.size.y / 2.f});
