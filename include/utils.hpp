@@ -1,6 +1,11 @@
 #ifndef CHIP_8_EMULATOR_UTILS_HPP
 #define CHIP_8_EMULATOR_UTILS_HPP
 
+// Весь winapi в namespace utils был 0_o
+#if defined(_WIN32)
+#include <windows.h>
+#endif
+
 #include <iostream>
 
 #include <SFML/Graphics.hpp>
@@ -150,7 +155,44 @@ inline void SAERMO_logger(const std::optional<sf::Event>& event) {
 }
 
 #ifdef _WIN32
-#include <windows.h>
+std::wstring show_file_dialog_w(HWND hwnd) {
+    OPENFILENAMEW ofn = {0};
+    wchar_t szFile[260] = {0};
+
+    ofn.lStructSize = sizeof(ofn);
+    ofn.hwndOwner = hwnd;
+    ofn.lpstrFile = szFile;
+    ofn.nMaxFile = sizeof(szFile) / sizeof(wchar_t);
+    ofn.lpstrFilter = L"Chip-8 ROM (*.ch8)\0*.ch8\0All files (*.*)\0*.*\0";
+    ofn.nFilterIndex = 1;
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+    if (GetOpenFileNameW(&ofn) == TRUE) {
+        std::wstring path = szFile;
+        return path;
+    }
+
+    return {};
+}
+
+std::string show_file_dialog(HWND hwnd) {
+    OPENFILENAMEA ofn = {0};
+    char szFile[260] = {0};
+
+    ofn.lStructSize = sizeof(ofn);
+    ofn.hwndOwner = hwnd;
+    ofn.lpstrFile = szFile;
+    ofn.nMaxFile = sizeof(szFile);
+    ofn.lpstrFilter = "Chip-8 ROM (*.ch8)\0*.ch8\0All files (*.*)\0*.*\0";
+    ofn.nFilterIndex = 1;
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+    if (GetOpenFileNameA(&ofn) == TRUE) {
+        std::string path = szFile;
+        return path;
+    }
+    return {};
+}
 #else  
 
 #endif

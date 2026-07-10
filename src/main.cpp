@@ -2,6 +2,7 @@
 #include <cmath>
 
 #include <iostream>
+#include <filesystem>
 
 #include "utils.hpp"
 
@@ -24,12 +25,11 @@
 // tools или misc или helpers или utils или че там пишут я забыл уже но мне лично лень просто
 
 int main(int argc, char* argv[]){
-
     std::string rom_path{};
 
     if(argc < 2){
-        std::cerr << "Usage: " << argv[0] << " <path_to_rom>\n";
-        std::cerr << "Example: " << argv[0] << " Tetris_.ch8";
+//        std::cerr << "Usage: " << argv[0] << " <path_to_rom>\n";
+//        std::cerr << "Example: " << argv[0] << " Tetris_.ch8\n";
         rom_path = "Tetris_.ch8";
         // return -1;
     }
@@ -112,8 +112,7 @@ int main(int argc, char* argv[]){
         });
 
         keys[i].set_size({128, 128});
-        // как то надо будет переделать конечно всю систему загрузки текстурок,
-        // а то 16 одинаковых наборов выходит по итогу
+
         keys[i].load_texture("../assets/sprites/KBButton_Default.png", Button::State::Normal);
         keys[i].load_texture("../assets/sprites/KBButton_Hovered.png", Button::State::Hovered);
         keys[i].load_texture("../assets/sprites/KBButton_Locked.png", Button::State::Locked);
@@ -132,6 +131,20 @@ int main(int argc, char* argv[]){
     }
 
     gui.add(&keyboard);
+
+#ifdef _WIN32
+    Button open_file{"Open ROM", {150, 80}, {d_pos.x + 10, 0}, font};
+    open_file.set_on_click([&window, &emulator](){
+        auto path = utils::show_file_dialog(window.getNativeHandle());
+
+        if(path.ends_with(".ch8") && std::filesystem::exists(path)) {
+            emulator.get_cpu().reset();
+            emulator.load_ROM(path);
+        }
+    });
+    gui.add(&open_file);
+#endif
+
 #ifdef CHIP8_DEBUG
     Debugger d(emulator);
 
