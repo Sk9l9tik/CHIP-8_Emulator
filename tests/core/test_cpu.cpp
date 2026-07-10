@@ -332,3 +332,144 @@ TEST_F(CPU_Test, RNDGeneratesAValueInUint8Range){
 
     EXPECT_TRUE(std::in_range<uint8_t>(cpu.get_register(0)));
 }
+
+TEST_F(CPU_Test, JMPSetsPCToVxPlusNNN){
+    loadOpcodeAndExecute(0x6078, 0x200);
+    uint8_t Vx = cpu.get_register(0);
+
+    loadOpcodeAndExecute(0xB333, 0x202);
+
+    EXPECT_EQ(cpu.get_PC(), 0x333 + Vx);
+}
+
+TEST_F(CPU_Test, DRWSetsVfIfCollisionAndDrawsAtCorrectPos){
+    loadOpcodeAndExecute(0x6078);
+    loadOpcodeAndExecute(0x6175, 0x202);
+    loadOpcodeAndExecute(0xA050, 0x204);
+    loadOpcodeAndExecute(0xD017, 0x206);
+
+    EXPECT_FALSE(cpu.get_register(15));
+
+    const auto& pixels {fb.get_frame_buffer()};
+
+    uint8_t px = (0x78) % 64;
+    uint8_t py = (0x75) % 32;
+
+    for(uint8_t i = 0; i < 8; ++i){
+        if(i < 4) EXPECT_TRUE(pixels.at(py*64+px+i));
+        else EXPECT_FALSE(pixels.at(py*64+px+i));
+    }
+
+    loadOpcodeAndExecute(0xD017, 0x208);
+
+    EXPECT_TRUE(cpu.get_register(15));
+
+    for(uint8_t i = 0; i < 8; ++i)
+        EXPECT_FALSE(pixels.at(py*64+px+i));
+
+}
+
+TEST_F(CPU_Test, SKPSkipsInstructionIfButtonNumberVxIsPressed){
+    cpu.set_key_state(0, true);
+    loadOpcodeAndExecute(0xE09E, 0x200);
+
+    EXPECT_EQ(cpu.get_PC(), 0x204);
+
+    loadOpcodeAndExecute(0x6101, 0x204);
+
+    loadOpcodeAndExecute(0xE19E, 0x206);
+    EXPECT_EQ(cpu.get_PC(), 0x208);
+}
+
+TEST_F(CPU_Test, SNKPSkipsInstructionIfButtonNumberVxIsNotPressed){
+    cpu.set_key_state(0, true);
+    loadOpcodeAndExecute(0xE0A1, 0x200);
+
+    EXPECT_EQ(cpu.get_PC(), 0x202);
+
+    loadOpcodeAndExecute(0x6101, 0x202);
+
+    loadOpcodeAndExecute(0xE1A1, 0x204);
+    EXPECT_EQ(cpu.get_PC(), 0x208);
+}
+
+TEST_F(CPU_Test, LDSetsVxToDT_LDSetsDTToVx_LDSetsSTToVx){
+    loadOpcodeAndExecute(0x6078, 0x200);
+
+    loadOpcodeAndExecute(0xF015, 0x202);
+
+    EXPECT_EQ(cpu.get_register(0), cpu.get_delay_timer());
+
+    loadOpcodeAndExecute(0xF018, 0x204);
+
+    EXPECT_EQ(cpu.get_register(0), cpu.get_sound_timer());
+
+    loadOpcodeAndExecute(0x6077, 0x206);
+
+    EXPECT_NE(cpu.get_register(0), cpu.get_delay_timer());
+
+    loadOpcodeAndExecute(0xF007, 0x208);
+
+    EXPECT_EQ(cpu.get_register(0), cpu.get_delay_timer());
+}
+
+TEST_F(CPU_Test, LDWaitsForInputAndSetsKeyVxToPressed){
+    loadOpcodeAndExecute(0x6001, 0x200);
+
+    loadOpcodeAndExecute(0xF00A, 0x202);
+
+    cpu.tick();
+
+    EXPECT_EQ(cpu.get_PC(), 0x204);
+
+    cpu.set_key_state(0x1, true);
+
+    loadOpcodeAndExecute(0x6078, 0x204);
+
+    EXPECT_EQ(cpu.get_PC(), 0x206);
+}
+
+TEST_F(CPU_Test, ADDSetsIToIPlusVx){
+    loadOpcodeAndExecute(0x6078, 0x200);
+
+    loadOpcodeAndExecute(0xA333, 0x202);
+
+    loadOpcodeAndExecute(0xF01E, 0x204);
+
+    EXPECT_EQ(cpu.get_index(), 0x078 + 0x333);
+}
+
+TEST_F(CPU_Test, LDWritesBinaryDec){
+    loadOpcodeAndExecute(0x60FE, 0x200);
+
+    loadOpcodeAndExecute(0xA333, 0x202);
+
+    loadOpcodeAndExecute(0xF033, 0x204);
+
+    EXPECT_EQ(mem.read(cpu.get_index()), 2);
+    EXPECT_EQ(mem.read(cpu.get_index() + 1), 5);
+    EXPECT_EQ(mem.read(cpu.get_index() + 2), 4);
+}
+
+TEST_F(CPU_Test, LDWritesRegistersFromV0ToVxIntoMemory_LDReadsItFromMemoryIntoRegisters){
+    loadOpcodeAndExecute(0x60FE, 0x200);
+
+    loadOpcodeAndExecute(0xA333, 0x202);
+
+    loadOpcodeAndExecute(0x6178, 0x204);
+    loadOpcodeAndExecute(0x6213, 0x206);
+
+    loadOpcodeAndExecute(0xF255, 0x208);
+
+    for(uint8_t i = 0; i < 3; ++i)
+        EXPECT_EQ(mem.read(cpu.get_index() + i), cpu.get_register(i));
+
+    loadOpcodeAndExecute(0x6000, 0x20A);
+    loadOpcodeAndExecute(0x6100, 0x20C);
+    loadOpcodeAndExecute(0x6222, 0x20E);
+
+    loadOpcodeAndExecute(0xF265, 0x210);
+
+    for(uint8_t i = 0; i < 3; ++i)
+        EXPECT_EQ(mem.read(cpu.get_index() + i), cpu.get_register(i));
+}
