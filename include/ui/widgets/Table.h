@@ -3,12 +3,9 @@
 
 #include "ui/Widget.h"
 
-//
-
-
 class Table : public Widget{
 public:
-    //Style
+    // style
     float vertical_gap = 0.f;
     float horizontal_gap = 0.f;
     //
@@ -21,6 +18,8 @@ public:
     }
 
     bool add_widget(Widget* widget) {
+        if(!widget) return false;
+
         float x = pos.x + padding.left;
         float y = pos.y + padding.up;
 

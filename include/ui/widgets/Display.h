@@ -23,7 +23,7 @@ public:
         // ну неважно в принципе
     }
 
-    void update() override { // че
+    void update() override {
         update_texture();
     }
 
@@ -53,8 +53,8 @@ private:
 
         for (unsigned int i = 0; i < DISPLAY_WIDTH * DISPLAY_HEIGHT; i++) {
             pixels[i].position = {
-                    static_cast<float>(i % DISPLAY_WIDTH),
-                    static_cast<float>(i / DISPLAY_WIDTH)
+                static_cast<float>(i % DISPLAY_WIDTH),
+                static_cast<float>(i / DISPLAY_WIDTH)
             };
             pixels[i].color = pixel_data.get_frame_buffer()[i] ?
                               static_cast<sf::Color>(true_color) : static_cast<sf::Color>(false_color);

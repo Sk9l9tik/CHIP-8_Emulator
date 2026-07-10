@@ -33,8 +33,6 @@ public:
     [[nodiscard]] sf::Vector2f get_size()     const {return size;}
 
 protected:
-    Widget() = default;
-
     Widget *parent = nullptr;
 
     sf::Vector2f    pos;

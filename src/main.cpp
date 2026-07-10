@@ -22,9 +22,6 @@
 #include "debug/Debugger.h"
 #endif
 
-// Пишет в консоль вообще по каждому SFML событию, можете в отдельный файл как то выделить типа
-// tools или misc или helpers или utils или че там пишут я забыл уже но мне лично лень просто
-
 int main(int argc, char* argv[]){
     std::string rom_path{};
 
@@ -189,7 +186,6 @@ int main(int argc, char* argv[]){
         printf("OFF\n");
     });
     gui.add(&test);
-
 #ifdef CHIP8_DEBUG
     Debugger d(emulator);
 
