@@ -30,7 +30,7 @@ int main(int argc, char* argv[]){
     if(argc < 2){
 //        std::cerr << "Usage: " << argv[0] << " <path_to_rom>\n";
 //        std::cerr << "Example: " << argv[0] << " Tetris_.ch8\n";
-        rom_path = "Tetris_.ch8";
+        rom_path = "../assets/roms/Tetris_.ch8";
         // return -1;
     }
     else {

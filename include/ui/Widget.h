@@ -29,8 +29,6 @@ protected:
 
     sf::Vector2f    pos;  // Global
     sf::Vector2f    size; // Global
-
-    static inline ResourceManager rs;
 };
 
 #endif //CHIP_8_EMULATOR_WIDGET_H

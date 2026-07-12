@@ -3,7 +3,6 @@
 
 #include <SFML/Graphics.hpp>
 
-// Мне лень тут синглтонить чет если честно, можете сами переписать
 class ResourceManager{
 public:
     static void set_font(sf::Font& new_font) { default_font = new_font; }
@@ -31,7 +30,6 @@ public:
     }
 private:
     static inline sf::Font default_font;
-
     static inline std::unordered_map<std::string, sf::Texture> textures;
 
     //

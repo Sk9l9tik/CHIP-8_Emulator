@@ -1,12 +1,16 @@
 #ifndef CHIP_8_EMULATOR_TABLE_H
 #define CHIP_8_EMULATOR_TABLE_H
 
+#include <numeric>
 #include "ui/Widget.h"
 
 class Table : public Widget{
 public:
     Table(uint32_t cols, uint32_t rows) : cols_c(cols), rows_c(rows){
         _table.resize(cols*rows);
+
+        row_sizes.resize(rows);
+        col_sizes.resize(cols);
 
         background.setSize(size);
         set_bg_color(0x333333FF);
@@ -93,71 +97,58 @@ public:
     }
 private:
     void recount_size(){
-        float max_wx = 0.f, max_wy = 0.f;
-
-        for(auto pw : _table){
-            if(pw){
-                max_wx = std::max(max_wx, pw->get_size().x+pw->style.padding.left+pw->style.padding.right);
-                max_wy = std::max(max_wy, pw->get_size().y+pw->style.padding.top+pw->style.padding.bottom);
+        for(uint32_t j = 0; j < rows_c; j++){
+            for(uint32_t i = 0; i < cols_c; i++) {
+                auto pw = _table[i+j*cols_c];
+                if (pw) {
+                    col_sizes[i] = std::max(col_sizes[i],
+                                            pw->get_size().x + pw->style.padding.top + pw->style.padding.bottom);
+                    row_sizes[j] = std::max(row_sizes[j],
+                                            pw->get_size().y + pw->style.padding.left + pw->style.padding.right);
+                }
             }
         }
-        cell_size = {max_wx, max_wy};
 
-        float new_tx = max_wx * cols_c
+        float new_tx = std::accumulate(col_sizes.begin(),col_sizes.end(), 0.f)
                        + style.padding.left + style.padding.right
-                       + style.gap.horizontal*(cols_c - 1);
+                       + style.gap.horizontal*static_cast<float>(cols_c - 1);
 
-        float new_ty = max_wy * rows_c
+        float new_ty = std::accumulate(row_sizes.begin(),row_sizes.end(), 0.f)
                        + style.padding.top + style.padding.bottom
-                       + style.gap.vertical*(rows_c - 1);
+                       + style.gap.vertical*static_cast<float>(rows_c - 1);
 
         size = {new_tx, new_ty };
     }
 
-//    void replace_widgets(){
-//        float x = style.padding.left;
-//        float y = style.padding.top;
-//
-//        for(uint32_t j = 0; j < rows_c; j++){
-//            x = style.padding.left;
-//            for(uint32_t i = 0; i < cols_c; i++){
-//                auto pw = _table[i + j*cols_c];
-//                if(pw){
-//                    pw->set_position({
-//                        x + style.gap.horizontal * (i%cols_c != 0) + pw->style.padding.left,
-//                        y + style.gap.vertical * (j != 0) + pw->style.padding.top
-//                    });
-//
-//                }
-//                x += cell_size.x;
-//            }
-//            y += cell_size.y;
-//        }
-//    }
     void replace_widgets(){
-        float x;
-        float y = pos.y + style.padding.top;
+        float y = style.padding.top + pos.y;
 
         for(uint32_t j = 0; j < rows_c; j++){
-            x = pos.x + style.padding.left;
+            float x = style.padding.left + pos.x;
+
             for(uint32_t i = 0; i < cols_c; i++){
-                auto pw = _table[i + j*cols_c];
+                auto pw = _table[i + j * cols_c];
                 if(pw){
+                    float cell_x = x + pw->style.padding.left;
+                    float cell_y = y + pw->style.padding.top;
+
                     pw->set_position({
-                                             x + pw->style.padding.left,
-                                             y + pw->style.padding.top
+                                             cell_x,
+                                             cell_y
                                      });
                 }
-                x += cell_size.x + style.gap.horizontal;
+                x += col_sizes[i] + style.gap.horizontal;
             }
-            y += cell_size.y + style.gap.vertical;
+            y += row_sizes[j] + style.gap.vertical;
         }
     }
+
     sf::RectangleShape background;
     uint32_t cols_c;
     uint32_t rows_c;
 
-    sf::Vector2f cell_size = {0.f, 0.f};
+    std::vector<float> row_sizes;
+    std::vector<float> col_sizes;
 
     std::vector<Widget*> _table;
 };

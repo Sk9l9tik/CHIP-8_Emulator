@@ -115,7 +115,8 @@ public:
         try {
             auto t = textures.at(state);
             background.setTexture(*t, true);
-            background.setScale({size.x / (*t).getSize().x, size.y / (*t).getSize().y});
+            background.setScale({size.x / static_cast<float>((*t).getSize().x),
+                                        size.y / static_cast<float>((*t).getSize().y)});
         } catch (std::exception& e){
             // Does he blow?
 
@@ -151,7 +152,7 @@ public:
     }
 
     bool set_texture(const std::string &texture_name, State for_state){
-        auto texture = rs.get_texture(texture_name);
+        auto texture = ResourceManager::get_texture(texture_name);
         if(!texture) return false;
 
         textures[for_state] = texture;
