@@ -162,11 +162,15 @@ inline void SAERMO_logger(const std::optional<sf::Event>& event) {
 // Centers text in bounds
 inline void center_text(sf::Text &text, sf::FloatRect bounds){
     sf::FloatRect text_bounds = text.getLocalBounds();
-    text.setOrigin({text_bounds.size.x / 2.f, text_bounds.size.y / 2.f});
+
+    text.setOrigin({
+        text_bounds.position.x + text_bounds.size.x / 2.f,
+        text_bounds.position.y + text_bounds.size.y / 2.f
+    });
 
     text.setPosition({
         bounds.position.x + bounds.size.x / 2.f,
-        bounds.position.y + bounds.size.y / 2.f - 4.f
+        bounds.position.y + bounds.size.y / 2.f
     });
 }
 

@@ -23,7 +23,7 @@ public:
     void expand(){  expanded = true;  }
     void shrink(){  expanded = false; }
 
-    void handle_event(const std::optional<sf::Event> &event, const sf::Vector2i &mouse_pos) override {
+    void handle_event(const std::optional<sf::Event> &event) override {
         open_list.handle_event(event, mouse_pos);
         if(expanded){
 

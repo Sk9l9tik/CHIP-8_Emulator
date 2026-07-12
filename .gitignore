@@ -72,3 +72,10 @@ Testing/
 
 # IDEA
 .idea/
+
+# ПО КАКОЙ ТО ПРИЧИНЕ ГИТ МНЕ ЭТО В КОММИТЫ СУЕТ
+/cmake-build-debug/_deps/sfml-src/
+/cmake-build-debug/_deps/googletest-src/
+/cmake-build-debug/_deps/freetype-src/
+/cmake-build-debug/_deps/ogg-src/
+/cmake-build-debug/_deps/vorbis-src/

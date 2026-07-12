@@ -38,7 +38,7 @@ void GUI::handle_input(const std::optional<sf::Event> &event){
 
 }
 
-void GUI::handle_event(const std::optional<sf::Event> &event, [[maybe_unused]] const sf::Vector2i& mouse_pos) {
+void GUI::handle_event(const std::optional<sf::Event> &event) {
     if(const auto& resized = event->getIf<sf::Event::Resized>()){
         sf::FloatRect visible_area({0.f, 0.f}, sf::Vector2f(resized->size));
         sf_window->setView(sf::View(visible_area));
@@ -52,7 +52,7 @@ void GUI::handle_event(const std::optional<sf::Event> &event, [[maybe_unused]] c
     }
 
     for(auto& el : widgets){
-        el->handle_event(event, mouse_pos);
+        el->handle_event(event);
     }
 
 }

@@ -4,6 +4,9 @@
 #include <functional>
 #include <utility>
 #include "ui/Widget.h"
+#include "utils.hpp"
+
+using utils::center_text;
 
 class Button : public Widget{
 public:
@@ -15,93 +18,65 @@ public:
         Pressed,
     };
 
-    /* Default ugly button constructor
+    /* Transparent button constructor
      * To make it look better, you need to set 4 textures for all main states
+     * And also set size, position and text settings n everything
      * */
-    Button(const std::string& btn_text, sf::Vector2f _size, sf::Vector2f _pos, sf::Font &btn_font) : font(btn_font)
+    explicit Button(const std::string& btn_text)
+            : text(ResourceManager::get_font(), btn_text, 12)
     {
-        size = (_size.x == 0 || _size.y == 0) ? sf::Vector2f{64.f,64.f} : _size;
-        pos = _pos;
+        size = {64.f,64.f};
+        pos  = {0.f,0.f};
+
         // DEFAULT TEXT SETTINGS
-        text_size = static_cast<uint32_t>(size.x/8.f);
-        text = sf::Text(font, btn_text, text_size);
         text.setFillColor(sf::Color::Black);
 
         // CLICK AREA
         bounds = sf::FloatRect(pos, size);
 
-        // TEXTURES
-        textures[State::Normal] = sf::RenderTexture{static_cast<sf::Vector2u>(size)};
-        textures[State::Hovered] = sf::RenderTexture{static_cast<sf::Vector2u>(size)};
-        textures[State::Pressed] = sf::RenderTexture{static_cast<sf::Vector2u>(size)};
+        center_text(text, bounds);
 
-        textures[State::Normal].clear(sf::Color::Transparent);
-        textures[State::Hovered].clear(sf::Color::Transparent);
-        textures[State::Pressed].clear(sf::Color::Transparent);
-
-        sf::RectangleShape rect(size);
-        rect.setFillColor(sf::Color::White);
-        rect.setOutlineColor(sf::Color::Black);
-        rect.setOutlineThickness(0);
-
-        textures[State::Normal].draw(rect);
-        textures[State::Normal].display();
-
-        rect.setFillColor({255,255,255,200} );
-
-        textures[State::Hovered].draw(rect);
-        textures[State::Hovered].display();
-
-        rect.setFillColor({64,64,64,255});
-
-        textures[State::Pressed].draw(rect);
-        textures[State::Pressed].display();
-
-        // SPRITE
-        background.setTexture(textures[State::Normal].getTexture(), true);
-        background.setPosition(pos);
-        background.setScale({1,1});
-
-        // TEXT CENTERING
-        sf::FloatRect text_bounds = text.getLocalBounds();
-        text.setOrigin({text_bounds.size.x / 2.f, text_bounds.size.y / 2.f});
-
-        sf::FloatRect sprite_bounds = background.getGlobalBounds();
-        text.setPosition({
-            sprite_bounds.position.x + sprite_bounds.size.x / 2.f,
-            sprite_bounds.position.y + sprite_bounds.size.y / 2.f - 2
-        });
-
-        //
         state = State::Normal;
     }
 
-
-    /* Copy-constructor
-     * */
-    Button(const Button& other)
-        : Widget(other),
-        state(other.state),
-        bounds(other.bounds),
-        font(other.font),
-        text_size(other.text_size),
-        on_click(other.on_click),
-        on_release(other.on_release)
+     Button(const std::string& btn_text, sf::Vector2f _size, sf::Vector2f _pos)
+            : text(ResourceManager::get_font(), btn_text, 12)
     {
-        text = other.text;
-        text.setFont(font);
-        text.setFillColor(other.text.getFillColor());
+        size = _size;
+        pos  = _pos;
+        background.setPosition(_pos);
+        bounds.position = _pos;
 
+        // DEFAULT TEXT SETTINGS
+        text.setFillColor(sf::Color::Black);
 
-        background = other.background;
-        background.setTexture(textures[state].getTexture(), true);
+        // CLICK AREA
+        bounds = sf::FloatRect(pos, size);
+
+        center_text(text, bounds);
+
+        state = State::Normal;
     }
+
+    // Copy constructor
+    Button(const Button& other)
+            : Widget(other), bounds(other.bounds),
+              textures(other.textures),
+              text(other.text),
+              on_click(other.on_click),
+              on_release(other.on_release),
+              on_mouse_entered(other.on_mouse_entered),
+              on_mouse_exited(other.on_mouse_exited),
+              while_pressed(other.while_pressed)
+              {}
+
+    // Default constructor
+    Button() : Button("") {}
 
     ~Button() override = default;
 
-    /* Handles mouse events
-     * */
-    void handle_event(const std::optional<sf::Event> &event, [[maybe_unused]] const sf::Vector2i &mouse_pos) override {
+    /* Handles mouse events */
+    void handle_event(const std::optional<sf::Event> &event) override {
         // Lock check
         if(is_locked()) return;
 
@@ -135,14 +110,15 @@ public:
     }
 
     void update() override {
-        try{
-            background.setTexture(textures.at(state).getTexture(), true);
+        if(state == State::Pressed) while_pressed();
+
+        try {
+            auto t = textures.at(state);
+            background.setTexture(*t, true);
+            background.setScale({size.x / (*t).getSize().x, size.y / (*t).getSize().y});
         } catch (std::exception& e){
-            try {
-                background.setTexture(textures.at(State::Normal).getTexture(), true);
-            } catch (std::exception& e){
-                throw std::runtime_error("Button have no textures.");
-            }
+            // Does he blow?
+
         }
     }
 
@@ -152,70 +128,33 @@ public:
     }
 
     void set_position(sf::Vector2f _pos) override {
+
         pos = _pos;
         bounds.position = _pos;
         background.setPosition(_pos);
 
-        center_text();
+        center_text(text, bounds);
     }
 
     void set_size(sf::Vector2f _size) override {
+        if(_size == size) return;
+        if(_size.x != 0 || _size.y != 0) {
+            background.scale({_size.x / size.x, _size.y / size.y});
+        } else {
+            background.setScale({0.f, 0.f});
+        }
+
         size = _size;
         bounds.size = _size;
-        // UPDATE TEXTURES
 
-        text.setCharacterSize(static_cast<uint32_t>(_size.x/4.f));
-        center_text();
+        center_text(text, bounds);
     }
 
-    void set_text_size(uint32_t size){
-        text.setCharacterSize(size);
-        center_text();
-    }
+    bool set_texture(const std::string &texture_name, State for_state){
+        auto texture = rs.get_texture(texture_name);
+        if(!texture) return false;
 
-    bool load_texture(const sf::Texture& texture, State _state){
-        sf::Vector2u texture_size = texture.getSize();
-        sf::Vector2f button_size = bounds.size;
-
-        sf::Sprite sprite(texture);
-        sprite.setScale({
-            button_size.x / static_cast<float>(texture_size.x),
-            button_size.y / static_cast<float>(texture_size.y)
-        });
-
-        if (!textures[_state].resize(static_cast<sf::Vector2u>(button_size))) {
-            return false;
-        }
-
-        textures[_state].clear(sf::Color::Transparent);
-        textures[_state].draw(sprite);
-        textures[_state].display();
-
-        return true;
-    }
-
-    bool load_texture(const std::string& path, State _state){
-        sf::Texture texture;
-        if (!texture.loadFromFile(path)) {
-            return false;
-        }
-        sf::Vector2u texture_size = texture.getSize();
-        sf::Vector2f button_size = bounds.size;
-
-        sf::Sprite sprite(texture);
-        sprite.setScale({
-            button_size.x / static_cast<float>(texture_size.x),
-            button_size.y / static_cast<float>(texture_size.y)
-        });
-
-
-        if (!textures[_state].resize(static_cast<sf::Vector2u>(button_size))) {
-            return false;
-        }
-
-        textures[_state].clear(sf::Color::Transparent);
-        textures[_state].draw(sprite);
-        textures[_state].display();
+        textures[for_state] = texture;
 
         return true;
     }
@@ -242,37 +181,47 @@ public:
         on_mouse_exited = std::move(func);
     }
 
-    sf::Text& get_text(){
-        return text;
+    void set_while_pressed(std::function<void()> func) {
+        while_pressed = std::move(func);
     }
 
+    void set_char_size(uint32_t new_size) {
+        text.setCharacterSize(new_size);
+        center_text(text, bounds);
+    }
+
+    void set_string(const std::string& new_str){
+        text.setString(new_str);
+        center_text(text, bounds);
+    }
+
+    void set_text_color(uint32_t color){
+        text.setFillColor(sf::Color(color));
+    }
 protected:
-    void center_text(){
-        sf::FloatRect text_bounds = text.getLocalBounds();
-        text.setOrigin({text_bounds.size.x / 2.f, text_bounds.size.y / 2.f});
-
-        text.setPosition({
-            bounds.position.x + bounds.size.x / 2.f,
-            bounds.position.y + bounds.size.y / 2.f - 4.f
-        });
-    }
-
+    // Button state
     State state = State::Undefined;
 
+    // Click area
     sf::FloatRect bounds;
 
-    std::unordered_map<State, sf::RenderTexture> textures;
+    // Textures
+    std::unordered_map<State, const sf::Texture*> textures;
 
-    sf::Texture dummy = {}; // constructor for 'Button' must explicitly initialize... OK
+    sf::Texture dummy = {}; // constructor for 'Button' must explicitly initialize... OK (56 bytes ksta)
     sf::Sprite background = sf::Sprite(dummy);
-    sf::Font &font;
-    sf::Text text = {font,"",0};
-    uint32_t text_size;
 
+    // Text
+    sf::Text text;
+
+    // Event handlers
     std::function<void()> on_click          = [](){};
     std::function<void()> on_release        = [](){};
     std::function<void()> on_mouse_entered  = [](){};
     std::function<void()> on_mouse_exited   = [](){};
+    /* called every frame while button is pressed
+     * */
+    std::function<void()> while_pressed     = [](){};
 };
 
 #endif //CHIP_8_EMULATOR_BUTTON_H

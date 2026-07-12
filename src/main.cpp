@@ -15,6 +15,7 @@
 #include "ui/widgets/Display.h"
 #include "ui/widgets/Table.h"
 #include "ui/widgets/Toggle.h"
+#include "ui/ResourceManager.h"
 
 #define CHIP8_DEBUG1
 
@@ -51,11 +52,11 @@ int main(int argc, char* argv[]){
 
     GUI gui{&window, &emulator};
     sf::Font font;
-    if (!font.openFromFile("../assets/fonts/Galmuri7.ttf")) 
-      if(!font.openFromFile("../../assets/fonts/Galmuri7.ttf"))
-          return -1;
+    if (!font.openFromFile("../assets/fonts/Roboto-Regular.ttf"))
+        if(!font.openFromFile("../../assets/fonts/Roboto-Regular.ttf"))
+           return -1;
 
-    font.setSmooth(false);
+    ResourceManager::set_font(font);
 
     // SOUND
     const unsigned SAMPLE_RATE = 44100;
@@ -95,27 +96,27 @@ int main(int argc, char* argv[]){
     Table keyboard{4,4};
     keyboard.set_position({0, d_pos.y});
     keyboard.set_size({640, 640});
-    keyboard.vertical_gap = 21;
-    keyboard.horizontal_gap = 21;
-    keyboard.padding = {32};
+    keyboard.style.gap.vertical = 21;
+    keyboard.style.gap.horizontal = 21;
+    keyboard.style.padding = {32};
     std::vector<Button> keys;
     keys.reserve(16);
 
+    ResourceManager::load_texture("btn_keypad_normal", "../assets/sprites/KBButton_Default.png");
+    ResourceManager::load_texture("btn_keypad_hovered", "../assets/sprites/KBButton_Hovered.png");
+    ResourceManager::load_texture("btn_keypad_pressed", "../assets/sprites/KBButton_Pressed.png");
+    ResourceManager::load_texture("btn_keypad_locked", "../assets/sprites/KBButton_Locked.png");
+
     for(int i = 0; i < 16; i++){
         const char hex_chars[] = "0123456789ABCDEF";
-        keys.emplace_back(Button{
-            std::string(1,hex_chars[i]),
-            {0,0},
-            {0,0},
-            font
-        });
+        keys.emplace_back(std::string(1,hex_chars[i]));
 
         keys[i].set_size({128, 128});
-
-        keys[i].load_texture("../assets/sprites/KBButton_Default.png", Button::State::Normal);
-        keys[i].load_texture("../assets/sprites/KBButton_Hovered.png", Button::State::Hovered);
-        keys[i].load_texture("../assets/sprites/KBButton_Locked.png", Button::State::Locked);
-        keys[i].load_texture("../assets/sprites/KBButton_Pressed.png", Button::State::Pressed);
+        keys[i].set_char_size(32);
+        keys[i].set_texture("btn_keypad_normal", Button::State::Normal);
+        keys[i].set_texture("btn_keypad_hovered", Button::State::Hovered);
+        keys[i].set_texture("btn_keypad_locked", Button::State::Locked);
+        keys[i].set_texture("btn_keypad_pressed", Button::State::Pressed);
 
         keys[i].set_on_click([&emulator, i](){
             emulator.get_cpu().set_key_state(i, true);
@@ -131,8 +132,18 @@ int main(int argc, char* argv[]){
 
     gui.add(&keyboard);
 
-    Button open_file{"Open ROM", {150, 80}, {d_pos.x + 10, 0}, font};
-    open_file.set_text_size(18);
+    Button open_file{"Open ROM", {150, 80}, {d_pos.x + 10, 0}};
+    sf::RectangleShape rec({1, 1});
+    rec.setFillColor(sf::Color::White);
+    sf::RenderTexture r_t({1,1});
+    r_t.draw(rec);
+    r_t.display();
+    ResourceManager::load_texture("def", r_t.getTexture());
+    for(int i = 0; i < 5; i++){
+        open_file.set_texture("def", static_cast<Button::State>(i));
+    }
+
+    open_file.set_char_size(18);
     open_file.set_on_click([&window, &emulator](){
 
     #ifdef _WIN32
@@ -149,7 +160,7 @@ int main(int argc, char* argv[]){
     });
     gui.add(&open_file);
 
-    Toggle test{"", {50.f, 50.f}, {d_pos.x +10, 90}, font};
+    Toggle test{"", {50.f, 50.f}, {d_pos.x +10, 90}};
     sf::CircleShape btn_c(50.f/4.f, 30);
 
     btn_c.setFillColor(sf::Color::Red);
@@ -160,14 +171,17 @@ int main(int argc, char* argv[]){
     t.draw(btn_c);
     t.display();
 
-    test.load_texture(t.getTexture(), Button::State::Pressed);
+    ResourceManager::load_texture("button_breakpoint_pressed", t.getTexture());
+
+    test.set_texture("button_breakpoint_pressed", Button::State::Pressed);
 
     btn_c.setFillColor({255,0,0,180});
     t.clear(sf::Color::Transparent);
     t.draw(btn_c);
     t.display();
 
-    test.load_texture(t.getTexture(), Button::State::Hovered);
+    ResourceManager::load_texture("button_breakpoint_hovered", t.getTexture());
+    test.set_texture("button_breakpoint_hovered", Button::State::Hovered);
 
     sf::Text text(font, "123", 16);
     text.setFillColor(sf::Color::White);
@@ -176,7 +190,9 @@ int main(int argc, char* argv[]){
     t.draw(text);
     t.display();
 
-    test.load_texture(t.getTexture(), Button::State::Normal);
+    ResourceManager::load_texture("button_breakpoint_normal", t.getTexture());
+    test.set_texture("button_breakpoint_normal", Button::State::Normal);
+    test.set_texture("button_breakpoint_normal", Button::State::Locked);
 
     test.set_on_click([](){
         printf("ON\n");
@@ -309,7 +325,7 @@ int main(int argc, char* argv[]){
         utils::SAERMO_logger(event);
 #endif
 
-            gui.handle_event(event, sf::Mouse::getPosition(window));
+            gui.handle_event(event);
         }
 
         while(cpu_accumulator >= CPU_TICK_TIME) {

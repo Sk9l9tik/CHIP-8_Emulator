@@ -7,7 +7,7 @@ class Toggle : public Button{
 public:
     using Button::Button;
 
-    void handle_event(const std::optional<sf::Event> &event, [[maybe_unused]] const sf::Vector2i &mouse_pos) override {
+    void handle_event(const std::optional<sf::Event> &event) override {
         // Lock check
         if(is_locked()) return;
 
