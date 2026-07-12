@@ -156,6 +156,10 @@ int main(int argc, char* argv[]){
         if(path.ends_with(".ch8") && std::filesystem::exists(path)) {
             emulator.get_cpu().reset();
             emulator.load_ROM(path);
+
+            auto pos = path.find_last_of('/');
+            if(pos == std::string::npos) pos = path.find_last_of('\\');
+            window.setTitle("CHIP-8 Emulator - " + path.substr(pos != std::string::npos ? pos+1 : 0));
         }
     });
     gui.add(&open_file);
@@ -228,9 +232,12 @@ int main(int argc, char* argv[]){
     sf::Time timer_accumulator = sf::Time::Zero;
 //    sf::Time last_time = timer_clock.getElapsedTime();
 
+    auto pos = rom_path.find_last_of('/');
+    if(pos == std::string::npos) pos = rom_path.find_last_of('\\');
+
     window.create(
             sf::VideoMode(static_cast<sf::Vector2u>(gui.get_size())),
-                    "CHIP-8 Emulator - " + rom_path,
+                    "CHIP-8 Emulator - " + rom_path.substr(pos != std::string::npos ? pos+1 : 0),
                     sf::Style::Default,
                     sf::State::Windowed);
     window.setFramerateLimit(60);

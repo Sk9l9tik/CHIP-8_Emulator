@@ -133,9 +133,9 @@ private:
                     float cell_y = y + pw->style.padding.top;
 
                     pw->set_position({
-                                             cell_x,
-                                             cell_y
-                                     });
+                        cell_x,
+                        cell_y
+                    });
                 }
                 x += col_sizes[i] + style.gap.horizontal;
             }
