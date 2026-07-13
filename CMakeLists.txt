@@ -52,6 +52,8 @@ add_executable(chip8_emu
     src/main.cpp
 )
 
+target_link_options(chip8_emu PRIVATE $<$<CONFIG:RELEASE>: -static>)
+
 target_include_directories(chip8_emu PRIVATE ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(chip8_emu PRIVATE sfml-graphics sfml-audio)
 
