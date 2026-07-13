@@ -54,7 +54,8 @@ CHIP-8 - интерпретируемый язык, использовавший
 ### Требования для самостоятельной сборки
 * Компилятор с поддержкой C++23
 * CMake 3.31+
-* Git
+
+Git
   Зависимости подтягиваются автоматически через FetchContent, если не найдены в системе:
 * SFML 3.0.2
 * GoogleTest 1.17.0
@@ -140,7 +141,8 @@ The frame buffer **is not** stored in the main memory (unlike the original COSMA
 ### Requirements for building
 * Compiler with C++23
 * CMake 3.31+
-* Git
+
+Git
   Dependencies are pulled up automatically via fetchContent if they are not found in the system:
 * SFML 3.0.2
 * GoogleTest 1.17.0
