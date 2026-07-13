@@ -4,7 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include "Widget.h"
 #include "core/CHIP_8.h"
-
+#include "ui/ResourceManager.h"
 
 
 // Пока key-mapping такой чисто, потом можно как то удобнее сделать

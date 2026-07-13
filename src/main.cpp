@@ -16,6 +16,7 @@
 #include "ui/widgets/Table.h"
 #include "ui/widgets/Toggle.h"
 #include "ui/widgets/ScrollView.h"
+#include "ui/widgets/Label.h"
 
 #include "ui/ResourceManager.h"
 #define CHIP8_DEBUG1
@@ -97,8 +98,8 @@ int main(int argc, char* argv[]){
     Table keyboard{4,4};
     keyboard.set_position({0, d_pos.y});
     keyboard.set_size({640, 640});
-    keyboard.style.gap.vertical = 21;
-    keyboard.style.gap.horizontal = 21;
+    keyboard.style.gap.vertical = 64./3.;
+    keyboard.style.gap.horizontal = 64./3.;
     keyboard.style.padding = {32};
     std::vector<Button> keys;
     keys.reserve(16);
@@ -214,6 +215,12 @@ int main(int argc, char* argv[]){
 
     scroll_test.add_widget(&btn);
 
+
+    Label test_label("0_0QWERTYUYITOPA{SDVJCXKVNZx1234567890|", {0,0},{d_pos.x, 500});
+    test_label.set_bg_color(0xff0000ff);
+    test_label.set_text_color(0xffffffff);
+    test_label.auto_resize_bg(true);
+    gui.add(&test_label);
     gui.add(&scroll_test);
 
     window.create(
@@ -312,7 +319,9 @@ int main(int argc, char* argv[]){
 #ifdef DEBUG
         utils::SAERMO_logger(event);
 #endif
-
+            if(auto e = event->getIf<sf::Event::MouseMoved>()){
+                printf("%d %d\n", e->position.x, e->position.y);
+            }
             gui.handle_event(event);
         }
 

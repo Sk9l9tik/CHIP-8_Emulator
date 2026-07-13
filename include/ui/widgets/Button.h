@@ -39,7 +39,7 @@ public:
         state = State::Normal;
     }
 
-     Button(const std::string& btn_text, sf::Vector2f _size, sf::Vector2f _pos)
+    Button(const std::string& btn_text, sf::Vector2f _size, sf::Vector2f _pos)
             : text(ResourceManager::get_font(), btn_text, 12)
     {
         size = _size;

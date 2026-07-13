@@ -3,6 +3,10 @@
 GUI::GUI(sf::RenderWindow *window, CHIP_8 *emul) {
     sf_window = window;
     emulator = emul;
+
+    if (ResourceManager::font_setted) {
+        throw std::runtime_error("Error: set default font.");
+    }
 }
 
 void GUI::handle_input(const std::optional<sf::Event> &event){

@@ -5,7 +5,9 @@
 
 class ResourceManager{
 public:
-    static void set_font(sf::Font& new_font) { default_font = new_font; }
+    static inline bool font_setted = false;
+
+    static void set_font(sf::Font& new_font) { default_font = new_font; font_setted = true; }
     static sf::Font& get_font() { return default_font; }
 
     static sf::Texture* load_texture(const std::string& name, sf::Texture texture){
