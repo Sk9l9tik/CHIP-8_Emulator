@@ -16,14 +16,6 @@ CHIP-8 - интерпретируемый язык, использовавший
 * core/ - ядро эмулятора
 * ui/ - графический интерфейс
 * debug/ - отладчик
-#### core/ - ядро эмулятора
-
-| Класс       | Ответственность                                                                                |
-|-------------|------------------------------------------------------------------------------------------------|
-| Memory      | Хранение 4 КБ адресного пространства, загрузка шрифтов и ROM, чтение/запись с проверкой границ |
-| FrameBuffer | Буфер кадра 64x32, отрисовка спрайтов, детекция коллизий                                       |
-| CPU         | Регистры, стек, таймеры, цикл fetch-decode-execute, обработка всех опкодов                     |
-| CHIP_8      | Оркестратор - владеет Memory/FrameBuffer/CPU, следит за порядком их инициализации              |
 
 *CPU* не владеет *Memory* и *FrameBuffer*, а хранит ссылки на них - это позволяет модулям графики и отладки работать с теми же объектами, которые исполняет процессор без дублирования состояния.
 
@@ -35,18 +27,6 @@ CHIP-8 - интерпретируемый язык, использовавший
 0x200-0xFFF ROM-код программы
 
 Буфер кадра **не** хранится в основной памяти (в отличие от оригинальной COSMAC VIP, где под дисплей была зарезервирована зона 0xF00-0xFFF) - это снижает риск случайной порчи видеопамяти опкодами вроде FX55.
-
-#### ui/ - графический интерфейс
-
-| Класс | Ответственность |
-|-------|-----------------|
-| TODO  |                 |
-
-#### debug/ - отладчик
-
-| Класс | Ответственность |
-|-------|-----------------|
-| TODO  |                 |
 
 ### Установка
 **Ожидается скорый релиз**
@@ -103,14 +83,6 @@ The project is divided into three modules that are being developed in parallel:
 * core/ - the core of the emulator
 * ui/ - graphical interface
 * debug/ - debugger
-#### core/ - the core of the emulator
-
-| Class       | Responsibility                                                                               |
-|-------------|----------------------------------------------------------------------------------------------|
-| Memory      | Storing 4 KB of address space, loading fonts and ROM, read/write with bounds checking        |
-| FrameBuffer | 64x32 frame buffer, sprite rendering, collision detection                                    |
-| CPU         | Registers, stack, timers, fetch-decode-execute cycle, processing of all opcodes              |
-| CHIP_8      | The orchestrator owns the Memory/FrameBuffer/CPU, monitors the order of their initialization |
 
 The *CPU* does not own *Memory* and *FrameBuffer*, but stores references to them. This allows the graphics and debugging modules to work with the same objects executed by the processor without duplicating the state.
 
@@ -122,18 +94,6 @@ Location of data in memory
 0x200-0xFFF ROM program code
 
 The frame buffer **is not** stored in the main memory (unlike the original COSMAC VIP, where the 0xF00-0xFFF zone was reserved for the display) - this reduces the risk of accidental damage to video memory by opcodes like FX55.
-
-#### ui/ - graphical interface
-
-| Class | Responsibility |
-|-------|----------------|
-| TODO  |                |
-
-#### debug/ - debugger
-
-| Class | Responsibility |
-|-------|----------------|
-| TODO  |                |
 
 ### Installation
 **Release coming soon**
