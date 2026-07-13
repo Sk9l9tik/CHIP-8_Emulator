@@ -15,8 +15,9 @@
 #include "ui/widgets/Display.h"
 #include "ui/widgets/Table.h"
 #include "ui/widgets/Toggle.h"
-#include "ui/ResourceManager.h"
+#include "ui/widgets/ScrollView.h"
 
+#include "ui/ResourceManager.h"
 #define CHIP8_DEBUG1
 
 #ifdef CHIP8_DEBUG
@@ -164,47 +165,6 @@ int main(int argc, char* argv[]){
     });
     gui.add(&open_file);
 
-    Toggle test{"", {50.f, 50.f}, {d_pos.x +10, 90}};
-    sf::CircleShape btn_c(50.f/4.f, 30);
-
-    btn_c.setFillColor(sf::Color::Red);
-    btn_c.setPosition({test.get_size().x / 4.f, test.get_size().y / 4.f});
-
-    sf::RenderTexture t(static_cast<sf::Vector2u>(test.get_size()));
-    t.clear(sf::Color::Transparent);
-    t.draw(btn_c);
-    t.display();
-
-    ResourceManager::load_texture("button_breakpoint_pressed", t.getTexture());
-
-    test.set_texture("button_breakpoint_pressed", Button::State::Pressed);
-
-    btn_c.setFillColor({255,0,0,180});
-    t.clear(sf::Color::Transparent);
-    t.draw(btn_c);
-    t.display();
-
-    ResourceManager::load_texture("button_breakpoint_hovered", t.getTexture());
-    test.set_texture("button_breakpoint_hovered", Button::State::Hovered);
-
-    sf::Text text(font, "123", 16);
-    text.setFillColor(sf::Color::White);
-    utils::center_text(text, {{}, {50.f, 50.f}});
-    t.clear(sf::Color::Transparent);
-    t.draw(text);
-    t.display();
-
-    ResourceManager::load_texture("button_breakpoint_normal", t.getTexture());
-    test.set_texture("button_breakpoint_normal", Button::State::Normal);
-    test.set_texture("button_breakpoint_normal", Button::State::Locked);
-
-    test.set_on_click([](){
-        printf("ON\n");
-    });
-    test.set_on_release([](){
-        printf("OFF\n");
-    });
-    gui.add(&test);
 #ifdef CHIP8_DEBUG
     Debugger d(emulator);
 
@@ -234,6 +194,27 @@ int main(int argc, char* argv[]){
 
     auto pos = rom_path.find_last_of('/');
     if(pos == std::string::npos) pos = rom_path.find_last_of('\\');
+
+    ScrollView scroll_test({640, 300}, {d_pos.x+10, open_file.get_size().y + 30});
+
+    Button btn("TEST TEST TEST", {640, 1200}, {1,1});
+
+    btn.set_texture("btn_keypad_normal", Button::State::Normal);
+    btn.set_texture("btn_keypad_hovered", Button::State::Hovered);
+    btn.set_texture("btn_keypad_pressed", Button::State::Pressed);
+    btn.set_on_click([](){
+        printf("SAERMO\n");
+    });
+    btn.set_on_mouse_entered([&btn](){
+       printf("hovered\n");
+    });
+    btn.set_on_mouse_exited([&btn](){
+        printf("unhovered\n");
+    });
+
+    scroll_test.add_widget(&btn);
+
+    gui.add(&scroll_test);
 
     window.create(
             sf::VideoMode(static_cast<sf::Vector2u>(gui.get_size())),

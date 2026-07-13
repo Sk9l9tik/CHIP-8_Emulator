@@ -176,7 +176,7 @@ inline void center_text(sf::Text &text, sf::FloatRect bounds){
 
 #ifdef _WIN32
 inline std::wstring show_file_dialog_w(HWND hwnd) {
-    OPENFILENAMEW ofn = {0};
+    OPENFILENAMEW ofn = {};
     wchar_t szFile[260] = {0};
 
     ofn.lStructSize = sizeof(ofn);
@@ -196,7 +196,7 @@ inline std::wstring show_file_dialog_w(HWND hwnd) {
 }
 
 inline std::string show_file_dialog(HWND hwnd) {
-    OPENFILENAMEA ofn = {0};
+    OPENFILENAMEA ofn = {};
     char szFile[260] = {0};
 
     ofn.lStructSize = sizeof(ofn);

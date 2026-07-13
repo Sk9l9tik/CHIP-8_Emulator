@@ -111,6 +111,7 @@ public:
 
     void update() override {
         if(state == State::Pressed) while_pressed();
+        if(state == State::Hovered) while_hovered();
 
         try {
             auto t = textures.at(state);
@@ -186,6 +187,11 @@ public:
         while_pressed = std::move(func);
     }
 
+    void set_while_hovered(std::function<void()> func) {
+        while_hovered = std::move(func);
+    }
+
+
     void set_char_size(uint32_t new_size) {
         text.setCharacterSize(new_size);
         center_text(text, bounds);
@@ -198,6 +204,47 @@ public:
 
     void set_text_color(uint32_t color){
         text.setFillColor(sf::Color(color));
+    }
+
+    // анфортунатули, без этого никак
+    void set_state(State s){
+        State old = state;
+        state = s;
+        switch(old){
+            case State::Normal:
+                switch(s){
+                    case State::Pressed:
+                        on_click();
+                        break;
+                    case State::Hovered:
+                        on_mouse_entered();
+                        break;
+                    default: break;
+                }
+                break;
+            case State::Pressed:
+                switch(s){
+                    case State::Normal:
+                    case State::Hovered:
+                        on_release();
+                        break;
+                    default: break;
+                }
+                break;
+            case State::Hovered:
+                switch(s){
+                    case State::Normal:
+                        on_mouse_exited();
+                        break;
+                    case State::Pressed:
+                        on_click();
+                        break;
+                    default: break;
+                }
+                break;
+            default:
+                break;
+        }
     }
 protected:
     // Button state
@@ -223,6 +270,7 @@ protected:
     /* called every frame while button is pressed
      * */
     std::function<void()> while_pressed     = [](){};
+    std::function<void()> while_hovered     = [](){};
 };
 
 #endif //CHIP_8_EMULATOR_BUTTON_H
