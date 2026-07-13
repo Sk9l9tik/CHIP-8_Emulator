@@ -10,15 +10,15 @@
 #include "core/Memory.h"
 
 #include "ui/GUI.h"
+#include "ui/ResourceManager.h"
 
 #include "ui/widgets/Button.h"
 #include "ui/widgets/Display.h"
+#include "ui/widgets/Label.h"
+#include "ui/widgets/ScrollView.h"
 #include "ui/widgets/Table.h"
 #include "ui/widgets/Toggle.h"
-#include "ui/widgets/ScrollView.h"
-#include "ui/widgets/Label.h"
 
-#include "ui/ResourceManager.h"
 #define CHIP8_DEBUG1
 
 #ifdef CHIP8_DEBUG

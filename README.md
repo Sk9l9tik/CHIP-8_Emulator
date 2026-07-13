@@ -1,144 +1,163 @@
 # CHIP-8 Emulator
 
-## RU:
+[🇬🇧 English](README.md) | [🇷🇺 Русский](README_RU.md)
 
-Учебный проект - эмулятор ВМ CHIP-8.
+![C++](https://img.shields.io/badge/C%2B%2B-23-blue.svg)
+![CMake](https://img.shields.io/badge/CMake-3.31+-green.svg)
+![SFML](https://img.shields.io/badge/SFML-3.0.2-orange.svg)
+![License](https://img.shields.io/badge/License-MIT-blue.svg)
 
-CHIP-8 - интерпретируемый язык, использовавшийся в середине 1970-х годов для упрощения разработки игр на 8-битных микрокомпьютерах. Несмотря на простоту, его архитектура включает все базовые концепции реальных процессоров: регистры, адресуемую память, стек вызовов, цикл выборки-декодировании-исполнения инструкций.
-### Возможности
-* Полная поддержка системы команд CHIP-8
-* Графический интерфейс на SFML 3
-* Встроенный отладчик: пошаговое выполнение, точки останова, дизассемблер, просмотр памяти
-* Юнит-тестирование
-* Загрузка произвольных ROM-файлов
-### Архитектура
-Проект разделён на три модуля, разрабатываемых параллельно:
-* core/ - ядро эмулятора
-* ui/ - графический интерфейс
-* debug/ - отладчик
+A modern **CHIP-8 emulator** written in **C++23** with **SFML 3**, featuring a graphical interface, an integrated debugger, and a modular architecture designed for learning emulator development.
 
-*CPU* не владеет *Memory* и *FrameBuffer*, а хранит ссылки на них - это позволяет модулям графики и отладки работать с теми же объектами, которые исполняет процессор без дублирования состояния.
+---
 
-Расположение данных в памяти
+## Table of Contents
 
-0x000-0x04F не используется
-0x050-0x09F встроенный шрифтовой набор
-0x0A0-0x1FF не используется
-0x200-0xFFF ROM-код программы
+* [Overview](#overview)
+* [Features](#features)
+* [Architecture](#architecture-1)
+* [Memory Layout](#memory-layout)
+* [Building](#building)
+* [Running](#running)
+* [Controls](#controls)
+* [Credits](#credits)
 
-Буфер кадра **не** хранится в основной памяти (в отличие от оригинальной COSMAC VIP, где под дисплей была зарезервирована зона 0xF00-0xFFF) - это снижает риск случайной порчи видеопамяти опкодами вроде FX55.
+---
 
-### Установка
-**Ожидается скорый релиз**
+## Overview
 
-### Требования для самостоятельной сборки
-* Компилятор с поддержкой C++23
+**CHIP-8 Emulator** is an educational project implementing a complete CHIP-8 virtual machine emulator in modern **C++23**.
+
+Originally introduced in the 1970s, CHIP-8 provided a simple platform for developing games on 8-bit computers. Although small, its architecture includes nearly every fundamental concept found in real CPUs:
+
+* registers
+* addressable memory
+* call stack
+* timers
+* the **Fetch → Decode → Execute** instruction cycle
+
+The project is intended as a learning resource for emulator development, CPU architecture, and modern C++ design.
+
+---
+
+## Features
+
+* Complete CHIP-8 instruction set implementation
+* SFML 3 graphical interface
+* Integrated debugger
+
+  * step execution
+  * breakpoints
+  * disassembler
+  * memory viewer
+  * register viewer
+* Load arbitrary CHIP-8 ROMs
+* Unit tests
+* Modular architecture
+
+---
+
+## Architecture
+
+The project consists of three independent modules:
+
+```text
+core/
+ui/
+debug/
+```
+
+| Module    | Description                                   |
+| --------- | --------------------------------------------- |
+| **core**  | CPU, memory, timers and instruction execution |
+| **ui**    | Rendering and input                           |
+| **debug** | Debugger and disassembler                     |
+
+### Design
+
+The `CPU` does **not own** the `Memory` or `FrameBuffer`.
+
+Instead, it stores references to shared objects, allowing the debugger and UI to inspect exactly the same emulator state without duplicating memory.
+
+---
+
+## Memory Layout
+
+|       Address | Purpose       |
+| ------------: | ------------- |
+| `0x000–0x04F` | Unused        |
+| `0x050–0x09F` | Built-in font |
+| `0x0A0–0x1FF` | Unused        |
+| `0x200–0xFFF` | Program ROM   |
+
+Unlike the original COSMAC VIP, the framebuffer is stored separately from system memory. This prevents instructions such as `FX55` from accidentally overwriting display memory.
+
+---
+
+## Requirements
+
+* C++23 compiler
 * CMake 3.31+
 
-Git
-  Зависимости подтягиваются автоматически через FetchContent, если не найдены в системе:
+Dependencies are automatically downloaded via **FetchContent** if they are not available on the system.
+
 * SFML 3.0.2
 * GoogleTest 1.17.0
-### Сборка
+
+---
+
+## Building
+
 ```bash
 git clone https://github.com/Sk9l9tik/CHIP-8_Emulator.git
 cd CHIP-8_Emulator
-mkdir build && cd build
+
+mkdir build
+cd build
+
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build .
 ```
-### Запуск
+
+---
+
+## Running
+
 ```bash
-./chip8_emu <путь до ROM-файла>
-```
-Пример (Windows)
-```bash
-cd cmake-build-release
-```
-```bash
-./chip8_emu.exe Tetris_.ch8
+./chip8_emu <ROM>
 ```
 
+Example:
 
-В эмуляторе также есть кнопка открытия ROM, если эмулятор уже работает.
-### Управление
-| Оригинал        | Эмулятор        |
-|-----------------|-----------------|
-| `1` `2` `3` `C` | `2` `3` `4` `Z` |
-| `4` `5` `6` `D` | `Q` `W` `E` `X` |
-| `7` `8` `9` `E` | `R` `A` `S` `C` |
-| `A` `0` `B` `F` | `D` `1` `F` `V` |
-## EN:
-The educational project - CHIP-8 VM emulator.
-
-CHIP-8 is an interpreted language used in the mid-1970s to simplify game development on 8-bit microcomputers. Despite its simplicity, its architecture includes all the basic concepts of real processors: registers, addressable memory, a call stack, and the fetch-decode-execute cycle of instructions.
-### Features
-* Full support for the CHIP-8 command system
-* Graphical interface based on SFML 3
-* Built-in debugger: step-by-step execution, breakpoints, disassembler
-* Unit testing
-* Loading custom ROM files
-### Architecture
-The project is divided into three modules that are being developed in parallel:
-* core/ - the core of the emulator
-* ui/ - graphical interface
-* debug/ - debugger
-
-The *CPU* does not own *Memory* and *FrameBuffer*, but stores references to them. This allows the graphics and debugging modules to work with the same objects executed by the processor without duplicating the state.
-
-Location of data in memory
-
-0x000-0x04F not used
-0x050-0x09F built-in font set
-0x0A0-0x1FF is not used
-0x200-0xFFF ROM program code
-
-The frame buffer **is not** stored in the main memory (unlike the original COSMAC VIP, where the 0xF00-0xFFF zone was reserved for the display) - this reduces the risk of accidental damage to video memory by opcodes like FX55.
-
-### Installation
-**Release coming soon**
-
-### Requirements for building
-* Compiler with C++23
-* CMake 3.31+
-
-Git
-  Dependencies are pulled up automatically via fetchContent if they are not found in the system:
-* SFML 3.0.2
-* GoogleTest 1.17.0
-### Building
 ```bash
-git clone https://github.com/Sk9l9tik/CHIP-8_Emulator.git
-cd CHIP-8_Emulator
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-cmake --build .
+./chip8_emu Tetris_.ch8
 ```
-### Launching
-```bash
-./chip8_emu <path-to-ROM>
-```
-Example (Windows)
-```bash
-cd cmake-build-release
-```
-```bash
-./chip8_emu.exe Tetris_.ch8
-```
-The emulator also has a button to open the ROM if the emulator is already running.
-### Controls
 
-| Original        | Emulator        |
-|-----------------|-----------------|
-| `1` `2` `3` `C` | `2` `3` `4` `Z` |
-| `4` `5` `6` `D` | `Q` `W` `E` `X` |
-| `7` `8` `9` `E` | `R` `A` `S` `C` |
-| `A` `0` `B` `F` | `D` `1` `F` `V` |
+Windows:
 
-### Авторы (Credits):
+```bash
+chip8_emu.exe Tetris_.ch8
+```
 
-| IMG                                                                      | Участник (Contributor)                   | Роль (Role)            |
-|--------------------------------------------------------------------------|------------------------------------------|------------------------|
-| <img src="https://github.com/Sk9l9tik.png" width="50" height="50">       | [Sk9l9tik](https://github.com/Sk9l9tik)  | Debugger               |
-| <img src="https://github.com/crw884.png" width="50" height="50">         | [crw884](https://github.com/crw884)      | UI, SFML, Design       |
-| <img src="https://github.com/SosikuKawiiHog.png" width="50" height="50"> | [SKH](https://github.com/SosikuKawiiHog) | Core, Module Contracts |
+A ROM can also be loaded from the graphical interface while the emulator is running.
+
+---
+
+## Controls
+
+| CHIP-8    | Keyboard  |
+| --------- | --------- |
+| `1 2 3 C` | `2 3 4 Z` |
+| `4 5 6 D` | `Q W E X` |
+| `7 8 9 E` | `R A S C` |
+| `A 0 B F` | `D 1 F V` |
+
+---
+
+## Credits
+
+| Avatar                                                       | Contributor                              | Role               |
+| ------------------------------------------------------------ | ---------------------------------------- | ------------------ |
+| <img src="https://github.com/Sk9l9tik.png" width="50">       | [Sk9l9tik](https://github.com/Sk9l9tik)  | Debugger           |
+| <img src="https://github.com/crw884.png" width="50">         | [crw884](https://github.com/crw884)      | UX/UI, SFML   |
+| <img src="https://github.com/SosikuKawiiHog.png" width="50"> | [SKH](https://github.com/SosikuKawiiHog) | Core, Architecture |
