@@ -24,6 +24,7 @@ CHIP-8 - интерпретируемый язык, использовавший
 | FrameBuffer | Буфер кадра 64x32, отрисовка спрайтов, детекция коллизий                                       |
 | CPU         | Регистры, стек, таймеры, цикл fetch-decode-execute, обработка всех опкодов                     |
 | CHIP_8      | Оркестратор - владеет Memory/FrameBuffer/CPU, следит за порядком их инициализации              |
+
 *CPU* не владеет *Memory* и *FrameBuffer*, а хранит ссылки на них - это позволяет модулям графики и отладки работать с теми же объектами, которые исполняет процессор без дублирования состояния.
 
 Расположение данных в памяти
@@ -109,6 +110,7 @@ The project is divided into three modules that are being developed in parallel:
 | FrameBuffer | 64x32 frame buffer, sprite rendering, collision detection                                    |
 | CPU         | Registers, stack, timers, fetch-decode-execute cycle, processing of all opcodes              |
 | CHIP_8      | The orchestrator owns the Memory/FrameBuffer/CPU, monitors the order of their initialization |
+
 The *CPU* does not own *Memory* and *FrameBuffer*, but stores references to them. This allows the graphics and debugging modules to work with the same objects executed by the processor without duplicating the state.
 
 Location of data in memory
@@ -118,7 +120,7 @@ Location of data in memory
 0x0A0-0x1FF is not used
 0x200-0xFFF ROM program code
 
-The frame buffer ** is not** stored in the main memory (unlike the original COSMAC VIP, where the 0xF00-0xFFF zone was reserved for the display) - this reduces the risk of accidental damage to video memory by opcodes like FX55.
+The frame buffer **is not** stored in the main memory (unlike the original COSMAC VIP, where the 0xF00-0xFFF zone was reserved for the display) - this reduces the risk of accidental damage to video memory by opcodes like FX55.
 
 #### ui/ - graphical interface
 
