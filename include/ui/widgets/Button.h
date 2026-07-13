@@ -118,6 +118,21 @@ public:
             background.setTexture(*t, true);
             background.setScale({size.x / static_cast<float>((*t).getSize().x),
                                         size.y / static_cast<float>((*t).getSize().y)});
+
+            switch(state){
+                case State::Normal:
+                    background.setColor(sf::Color(0xA796E8FF));
+                    break;
+                case State::Hovered:
+                case State::Pressed:
+                    background.setColor(sf::Color(0xC4B7F0FF));
+                    break;
+                case State::Locked:
+                    background.setColor(sf::Color(0x313244FF));
+                    break;
+                default:
+                    background.setColor(sf::Color::White);
+            }
         } catch (std::exception& e){
             // Does he blow?
 

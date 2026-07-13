@@ -340,7 +340,7 @@ int main(int argc, char* argv[]){
             timer_accumulator -= CLOCK_TIME;
         }
 
-        window.clear(sf::Color::Black);
+        window.clear(sf::Color(0x181825FF));
         gui.update();
         gui.render();
 

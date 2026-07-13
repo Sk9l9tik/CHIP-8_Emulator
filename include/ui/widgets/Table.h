@@ -13,7 +13,7 @@ public:
         col_sizes.resize(cols);
 
         background.setSize(size);
-        set_bg_color(0x333333FF);
+        set_bg_color(0x313244FF);
     }
 
     bool add_widget(Widget* widget) {
