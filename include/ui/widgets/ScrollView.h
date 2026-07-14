@@ -39,6 +39,13 @@ public:
 
         for (auto widget : widgets) {
             if (widget != nullptr) {
+                if (!is_widget_visible(widget)) {
+                    if (auto* btn = dynamic_cast<Button*>(widget)) {
+                        btn->set_state(btn->is_locked() ? Button::State::Locked : Button::State::Normal);
+                    }
+                    continue;
+                }
+
                 if(auto e = correct_mouse_pos(event)){
                     widget->handle_event(e);
                 }
@@ -58,7 +65,7 @@ public:
 
     void update() override {
         for (auto* widget : widgets) {
-            if (widget != nullptr) {
+            if (widget != nullptr && is_widget_visible(widget)) {
                 widget->update();
             }
         }
@@ -81,7 +88,7 @@ public:
         render_target.setView(view);
 
         for (auto* widget : widgets) {
-            if (widget != nullptr) {
+            if (widget != nullptr && is_widget_visible(widget)) {
                 widget->render(render_target);
             }
         }
@@ -113,11 +120,26 @@ public:
     float get_scroll() const { return scroll; }
 
 private:
-    bool is_mouse_over(sf::Vector2i mouse_pos){
+    bool is_widget_visible(const Widget* widget) const {
+        if (widget == nullptr) return false;
+
+        sf::Vector2f widget_pos = widget->get_position();
+        sf::Vector2f widget_size = widget->get_size();
+
+        sf::FloatRect widget_rect(widget_pos, widget_size);
+        sf::FloatRect visible_rect(
+                {0.f, scroll},
+                {size.x, scroll + size.y}
+        );
+
+        return widget_rect.findIntersection(visible_rect).has_value();
+    }
+
+    bool is_mouse_over(sf::Vector2i mouse_pos) const {
         return (sf::FloatRect{pos, size}).contains(static_cast<sf::Vector2f>(mouse_pos));
     }
 
-    bool is_mouse_over(sf::Vector2f mouse_pos){
+    bool is_mouse_over(sf::Vector2f mouse_pos) const {
         return (sf::FloatRect{pos, size}).contains(mouse_pos);
     }
 

@@ -3,14 +3,15 @@
 
 
 int main(int argc, char* argv[]){
-    std::string rom_path{(argc >= 2) ? argv[1] : "../assets/roms/Tetris_.ch8"};
+    std::string rom_path{(argc >= 2) ? argv[1] : "../assets/roms/IBM_Logo.ch8"};
 
 
     try{
         App app(rom_path);
         app.run();
     } catch(const std::exception& e){
-        std::cerr << "Fatal  error: " << e.what() << '\n';
+        std::cerr << "Fatal error: " << e.what() << '\n';
+        system("pause");
         return -1;
     }
     return 0;

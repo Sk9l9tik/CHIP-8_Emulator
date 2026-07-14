@@ -27,7 +27,7 @@ public:
     }
 
 protected:
-    Widget *parent = nullptr; // НУ ВОТ ОН ДОЛЖЕН ИНОГДА БЫТЬ NULL
+    Widget *parent = nullptr;
 
     sf::Vector2f    pos;  // Global
     sf::Vector2f    size; // Global

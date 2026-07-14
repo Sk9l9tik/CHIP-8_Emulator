@@ -28,13 +28,17 @@ App::App(const std::string& rom_path_):
     load_rom(rom_path);
 
     load_font();
+
     setup_sound();
+    //GUI
     setup_display();
     setup_keyboard();
     setup_debug_panel();
     setup_open_rom_button();
     // SETUP ALL GUI ELEMENTS BEFORE WINDOW CREATION
     create_window();
+
+    debugger.pause();
 }
 
 void App::load_rom(const std::string &path) {
@@ -220,11 +224,37 @@ void App::setup_debug_panel() {
     spec_reg.style.gap = {-2.f};
     spec_reg.update();
     gui.add(&spec_reg);
+#define chto
+#ifdef chto
+    // Ща будет очень плохо но я ниче лучше не придумал пока
+    const int mem_size = 2048;
+    // Сколько там памяти точно нам не нужно я не знаю
+
+    //std::array<std::unique_ptr<Table>, mem_size>  rows;
+    //std::array<std::unique_ptr<Toggle>, mem_size> bps;
+    //std::array<std::unique_ptr<Label>, mem_size>  dsms;
+
+    ScrollView disassembly({0,0}, {0,0});
+
+    for(int i = 0; i < mem_size; i++){
+        /* Короче
+         * В теории здесь создается 2к таблиц размером 2 на 1, где слева брейкпойнт
+         * а справа строка типа " 0x0200 3A00 SE VA, 0x00 "
+         * они тут настраиваются, кладутся в ScrollView, он с нужным размером под
+         * блоком регистров будет рисоваться
+         *
+         * ScrollView обновляет, шлет ивенты и рендерит только те объедки, которые
+         * попадают в View, так что те три прикола хоть и будут весить ~7-8мб
+         * но вроде сильно грузить не должны
+         *
+         * ну я надеюсь*/
+    }
+#endif
 }
 
 void App::setup_open_rom_button() {
     auto d_pos = display.get_size();
-
+    //
     open_file_btn.set_position({d_pos.x + 10, spec_reg.get_size().y + spec_reg.get_position().y + 10});
 
     sf::RectangleShape rec(open_file_btn.get_size());
@@ -280,9 +310,6 @@ void App::create_window() {
             sf::Style::Default,
             sf::State::Windowed);
     window.setFramerateLimit(60);
-
-
-    //printf("%f\n", registers.get_size().x);
     window.requestFocus();
 }
 
@@ -293,8 +320,6 @@ void App::run(){
 
     const sf::Time CPU_TICK_TIME = sf::seconds(1.0f / CPU_HZ);
     const sf::Time CLOCK_TIME = sf::seconds(1.0f / TIMER_HZ);
-
-    //sf::Clock test;
 
     while(window.isOpen()){
         // Текущее время работы CPU

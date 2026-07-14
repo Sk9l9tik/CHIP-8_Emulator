@@ -6,6 +6,7 @@
 
 class Table : public Widget{
 public:
+    // TODO: сделать нормальный _table чтобы можно было менять размер
     Table(uint32_t cols, uint32_t rows) : cols_c(cols), rows_c(rows){
         _table.resize(cols*rows);
 
@@ -14,6 +15,10 @@ public:
 
         background.setSize(size);
         set_bg_color(0x313244FF);
+    }
+
+    Table(Table& other) : Widget(other), background(other.background), cols_c(other.cols_c), rows_c(other.rows_c) {
+        // А вот виджеты он красть не может
     }
 
     bool add_widget(Widget* widget) {
@@ -101,6 +106,7 @@ public:
     void set_bg_color(sf::Color color){
         background.setFillColor(color);
     }
+
 private:
     void recount_size(){
         for(uint32_t j = 0; j < rows_c; j++){

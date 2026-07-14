@@ -186,7 +186,7 @@ inline void center_text(sf::Text &text, sf::FloatRect bounds){
 
     text.setPosition({
         bounds.position.x + bounds.size.x / 2.f,
-        bounds.position.y + bounds.size.y / 2.f
+        bounds.position.y + bounds.size.y / 2.f + 1.f
     });
 }
 
