@@ -6,7 +6,7 @@ App::App(const std::string& rom_path_):
     rom_path(rom_path_),
     window(),
     font(),
-    gui(&window, &emulator, &debugger),
+    gui(window, emulator, debugger),
     sound_buffer(create_beep_buffer()),
     sound(sound_buffer),
     display(emulator.get_frame_buffer()),
@@ -33,6 +33,7 @@ App::App(const std::string& rom_path_):
     setup_keyboard();
     setup_debug_panel();
     setup_open_rom_button();
+    // SETUP ALL GUI ELEMENTS BEFORE WINDOW CREATION
     create_window();
 }
 
@@ -265,7 +266,6 @@ std::string App::make_title(const std::string &path) {
 }
 
 void App::create_window() {
-    // ADD ALL GUI ELEMENTS BEFORE WINDOW CREATION
     window.create(
             sf::VideoMode(static_cast<sf::Vector2u>(gui.get_size())),
             make_title(rom_path),
@@ -275,7 +275,6 @@ void App::create_window() {
 
 
     //printf("%f\n", registers.get_size().x);
-    // \/\/\/
     window.requestFocus();
 }
 

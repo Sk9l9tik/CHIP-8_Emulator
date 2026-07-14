@@ -23,12 +23,11 @@ public:
 
     [[nodiscard]] virtual sf::Vector2f get_position() const {return pos;}
     [[nodiscard]] virtual sf::Vector2f get_size()     const {
-        return {size.x,
-                size.y};
+        return {size.x, size.y};
     }
 
 protected:
-    Widget *parent = nullptr;
+    Widget *parent = nullptr; // НУ ВОТ ОН ДОЛЖЕН ИНОГДА БЫТЬ NULL
 
     sf::Vector2f    pos;  // Global
     sf::Vector2f    size; // Global

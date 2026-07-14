@@ -1,17 +1,13 @@
 #include "ui/GUI.h"
 
-GUI::GUI(sf::RenderWindow *window, CHIP_8 *emul, Debugger *debug) {
-    sf_window = window;
-    emulator = emul;
-    debugger = debug;
-
+GUI::GUI(sf::RenderWindow &window, CHIP_8 &emul, Debugger &debug) : sf_window(window), emulator(emul), debugger(debug) {
     if (ResourceManager::font_setted) {
         throw std::runtime_error("Error: set default font.");
     }
 }
 
 void GUI::handle_input(const std::optional<sf::Event> &event){
-    auto &cpu = emulator->get_cpu();
+    auto &cpu = emulator.get_cpu();
 
     // Nevajno...
     auto ep = event->getIf<sf::Event::KeyPressed>();
@@ -35,7 +31,7 @@ void GUI::handle_input(const std::optional<sf::Event> &event){
 
     if(ep) switch(ep->scancode){
         case sf::Keyboard::Scancode::Escape:
-            sf_window->close();
+            sf_window.close();
             break;
 //        case sf::Keyboard::Scancode::F1:
 //            break;
@@ -44,14 +40,14 @@ void GUI::handle_input(const std::optional<sf::Event> &event){
 //        case sf::Keyboard::Scancode::F3:
 //            break;
         case sf::Keyboard::Scancode::F5:
-            debugger->resume();
+            debugger.resume();
             break;
         case sf::Keyboard::Scancode::F9:
-            debugger->pause();
+            debugger.pause();
             break;
         case sf::Keyboard::Scancode::F10:
-            if(debugger->is_paused()){
-                debugger->step();
+            if(debugger.is_paused()){
+                debugger.step();
             }
             break;
         default:
@@ -61,9 +57,9 @@ void GUI::handle_input(const std::optional<sf::Event> &event){
 }
 
 void GUI::handle_event(const std::optional<sf::Event> &event) {
-    if(const auto& resized = event->getIf<sf::Event::Resized>()){
+    if(auto resized = event->getIf<sf::Event::Resized>()){
         sf::FloatRect visible_area({0.f, 0.f}, sf::Vector2f(resized->size));
-        sf_window->setView(sf::View(visible_area));
+        sf_window.setView(sf::View(visible_area));
         for(auto& el: widgets){
             el->update();
         }
@@ -81,11 +77,11 @@ void GUI::handle_event(const std::optional<sf::Event> &event) {
 
 void GUI::render() {
     for (auto& widget : widgets) {
-        widget->render(*sf_window);
+        widget->render(sf_window);
     }
 }
 
-void GUI::update(sf::Time delta) {
+void GUI::update() {
     for(auto& el: widgets){
         el->update();
     }
@@ -103,7 +99,7 @@ void GUI::setup_widgets() {
 sf::Vector2f GUI::get_size() {
     float width = 0, height = 0;
 
-    for(auto& el : widgets){
+    for(auto el : widgets){
         width = std::max(width, el->get_size().x + el->get_position().x);
         height = std::max(height, el->get_size().y + el->get_position().y);
     }

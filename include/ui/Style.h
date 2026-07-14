@@ -14,7 +14,6 @@ public:
         Padding(float x) : top(x), right(x), bottom(x), left(x) {}
     } padding {0};
 
-    // Table only atp
     struct Gap{
         float horizontal = 0.f;
         float vertical   = 0.f;

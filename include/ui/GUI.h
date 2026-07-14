@@ -51,7 +51,7 @@ static std::unordered_map<sf::Keyboard::Scancode, int> key_scancodes{
 
 class GUI{
 public:
-    GUI(sf::RenderWindow *window, CHIP_8 *emulator, Debugger *debugger);
+    GUI(sf::RenderWindow &window, CHIP_8 &emulator, Debugger &debugger);
 
     void add(Widget *widget);
 
@@ -59,7 +59,7 @@ public:
 
     void setup_widgets();
 
-    void update(sf::Time delta = {});
+    void update();
 
     void handle_event(const std::optional<sf::Event> &event);
 
@@ -67,9 +67,9 @@ public:
 
     sf::Vector2f get_size();
 private:
-    sf::RenderWindow    *sf_window;
-    CHIP_8              *emulator;
-    Debugger            *debugger;
+    sf::RenderWindow    &sf_window;
+    CHIP_8              &emulator;
+    Debugger            &debugger;
     //
     std::vector<Widget*> widgets;
 };

@@ -6,8 +6,6 @@
 #include "ui/Widget.h"
 #include "utils.hpp"
 
-using utils::center_text;
-
 class Button : public Widget{
 public:
     enum class State{
@@ -34,7 +32,7 @@ public:
         // CLICK AREA
         bounds = sf::FloatRect(pos, size);
 
-        center_text(text, bounds);
+        utils::center_text(text, bounds);
 
         state = State::Normal;
     }
@@ -53,7 +51,7 @@ public:
         // CLICK AREA
         bounds = sf::FloatRect(pos, size);
 
-        center_text(text, bounds);
+        utils::center_text(text, bounds);
 
         state = State::Normal;
     }
@@ -113,8 +111,9 @@ public:
         if(state == State::Pressed) while_pressed();
         if(state == State::Hovered) while_hovered();
 
-        try {
+        if(textures.contains(state)){
             auto t = textures.at(state);
+
             background.setTexture(*t, true);
             background.setScale({size.x / static_cast<float>((*t).getSize().x),
                                         size.y / static_cast<float>((*t).getSize().y)});
@@ -133,9 +132,6 @@ public:
                 default:
                     background.setColor(sf::Color::White);
             }
-        } catch (std::exception& e){
-            // Does he blow?
-
         }
     }
 
@@ -150,7 +146,7 @@ public:
         bounds.position = _pos;
         background.setPosition(_pos);
 
-        center_text(text, bounds);
+        utils::center_text(text, bounds);
     }
 
     void set_size(sf::Vector2f _size) override {
@@ -164,7 +160,7 @@ public:
         size = _size;
         bounds.size = _size;
 
-        center_text(text, bounds);
+        utils::center_text(text, bounds);
     }
 
     bool set_texture(const std::string &texture_name, State for_state){
@@ -209,12 +205,12 @@ public:
 
     void set_char_size(uint32_t new_size) {
         text.setCharacterSize(new_size);
-        center_text(text, bounds);
+        utils::center_text(text, bounds);
     }
 
     void set_string(const std::string& new_str){
         text.setString(new_str);
-        center_text(text, bounds);
+        utils::center_text(text, bounds);
     }
 
     void set_text_color(uint32_t color){
@@ -262,7 +258,6 @@ public:
         }
     }
 protected:
-
     // Button state
     State state = State::Undefined;
 
