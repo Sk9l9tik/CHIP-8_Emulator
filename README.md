@@ -127,7 +127,9 @@ cmake --build .
 ./chip8_emu <ROM>
 ```
 
-Example:
+Examples:
+
+Linux:
 
 ```bash
 ./chip8_emu Tetris_.ch8
