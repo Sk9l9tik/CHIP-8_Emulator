@@ -6,8 +6,6 @@
 #include "ui/Widget.h"
 #include "utils.hpp"
 
-using utils::center_text;
-
 class Label : public Widget {
 public:
     Label(const std::string &_text, sf::Vector2f _size, sf::Vector2f _pos) : background({_size}){
@@ -20,7 +18,7 @@ public:
         background.setPosition(_pos);
         background.setFillColor(sf::Color::Transparent);
 
-        center_text(text, background.getGlobalBounds());
+        utils::center_text(text, background.getGlobalBounds());
     }
 
     Label() : Label("", {0.f,0.f}, {0.f,0.f}) {}
@@ -89,7 +87,19 @@ public:
         } else {
             background.setSize(size);
             background.setPosition(pos);
-            center_text(text, background.getGlobalBounds());
+
+            switch(origin){
+                case Origin::Center:
+                    utils::center_text(text, background.getGlobalBounds());
+                    break;
+                case Origin::Left:
+                    utils::left_text(text, background.getGlobalBounds());
+                    break;
+                case Origin::Right:
+                    utils::right_text(text, background.getGlobalBounds());
+                    break;
+            }
+
         }
     }
 
@@ -97,7 +107,27 @@ public:
         on_update = std::move(func);
     }
 
+    void stick_to_left(){
+        origin = Origin::Left;
+        auto_resize_bg(bg_size_auto);
+    }
+
+    void stick_to_center(){
+        origin = Origin::Center;
+        auto_resize_bg(bg_size_auto);
+    }
+
+    void stick_to_right(){
+        origin = Origin::Right;
+        auto_resize_bg(bg_size_auto);
+    }
 private:
+    enum class Origin{ // Works only without auto background size
+        Left,
+        Center,
+        Right
+    } origin = Origin::Center;
+
     bool bg_size_auto = false;
 
     sf::Text text{ResourceManager::get_font(), "", 24};

@@ -3,6 +3,17 @@
 
 class Style{
 public:
+    struct Margin {
+        float top;
+        float right;
+        float bottom;
+        float left;
+
+        Margin(float t, float r, float b, float l) : top(t), right(r), bottom(b), left(l) {}
+        Margin(float h, float v) : top(v), right(h), bottom(v), left(h) {}
+        Margin(float x) : top(x), right(x), bottom(x), left(x) {}
+    } margin {0};
+
     struct Padding {
         float top;
         float right;
@@ -13,6 +24,7 @@ public:
         Padding(float h, float v) : top(v), right(h), bottom(v), left(h) {}
         Padding(float x) : top(x), right(x), bottom(x), left(x) {}
     } padding {0};
+
 
     struct Gap{
         float horizontal = 0.f;

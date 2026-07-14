@@ -96,7 +96,7 @@ void App::setup_keyboard() {
     keyboard.set_size({640, 640});
     keyboard.style.gap.vertical = 64./3.;
     keyboard.style.gap.horizontal = 64./3.;
-    keyboard.style.padding = {32};
+    keyboard.style.margin = {32};
 
     ResourceManager::load_texture("btn_keypad_normal", "../assets/sprites/KBButton_Default.png");
     ResourceManager::load_texture("btn_keypad_hovered", "../assets/sprites/KBButton_Hovered.png");
@@ -135,14 +135,16 @@ void App::setup_debug_panel() {
         state_label.set_string(debugger.is_paused() ? "PAUSED" : "RUNNING");
     });
 
-    //state_label.set_bg_color(0x2A2A3AFF);
-    state_label.style.padding = {3,190,3,3};
+    state_label.set_bg_color(0x2A2A3AFF);
+    state_label.style.margin = {3};
+    state_label.stick_to_left();
     PC_label.set_on_update([this](){
         PC_label.set_string("PC=0x"+utils::int_as_hex_str(debugger.get_cpu_state().PC, 4));
     });
-    //PC_label.set_bg_color(0x2A2A3AFF);
-    PC_label.style.padding = {3,3,3,0};
+    PC_label.set_bg_color(0x2A2A3AFF);
+    PC_label.style.margin = {3, 3, 3, 196};
     PC_label.set_text_color(0xffffffdd);
+    PC_label.stick_to_left();
     state_label.set_text_color(0xED8653FF);
     state_label.set_char_size(21);
     PC_label.set_char_size(20);
@@ -152,13 +154,15 @@ void App::setup_debug_panel() {
     d_labels.add_widget(&state_label);
     d_labels.add_widget(&PC_label);
 
-    d_labels.update();
+    d_labels.style.gap.horizontal = -3;
 
+    d_labels.update();
     gui.add(&d_labels);
 
     reg_label.set_position({d_pos.x + 10, 60});
     reg_label.set_char_size(18);
     reg_label.set_text_color(0xffffffdd);
+
     gui.add(&reg_label);
 
     registers_table.set_position({d_pos.x + 10, reg_label.get_position().y + reg_label.get_size().y + 5});
@@ -166,7 +170,8 @@ void App::setup_debug_panel() {
     for(int i = 0; i < 16; i++){
         auto& l = reg_labels[i];
         l = {"VV=0x00", {}, {}};
-        l.style.padding = {3};
+        l.style.margin = {3};
+//        l.stick_to_center(); // BY DEFAULT
         l.set_bg_color(0x2A2A3AFF);
         l.set_size(sf::Text(font, "VF=0x00", 20).getLocalBounds().size + sf::Vector2f{20.f, 20.f});
         l.set_char_size(20);
@@ -179,9 +184,9 @@ void App::setup_debug_panel() {
     registers_table.update();
     registers_table.style.gap ={-2}; // На удивление это работает так, как я и думал
     gui.add(&registers_table);
-
+    //xd
     auto configure_reg_label = [this](Label& l){
-        l.style.padding = {3.f};
+        l.style.margin = {3.f};
         l.set_bg_color(0x2A2A3AFF);
         l.set_size(sf::Text(font, "I=0x000", 20).getLocalBounds().size + sf::Vector2f {20.f, 20.f});
         l.set_char_size(20);
@@ -203,7 +208,7 @@ void App::setup_debug_panel() {
     ST_label.set_on_update([this](){
         ST_label.set_string("ST=0x" + utils::int_as_hex_str(debugger.get_cpu_state().ST));
     });
-    // TODO: сделать смену Origin у текста, чтобы можно было прибить его к левому краю
+
     spec_reg.set_position({d_pos.x + 10, registers_table.get_size().y+registers_table.get_position().y});
 
     spec_reg.add_widget(&I_label);

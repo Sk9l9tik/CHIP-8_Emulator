@@ -175,12 +175,12 @@ inline std::string int_as_hex_str(int value, int min_width = 2) {
     return result;
 }
 
-// Centers text in bounds
+// Replaces text in bounds
 inline void center_text(sf::Text &text, sf::FloatRect bounds){
     sf::FloatRect text_bounds = text.getLocalBounds();
 
     text.setOrigin({
-        text_bounds.position.x + text_bounds.size.x / 2.f,
+        text_bounds.size.x / 2.f,
         text_bounds.position.y + text_bounds.size.y / 2.f
     });
 
@@ -190,6 +190,33 @@ inline void center_text(sf::Text &text, sf::FloatRect bounds){
     });
 }
 
+inline void left_text(sf::Text &text, sf::FloatRect bounds){
+    sf::FloatRect text_bounds = text.getLocalBounds();
+
+    text.setOrigin({
+        text_bounds.position.x,
+        text_bounds.position.y + text_bounds.size.y / 2.f
+    });
+
+    text.setPosition({
+        bounds.position.x,
+        bounds.position.y + bounds.size.y / 2.f
+    });
+}
+
+inline void right_text(sf::Text &text, sf::FloatRect bounds){
+    sf::FloatRect text_bounds = text.getLocalBounds();
+
+    text.setOrigin({
+        text_bounds.size.x + text_bounds.position.x,
+        text_bounds.position.y + text_bounds.size.y / 2.f
+    });
+
+    text.setPosition({
+        bounds.position.x + bounds.size.x,
+        bounds.position.y + bounds.size.y / 2.f
+    });
+}
 #ifdef _WIN32
 inline std::wstring show_file_dialog_w(HWND hwnd) {
     OPENFILENAMEW ofn = {};
