@@ -131,23 +131,6 @@ int main(int argc, char* argv[]){
     gui.add(&keyboard);
 
 
-
-#ifdef CHIP8_DEBUG
-    Debugger d(emulator);
-
-    auto disassembled = d.disassemble(Memory::ROM_START, 20);
-    std::cout << "addr\topcode\tmnemonic\n";
-    // for(auto&& [addr, opc, mnem] : disassembled) {
-    //   std::cout << "0x" << std::hex << std::uppercase << addr << "\t" << "0x" << opc << "\t" << mnem << '\n';
-    // }  
-
-    // auto a = d.memory_dump(Memory::ROM_START, Memory::MEM_SIZE);
-    // std::cout << a << '\n';  
-    // d.pause(); // cause no-bp is not set
-    d.set_breakpoint(0x20a);
-    // std::cout << "Paused at PC = 0x" << std::hex << emulator.get_cpu().get_PC() << "\n";
-#endif
-
     sf::Clock cpu_clock;
     const float CPU_HZ = 700.0f; // Частота проца
     const sf::Time CPU_TICK_TIME = sf::seconds(1.0f / CPU_HZ);
@@ -327,82 +310,10 @@ int main(int argc, char* argv[]){
         {
             if (event->is<sf::Event::Closed>())
                 window.close();
-#ifdef CHIP8_DEBUG
-            if(const auto* kp = event->getIf<sf::Event::KeyPressed>()){
-//                if(kp->scancode == sf::Keyboard::Scancode::F5){
-//                    d.resume();
-//                    std::cout << "Resumed\n";
-//                }
-//                else if(kp->scancode == sf::Keyboard::Scancode::F9){
-//                    d.pause();
-//                    std::cout << "Paused\n";
-//                }
-//                else if(kp->scancode == sf::Keyboard::Scancode::F10 && d.is_paused()){
-//                    d.step();
-//                    std::cout << "Step -> PC = 0x" << std::hex
-//                               << emulator.get_cpu().get_PC() << "\n";
-//                }
-                /*А вот это уже UIшное будет все*/
-                else if(kp->scancode == sf::Keyboard::Scancode::F6){
-                    uint16_t pc = emulator.get_cpu().get_PC();
-                    d.toggle_breakpoint(pc);
-                    std::cout << (d.has_breakpoint(pc) ? "Breakpoint set at 0x"
-                                                        : "Breakpoint cleared at 0x")
-                               << std::hex << pc << "\n";
-                }
-
-                // TODO: move this 3 blocks to window parts
-                else if(kp->scancode == sf::Keyboard::Scancode::F1){ // print cpu state
-                    auto state = d.get_cpu_state();
-
-                    std::cout << "PC: 0x" << std::hex << state.PC << '\n';
-                    std::cout << "I : 0x" << state.I  << '\n';
-                    std::cout << "SP: "   << std::dec << static_cast<int>(state.SP) << '\n';
-                    std::cout << "DT: "   << static_cast<int>(state.DT) << '\n';
-                    std::cout << "ST: "   << static_cast<int>(state.ST) << "\n\n";
-
-                    std::cout << std::uppercase << std::hex << std::setfill('0');
-
-                    auto registers = state.V;
-
-                    for (std::size_t i = 0, end = registers.size(); i < end; ++i) {
-                        std::cout << "V" << std::hex << i << ": 0x" << std::setw(2) << static_cast<int>(registers[i]) << '\n';
-                    }
-                    std::cout << std::dec;                          
-                }
-                else if(kp->scancode == sf::Keyboard::Scancode::F2){ // print memory
-                    auto memory = d.memory_dump(Memory::ROM_START, Memory::MEM_SIZE);
-                    std::cout << memory << '\n';  
-                }
-                else if(kp->scancode == sf::Keyboard::Scancode::F3){ // print stack
-                    auto state = d.get_cpu_state();
-                    std::cout << "Stack (SP = " << static_cast<int>(state.SP) << ")\n";
-
-                        std::cout << std::uppercase << std::hex << std::setfill('0');
-
-                        for (std::size_t i = 0; i < state.stack.size(); ++i) {
-                            std::cout << '[' << std::setw(2) << i << "] " << "0x" << std::setw(4) << state.stack[i];
-
-                            if (i == state.SP)
-                                std::cout << "  <-- SP";
-
-                            std::cout << '\n';
-                        }
-
-                        std::cout << std::dec;
-                }
-        }
-#endif
             gui.handle_event(event);
         }
 
         while(cpu_accumulator >= CPU_TICK_TIME) {
-//#ifdef CHIP8_DEBUG
-//            d.update();
-//            if(d.is_paused() == false || true){}
-//#else
-//            emulator.tick();
-//#endif
             d.update();
             cpu_accumulator -= CPU_TICK_TIME;
         }
