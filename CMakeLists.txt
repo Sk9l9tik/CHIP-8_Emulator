@@ -56,7 +56,7 @@ add_executable(chip8_emu
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   target_link_options(chip8_emu PRIVATE $<$<CONFIG:RELEASE>: -static-libgcc -static-libstdc++>)
-elseif()
+else()
   target_link_options(chip8_emu PRIVATE $<$<CONFIG:RELEASE>: -static>)
 endif()
 
