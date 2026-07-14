@@ -1,8 +1,9 @@
 #include "ui/GUI.h"
 
-GUI::GUI(sf::RenderWindow *window, CHIP_8 *emul) {
+GUI::GUI(sf::RenderWindow *window, CHIP_8 *emul, Debugger *debug) {
     sf_window = window;
     emulator = emul;
+    debugger = debug;
 
     if (ResourceManager::font_setted) {
         throw std::runtime_error("Error: set default font.");
@@ -35,6 +36,23 @@ void GUI::handle_input(const std::optional<sf::Event> &event){
     if(ep) switch(ep->scancode){
         case sf::Keyboard::Scancode::Escape:
             sf_window->close();
+            break;
+//        case sf::Keyboard::Scancode::F1:
+//            break;
+//        case sf::Keyboard::Scancode::F2:
+//            break;
+//        case sf::Keyboard::Scancode::F3:
+//            break;
+        case sf::Keyboard::Scancode::F5:
+            debugger->resume();
+            break;
+        case sf::Keyboard::Scancode::F9:
+            debugger->pause();
+            break;
+        case sf::Keyboard::Scancode::F10:
+            if(debugger->is_paused()){
+                debugger->step();
+            }
             break;
         default:
             break;

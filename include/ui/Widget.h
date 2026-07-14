@@ -22,7 +22,10 @@ public:
     virtual void set_parent  (Widget* p)          {parent = p;}
 
     [[nodiscard]] virtual sf::Vector2f get_position() const {return pos;}
-    [[nodiscard]] virtual sf::Vector2f get_size()     const {return size;}
+    [[nodiscard]] virtual sf::Vector2f get_size()     const {
+        return {size.x,
+                size.y};
+    }
 
 protected:
     Widget *parent = nullptr;

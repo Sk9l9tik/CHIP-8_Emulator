@@ -159,6 +159,20 @@ inline void SAERMO_logger(const std::optional<sf::Event>& event) {
     }
 }
 
+inline std::string int_as_hex_str(int value) {
+    const char hex_chars[] = "0123456789abcdef";
+    std::string result;
+    auto val = static_cast<uint32_t>(value);
+
+    do {
+        result += hex_chars[val % 16];
+        val /= 16;
+    } while (val > 0 || result.size() < 2);
+
+    std::reverse(result.begin(), result.end());
+    return result;
+}
+
 // Centers text in bounds
 inline void center_text(sf::Text &text, sf::FloatRect bounds){
     sf::FloatRect text_bounds = text.getLocalBounds();

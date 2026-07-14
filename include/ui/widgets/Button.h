@@ -118,7 +118,7 @@ public:
             background.setTexture(*t, true);
             background.setScale({size.x / static_cast<float>((*t).getSize().x),
                                         size.y / static_cast<float>((*t).getSize().y)});
-
+            //
             switch(state){
                 case State::Normal:
                     background.setColor(sf::Color(0xA796E8FF));
@@ -262,6 +262,7 @@ public:
         }
     }
 protected:
+
     // Button state
     State state = State::Undefined;
 

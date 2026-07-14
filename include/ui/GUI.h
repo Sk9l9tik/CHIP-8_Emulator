@@ -3,8 +3,10 @@
 
 #include <SFML/Graphics.hpp>
 #include "Widget.h"
-#include "core/CHIP_8.h"
 #include "ui/ResourceManager.h"
+
+#include "core/CHIP_8.h"
+#include "debug/Debugger.h"
 
 
 // Пока key-mapping такой чисто, потом можно как то удобнее сделать
@@ -49,7 +51,7 @@ static std::unordered_map<sf::Keyboard::Scancode, int> key_scancodes{
 
 class GUI{
 public:
-    GUI(sf::RenderWindow *window, CHIP_8 *emulator);
+    GUI(sf::RenderWindow *window, CHIP_8 *emulator, Debugger *debugger);
 
     void add(Widget *widget);
 
@@ -67,6 +69,7 @@ public:
 private:
     sf::RenderWindow    *sf_window;
     CHIP_8              *emulator;
+    Debugger            *debugger;
     //
     std::vector<Widget*> widgets;
 };

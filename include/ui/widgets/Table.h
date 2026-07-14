@@ -60,6 +60,8 @@ public:
     }
 
     void update() override {
+        recount_size();
+        replace_widgets();
         if(background.getSize() != size) background.setSize(size);
 
         for(auto& el: _table){
@@ -94,6 +96,10 @@ public:
 
     void set_bg_color(uint32_t color){
         background.setFillColor(static_cast<sf::Color>(color));
+    }
+
+    void set_bg_color(sf::Color color){
+        background.setFillColor(color);
     }
 private:
     void recount_size(){

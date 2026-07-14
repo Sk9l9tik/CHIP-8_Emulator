@@ -19,11 +19,7 @@
 #include "ui/widgets/Table.h"
 #include "ui/widgets/Toggle.h"
 
-#define CHIP8_DEBUG1
-
-#ifdef CHIP8_DEBUG
 #include "debug/Debugger.h"
-#endif
 
 
 int main(int argc, char* argv[]){
@@ -40,6 +36,7 @@ int main(int argc, char* argv[]){
     }
 
     CHIP_8 emulator {};
+    Debugger d(emulator);
 
     try{
         emulator.load_ROM(rom_path);
@@ -52,7 +49,7 @@ int main(int argc, char* argv[]){
 
     sf::RenderWindow window;
 
-    GUI gui{&window, &emulator};
+    GUI gui{&window, &emulator, &d};
     sf::Font font;
     if (!font.openFromFile("../assets/fonts/Roboto-Regular.ttf"))
         if(!font.openFromFile("../../assets/fonts/Roboto-Regular.ttf"))
@@ -134,10 +131,12 @@ int main(int argc, char* argv[]){
 
     gui.add(&keyboard);
 
-    Button open_file{"Open ROM", {150, 80}, {d_pos.x + 10, 0}};
-    sf::RectangleShape rec({1, 1});
+    Button open_file{"Open ROM", {130, 50}, {d_pos.x + 10, 0}};
+    sf::RectangleShape rec(open_file.get_size());
     rec.setFillColor(sf::Color::White);
-    sf::RenderTexture r_t({1,1});
+    rec.setOutlineColor(sf::Color(0x999999ff));
+    rec.setOutlineThickness(-2.f);
+    sf::RenderTexture r_t(static_cast<sf::Vector2u>(rec.getSize()));
     r_t.draw(rec);
     r_t.display();
     ResourceManager::load_texture("def", r_t.getTexture());
@@ -146,7 +145,7 @@ int main(int argc, char* argv[]){
     }
 
     open_file.set_char_size(18);
-    open_file.set_on_click([&window, &emulator](){
+    open_file.set_on_click([&window, &emulator, &rom_path](){
 
     #ifdef _WIN32
         auto path = utils::show_file_dialog(window.getNativeHandle());
@@ -162,6 +161,8 @@ int main(int argc, char* argv[]){
             auto pos = path.find_last_of('/');
             if(pos == std::string::npos) pos = path.find_last_of('\\');
             window.setTitle("CHIP-8 Emulator - " + path.substr(pos != std::string::npos ? pos+1 : 0));
+
+            rom_path = path;
         }
     });
     gui.add(&open_file);
@@ -193,36 +194,32 @@ int main(int argc, char* argv[]){
     sf::Time timer_accumulator = sf::Time::Zero;
 //    sf::Time last_time = timer_clock.getElapsedTime();
 
+
+    Table registers{4, 4};
+    registers.set_position({d_pos.x + 10, 90});
+    std::array<Label, 16> labels;
+    //TODO: переписать Label чтобы высота букв шрифта не ломала положение Label а то чет калище
+    // и шрифт поменять
+    // и приделать как то outline к таблице
+    for(int i = 0; i < 16; i++){
+        auto& l = labels[i];
+        l = {"VVV=0x00", {}, {}};
+        l.style.padding = {10};
+        l.set_on_update([&l, &d, i](){
+            l.set_string("V"+std::to_string(i)+"=0x"+utils::int_as_hex_str(d.get_cpu_state().V[i]));
+        });
+        //l.auto_resize_bg(true);
+
+        registers.add_widget(&l);
+    }
+    registers.style.gap = {4};
+    registers.update();
+    gui.add(&registers);
+
     auto pos = rom_path.find_last_of('/');
     if(pos == std::string::npos) pos = rom_path.find_last_of('\\');
 
-    ScrollView scroll_test({640, 300}, {d_pos.x+10, open_file.get_size().y + 30});
-
-    Button btn("TEST TEST TEST", {640, 1200}, {1,1});
-
-    btn.set_texture("btn_keypad_normal", Button::State::Normal);
-    btn.set_texture("btn_keypad_hovered", Button::State::Hovered);
-    btn.set_texture("btn_keypad_pressed", Button::State::Pressed);
-    btn.set_on_click([](){
-        printf("SAERMO\n");
-    });
-    btn.set_on_mouse_entered([&btn](){
-       printf("hovered\n");
-    });
-    btn.set_on_mouse_exited([&btn](){
-        printf("unhovered\n");
-    });
-
-    scroll_test.add_widget(&btn);
-
-
-    Label test_label("0_0QWERTYUYITOPA{SDVJCXKVNZx1234567890|", {0,0},{d_pos.x, 500});
-    test_label.set_bg_color(0xff0000ff);
-    test_label.set_text_color(0xffffffff);
-    test_label.auto_resize_bg(true);
-    gui.add(&test_label);
-    gui.add(&scroll_test);
-
+    // ADD ALL GUI ELEMENTS BEFORE WINDOW CREATION
     window.create(
             sf::VideoMode(static_cast<sf::Vector2u>(gui.get_size())),
                     "CHIP-8 Emulator - " + rom_path.substr(pos != std::string::npos ? pos+1 : 0),
@@ -230,11 +227,14 @@ int main(int argc, char* argv[]){
                     sf::State::Windowed);
     window.setFramerateLimit(60);
 
+
+    //printf("%f\n", registers.get_size().x);
     // \/\/\/
     window.requestFocus();
 
     while (window.isOpen())
     {
+
         // Текущее время работы CPU
         sf::Time curr = cpu_clock.getElapsedTime();
         // Разница с прошлым временем работы, т.е.
@@ -243,9 +243,9 @@ int main(int argc, char* argv[]){
         // сохраняем для след. кадра
         cpu_last_time = curr;
         // накопитель
-        cpu_accumulator+=delta;
-        timer_accumulator+=delta;
-        //
+        cpu_accumulator += delta;
+        timer_accumulator += delta;
+
 
         while (const std::optional event = window.pollEvent())
         {
@@ -253,19 +253,20 @@ int main(int argc, char* argv[]){
                 window.close();
 #ifdef CHIP8_DEBUG
             if(const auto* kp = event->getIf<sf::Event::KeyPressed>()){
-                if(kp->scancode == sf::Keyboard::Scancode::F5){
-                    d.resume();
-                    std::cout << "Resumed\n";
-                }
-                else if(kp->scancode == sf::Keyboard::Scancode::F9){
-                    d.pause();
-                    std::cout << "Paused\n";
-                }
-                else if(kp->scancode == sf::Keyboard::Scancode::F10 && d.is_paused()){
-                    d.step();
-                    std::cout << "Step -> PC = 0x" << std::hex
-                               << emulator.get_cpu().get_PC() << "\n";
-                }
+//                if(kp->scancode == sf::Keyboard::Scancode::F5){
+//                    d.resume();
+//                    std::cout << "Resumed\n";
+//                }
+//                else if(kp->scancode == sf::Keyboard::Scancode::F9){
+//                    d.pause();
+//                    std::cout << "Paused\n";
+//                }
+//                else if(kp->scancode == sf::Keyboard::Scancode::F10 && d.is_paused()){
+//                    d.step();
+//                    std::cout << "Step -> PC = 0x" << std::hex
+//                               << emulator.get_cpu().get_PC() << "\n";
+//                }
+                /*А вот это уже UIшное будет все*/
                 else if(kp->scancode == sf::Keyboard::Scancode::F6){
                     uint16_t pc = emulator.get_cpu().get_PC();
                     d.toggle_breakpoint(pc);
@@ -316,42 +317,42 @@ int main(int argc, char* argv[]){
                 }
         }
 #endif
-#ifdef DEBUG
-        utils::SAERMO_logger(event);
-#endif
-            if(auto e = event->getIf<sf::Event::MouseMoved>()){
-                printf("%d %d\n", e->position.x, e->position.y);
-            }
             gui.handle_event(event);
         }
 
         while(cpu_accumulator >= CPU_TICK_TIME) {
-#ifdef CHIP8_DEBUG
+//#ifdef CHIP8_DEBUG
+//            d.update();
+//            if(d.is_paused() == false || true){}
+//#else
+//            emulator.tick();
+//#endif
             d.update();
-            if(d.is_paused() == false || true){}
-#else
-            emulator.tick();
-#endif
             cpu_accumulator -= CPU_TICK_TIME;
         }
 
-        while(timer_accumulator >= CLOCK_TIME){
+        while(timer_accumulator >= CLOCK_TIME) {
             emulator.tick_timers();
             timer_accumulator -= CLOCK_TIME;
         }
 
-        window.clear(sf::Color(0x181825FF));
+        window.clear(sf::Color(0x0F0F18FF));
         gui.update();
         gui.render();
 
-        if(emulator.get_cpu().get_sound_timer() > 0){
-            if (sound.getStatus() != sf::Sound::Status::Playing) {
-                sound.play();
+        if(!d.is_paused()){
+            sound.setVolume(10);
+            if (emulator.get_cpu().get_sound_timer() > 0) {
+                if (sound.getStatus() != sf::Sound::Status::Playing) {
+                    sound.play();
+                }
+            } else {
+                if (sound.getStatus() == sf::Sound::Status::Playing) {
+                    sound.stop();
+                }
             }
         } else {
-            if (sound.getStatus() == sf::Sound::Status::Playing) {
-                sound.stop();
-            }
+            sound.setVolume(0);
         }
 
         window.display();

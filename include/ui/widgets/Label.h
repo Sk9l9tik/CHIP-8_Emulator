@@ -1,6 +1,8 @@
 #ifndef CHIP_8_EMULATOR_LABEL_H
 #define CHIP_8_EMULATOR_LABEL_H
 
+#include <functional>
+#include <utility>
 #include "ui/Widget.h"
 #include "utils.hpp"
 
@@ -21,8 +23,10 @@ public:
         center_text(text, background.getGlobalBounds());
     }
 
-    void update() override {
+    Label() : Label("", {0.f,0.f}, {0.f,0.f}) {}
 
+    void update() override {
+        on_update();
     }
 
     void handle_event(const std::optional<sf::Event> &event) override {
@@ -38,22 +42,13 @@ public:
         size = _size;
         background.setSize(_size);
 
-        if(!bg_size_auto) center_text(text, background.getGlobalBounds());
+        auto_resize_bg(bg_size_auto);
     }
 
     void set_position(sf::Vector2f _pos) override {
         pos = _pos;
         background.setPosition(_pos);
-        if(bg_size_auto) {
-            text.setOrigin({0,0});
-            text.setPosition(pos);
-            background.setSize(text.getLocalBounds().size);
-            background.setPosition(text.getLocalBounds().position);
-        } else {
-            background.setSize(size);
-            background.setPosition(pos);
-            center_text(text, background.getGlobalBounds());
-        }
+        auto_resize_bg(bg_size_auto);
     }
 
     void set_bg_color(uint32_t color) {
@@ -66,19 +61,13 @@ public:
 
     void set_char_size(uint32_t new_size){
         text.setCharacterSize(new_size);
-        if(!bg_size_auto) center_text(text, background.getGlobalBounds());
+        auto_resize_bg(bg_size_auto);
     }
 
     void set_string(const std::string &new_text){
         text.setString(new_text);
 
-        if(bg_size_auto) {
-            text.setOrigin({0,0});
-            text.setPosition(pos);
-            background.setSize(text.getLocalBounds().size);
-            background.setPosition(text.getLocalBounds().position);
-        } else
-            center_text(text, background.getGlobalBounds());
+        auto_resize_bg(bg_size_auto);
     }
 
     void set_text_color(uint32_t color) {
@@ -96,17 +85,25 @@ public:
             text.setPosition(pos);
             background.setSize(text.getGlobalBounds().size);
             background.setPosition(text.getGlobalBounds().position);
+            size = text.getGlobalBounds().size;
         } else {
             background.setSize(size);
             background.setPosition(pos);
             center_text(text, background.getGlobalBounds());
         }
     }
+
+    void set_on_update(std::function<void()> func){
+        on_update = std::move(func);
+    }
+
 private:
     bool bg_size_auto = true;
 
     sf::Text text{ResourceManager::get_font(), "", 24};
     sf::RectangleShape background;
+
+    std::function<void()> on_update = [](){};
 };
 
 #endif //CHIP_8_EMULATOR_LABEL_H
