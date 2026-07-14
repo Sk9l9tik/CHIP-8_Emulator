@@ -103,6 +103,7 @@ Dependencies are automatically downloaded via **FetchContent** if they are not a
 
 * SFML 3.0.2
 * GoogleTest 1.17.0
+* NFD 1.2.1 (for Linux systems)
 
 ---
 
