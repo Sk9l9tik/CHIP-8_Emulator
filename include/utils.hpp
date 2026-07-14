@@ -159,15 +159,17 @@ inline void SAERMO_logger(const std::optional<sf::Event>& event) {
     }
 }
 
-inline std::string int_as_hex_str(int value) {
-    const char hex_chars[] = "0123456789abcdef";
+inline std::string int_as_hex_str(int value, int min_width = 2) {
+    if (value == 0 && min_width == 0) return "0";
+
+    const char hex_chars[] = "0123456789ABCDEF";
     std::string result;
     auto val = static_cast<uint32_t>(value);
 
     do {
         result += hex_chars[val % 16];
         val /= 16;
-    } while (val > 0 || result.size() < 2);
+    } while (val > 0 || result.size() < static_cast<size_t>(min_width));
 
     std::reverse(result.begin(), result.end());
     return result;

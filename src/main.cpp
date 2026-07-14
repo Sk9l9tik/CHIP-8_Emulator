@@ -105,9 +105,8 @@ int main(int argc, char* argv[]){
     ResourceManager::load_texture("btn_keypad_hovered", "../assets/sprites/KBButton_Hovered.png");
     ResourceManager::load_texture("btn_keypad_pressed", "../assets/sprites/KBButton_Pressed.png");
     ResourceManager::load_texture("btn_keypad_locked", "../assets/sprites/KBButton_Locked.png");
-
+    const char hex_chars[] = "0123456789ABCDEF";
     for(int i = 0; i < 16; i++){
-        const char hex_chars[] = "0123456789ABCDEF";
         keys.emplace_back(std::string(1,hex_chars[i]));
 
         keys[i].set_size({128, 128});
@@ -128,7 +127,7 @@ int main(int argc, char* argv[]){
     for(auto& k : keys){
         keyboard.add_widget(&k);
     }
-
+    //keyboard.set_bg_color(0x2E2940FF);
     gui.add(&keyboard);
 
     Button open_file{"Open ROM", {130, 50}, {d_pos.x + 10, 0}};
@@ -194,27 +193,75 @@ int main(int argc, char* argv[]){
     sf::Time timer_accumulator = sf::Time::Zero;
 //    sf::Time last_time = timer_clock.getElapsedTime();
 
+    Label reg_label("Registers", {80, 20}, {d_pos.x + 10, 60});
+    reg_label.set_char_size(18);
+    reg_label.set_text_color(0xffffffdd);
+    gui.add(&reg_label);
 
     Table registers{4, 4};
-    registers.set_position({d_pos.x + 10, 90});
+    registers.set_position({d_pos.x + 10, 85});
     std::array<Label, 16> labels;
-    //TODO: переписать Label чтобы высота букв шрифта не ломала положение Label а то чет калище
-    // и шрифт поменять
-    // и приделать как то outline к таблице
+
     for(int i = 0; i < 16; i++){
         auto& l = labels[i];
-        l = {"VVV=0x00", {}, {}};
-        l.style.padding = {10};
-        l.set_on_update([&l, &d, i](){
-            l.set_string("V"+std::to_string(i)+"=0x"+utils::int_as_hex_str(d.get_cpu_state().V[i]));
+        l = {"VV=0x00", {}, {}};
+        l.style.padding = {3};
+        l.set_bg_color(0x2A2A3AFF);
+        l.set_size(sf::Text(font, "VF=0x00", 20).getLocalBounds().size + sf::Vector2f{20.f, 20.f});
+        l.set_char_size(20);
+        l.set_on_update([&l, &d, i, hex_chars](){
+            l.set_string("V"+std::string(1, hex_chars[i])+"=0x"+utils::int_as_hex_str(d.get_cpu_state().V[i]));
         });
-        //l.auto_resize_bg(true);
 
         registers.add_widget(&l);
     }
-    registers.style.gap = {4};
     registers.update();
+    registers.style.gap ={-2}; // На удивление это работает так, как я и думал
     gui.add(&registers);
+    // TODO: сделать смену Origin у текста, чтобы можно было прибить его к левому краю
+    Table spec_reg{2,2};
+    spec_reg.set_position({d_pos.x + 10, registers.get_size().y+registers.get_position().y});
+    Label I_reg_label("I=0x000", {40,40}, {0,0});
+    Label SP_reg_label("SP=0x00", {40,40}, {0,0});
+    Label DT_reg_label("DT=0x00", {40,40}, {0,0});
+    Label ST_reg_label("ST=0x00", {40,40}, {0,0});
+    I_reg_label.style.padding = {3.f};
+    SP_reg_label.style.padding = {3.f};
+    DT_reg_label.style.padding = {3.f};
+    ST_reg_label.style.padding = {3.f};
+
+    I_reg_label.set_bg_color(0x2A2A3AFF);
+    SP_reg_label.set_bg_color(0x2A2A3AFF);
+    DT_reg_label.set_bg_color(0x2A2A3AFF);
+    ST_reg_label.set_bg_color(0x2A2A3AFF);
+    I_reg_label.set_size(sf::Text(font, "I=0x000", 20).getLocalBounds().size + sf::Vector2f{20.f, 20.f});
+    I_reg_label.set_char_size(20);
+    I_reg_label.set_on_update([&I_reg_label, &d](){
+        I_reg_label.set_string("I=0x" + utils::int_as_hex_str(d.get_cpu_state().I, 3));
+    });
+    SP_reg_label.set_size(sf::Text(font, "I=0x000", 20).getLocalBounds().size + sf::Vector2f{20.f, 20.f});
+    SP_reg_label.set_char_size(20);
+    SP_reg_label.set_on_update([&SP_reg_label, &d](){
+        SP_reg_label.set_string("SP=0x" + utils::int_as_hex_str(d.get_cpu_state().SP));
+    });
+    DT_reg_label.set_size(sf::Text(font, "I=0x000", 20).getLocalBounds().size + sf::Vector2f{20.f, 20.f});
+    DT_reg_label.set_char_size(20);
+    DT_reg_label.set_on_update([&DT_reg_label, &d](){
+        DT_reg_label.set_string("DT=0x" + utils::int_as_hex_str(d.get_cpu_state().DT));
+    });
+    ST_reg_label.set_size(sf::Text(font, "I=0x000", 20).getLocalBounds().size + sf::Vector2f{20.f, 20.f});
+    ST_reg_label.set_char_size(20);
+    ST_reg_label.set_on_update([&ST_reg_label, &d](){
+        ST_reg_label.set_string("ST=0x" + utils::int_as_hex_str(d.get_cpu_state().ST));
+    });
+
+    spec_reg.add_widget(&I_reg_label);
+    spec_reg.add_widget(&SP_reg_label);
+    spec_reg.add_widget(&DT_reg_label);
+    spec_reg.add_widget(&ST_reg_label);
+    spec_reg.style.gap = {-2.f};
+    spec_reg.update();
+    gui.add(&spec_reg);
 
     auto pos = rom_path.find_last_of('/');
     if(pos == std::string::npos) pos = rom_path.find_last_of('\\');

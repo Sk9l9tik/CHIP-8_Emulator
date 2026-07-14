@@ -98,7 +98,7 @@ public:
     }
 
 private:
-    bool bg_size_auto = true;
+    bool bg_size_auto = false;
 
     sf::Text text{ResourceManager::get_font(), "", 24};
     sf::RectangleShape background;
