@@ -49,6 +49,7 @@ add_executable(chip8_emu
     ${CORE_SRC}
     ${DEBUG_SRC}
     ${UI_SRC}
+    src/App.cpp
     src/main.cpp
 )
 
