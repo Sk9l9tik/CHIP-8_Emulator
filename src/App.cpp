@@ -246,6 +246,7 @@ void App::setup_open_rom_button() {
     gui.add(&open_file_btn);
 }
 
+
 void App::open_rom_dialog() {
 #ifdef _WIN32
     auto path = utils::show_file_dialog(window.getNativeHandle());
