@@ -130,41 +130,7 @@ int main(int argc, char* argv[]){
     //keyboard.set_bg_color(0x2E2940FF);
     gui.add(&keyboard);
 
-    Button open_file{"Open ROM", {130, 50}, {d_pos.x + 10, 0}};
-    sf::RectangleShape rec(open_file.get_size());
-    rec.setFillColor(sf::Color::White);
-    rec.setOutlineColor(sf::Color(0x999999ff));
-    rec.setOutlineThickness(-2.f);
-    sf::RenderTexture r_t(static_cast<sf::Vector2u>(rec.getSize()));
-    r_t.draw(rec);
-    r_t.display();
-    ResourceManager::load_texture("def", r_t.getTexture());
-    for(int i = 0; i < 5; i++){
-        open_file.set_texture("def", static_cast<Button::State>(i));
-    }
 
-    open_file.set_char_size(18);
-    open_file.set_on_click([&window, &emulator, &rom_path](){
-
-    #ifdef _WIN32
-        auto path = utils::show_file_dialog(window.getNativeHandle());
-    #else
-        auto path = utils::show_file_dialog();
-    #endif
-        std::cout << path << '\n';
-
-        if(path.ends_with(".ch8") && std::filesystem::exists(path)) {
-            emulator.get_cpu().reset();
-            emulator.load_ROM(path);
-
-            auto pos = path.find_last_of('/');
-            if(pos == std::string::npos) pos = path.find_last_of('\\');
-            window.setTitle("CHIP-8 Emulator - " + path.substr(pos != std::string::npos ? pos+1 : 0));
-
-            rom_path = path;
-        }
-    });
-    gui.add(&open_file);
 
 #ifdef CHIP8_DEBUG
     Debugger d(emulator);
@@ -193,13 +159,40 @@ int main(int argc, char* argv[]){
     sf::Time timer_accumulator = sf::Time::Zero;
 //    sf::Time last_time = timer_clock.getElapsedTime();
 
+    Table d_labels{2,1};
+    Label state_label{"RUNNING", {100, 30}, {0,0}};
+    state_label.set_on_update([&state_label, &d](){
+        state_label.set_string(d.is_paused() ? "PAUSED" : "RUNNING");
+    });
+    //state_label.set_bg_color(0x2A2A3AFF);
+    state_label.style.padding = {3,190,3,3};
+    Label PC_label{"PC=0x0200", {100, 30}, {0,0}};
+    PC_label.set_on_update([&PC_label, &d](){
+        PC_label.set_string("PC=0x"+utils::int_as_hex_str(d.get_cpu_state().PC, 4));
+    });
+    //PC_label.set_bg_color(0x2A2A3AFF);
+    PC_label.style.padding = {3,3,3,0};
+    PC_label.set_text_color(0xffffffdd);
+    state_label.set_text_color(0xED8653FF);
+    state_label.set_char_size(21);
+    PC_label.set_char_size(20);
+
+    d_labels.set_position({d_pos.x + 10, 10});
+
+    d_labels.add_widget(&state_label);
+    d_labels.add_widget(&PC_label);
+
+    d_labels.update();
+
+    gui.add(&d_labels);
+
     Label reg_label("Registers", {80, 20}, {d_pos.x + 10, 60});
     reg_label.set_char_size(18);
     reg_label.set_text_color(0xffffffdd);
     gui.add(&reg_label);
 
     Table registers{4, 4};
-    registers.set_position({d_pos.x + 10, 85});
+    registers.set_position({d_pos.x + 10, reg_label.get_position().y + reg_label.get_size().y + 5});
     std::array<Label, 16> labels;
 
     for(int i = 0; i < 16; i++){
@@ -262,6 +255,42 @@ int main(int argc, char* argv[]){
     spec_reg.style.gap = {-2.f};
     spec_reg.update();
     gui.add(&spec_reg);
+
+    Button open_file{"Open ROM", {130, 50}, {d_pos.x + 10, spec_reg.get_size().y+spec_reg.get_position().y + 10}};
+    sf::RectangleShape rec(open_file.get_size());
+    rec.setFillColor(sf::Color::White);
+    rec.setOutlineColor(sf::Color(0x999999ff));
+    rec.setOutlineThickness(-2.f);
+    sf::RenderTexture r_t(static_cast<sf::Vector2u>(rec.getSize()));
+    r_t.draw(rec);
+    r_t.display();
+    ResourceManager::load_texture("def", r_t.getTexture());
+    for(int i = 0; i < 5; i++){
+        open_file.set_texture("def", static_cast<Button::State>(i));
+    }
+
+    open_file.set_char_size(18);
+    open_file.set_on_click([&window, &emulator, &rom_path](){
+
+#ifdef _WIN32
+        auto path = utils::show_file_dialog(window.getNativeHandle());
+#else
+        auto path = utils::show_file_dialog();
+#endif
+        std::cout << path << '\n';
+
+        if(path.ends_with(".ch8") && std::filesystem::exists(path)) {
+            emulator.get_cpu().reset();
+            emulator.load_ROM(path);
+
+            auto pos = path.find_last_of('/');
+            if(pos == std::string::npos) pos = path.find_last_of('\\');
+            window.setTitle("CHIP-8 Emulator - " + path.substr(pos != std::string::npos ? pos+1 : 0));
+
+            rom_path = path;
+        }
+    });
+    gui.add(&open_file);
 
     auto pos = rom_path.find_last_of('/');
     if(pos == std::string::npos) pos = rom_path.find_last_of('\\');

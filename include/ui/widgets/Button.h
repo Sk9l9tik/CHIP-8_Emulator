@@ -283,8 +283,8 @@ protected:
     std::function<void()> on_release        = [](){};
     std::function<void()> on_mouse_entered  = [](){};
     std::function<void()> on_mouse_exited   = [](){};
-    /* called every frame while button is pressed
-     * */
+
+    /* \/ called every frame \/ */
     std::function<void()> while_pressed     = [](){};
     std::function<void()> while_hovered     = [](){};
 };

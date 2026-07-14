@@ -21,7 +21,7 @@ public:
 
         for(uint32_t i = 0; i < _table.size(); i++){
             if(_table[i] == nullptr){
-                return add_widget(widget, i % cols_c, i / rows_c);
+                return add_widget(widget, i % cols_c, i / cols_c);
             }
         }
 
@@ -107,10 +107,14 @@ private:
             for(uint32_t i = 0; i < cols_c; i++) {
                 auto pw = _table[i+j*cols_c];
                 if (pw) {
+//                    col_sizes[i] = std::max(col_sizes[i],
+//                                            pw->get_size().x + pw->style.padding.top + pw->style.padding.bottom);
+//                    row_sizes[j] = std::max(row_sizes[j],
+//                                            pw->get_size().y + pw->style.padding.left + pw->style.padding.right);
                     col_sizes[i] = std::max(col_sizes[i],
-                                            pw->get_size().x + pw->style.padding.top + pw->style.padding.bottom);
+                                            pw->get_size().x + pw->style.padding.left + pw->style.padding.right);
                     row_sizes[j] = std::max(row_sizes[j],
-                                            pw->get_size().y + pw->style.padding.left + pw->style.padding.right);
+                                            pw->get_size().y + pw->style.padding.top + pw->style.padding.bottom);
                 }
             }
         }

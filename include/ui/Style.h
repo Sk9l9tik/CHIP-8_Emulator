@@ -9,7 +9,7 @@ public:
         float bottom;
         float left;
 
-        Padding(float u, float r, float d, float l) : top(u), right(r), bottom(d), left(l) {}
+        Padding(float t, float r, float b, float l) : top(t), right(r), bottom(b), left(l) {}
         Padding(float h, float v) : top(v), right(h), bottom(v), left(h) {}
         Padding(float x) : top(x), right(x), bottom(x), left(x) {}
     } padding {0};
