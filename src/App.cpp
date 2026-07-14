@@ -137,12 +137,14 @@ void App::setup_debug_panel() {
 
     state_label.set_bg_color(0x2A2A3AFF);
     state_label.style.margin = {3};
+    state_label.style.padding = {0,0,0,5};
     state_label.stick_to_left();
     PC_label.set_on_update([this](){
         PC_label.set_string("PC=0x"+utils::int_as_hex_str(debugger.get_cpu_state().PC, 4));
     });
     PC_label.set_bg_color(0x2A2A3AFF);
-    PC_label.style.margin = {3, 3, 3, 196};
+    PC_label.style.margin = {3, 3, 3, 0};
+    PC_label.style.padding = {0,5,0,186};
     PC_label.set_text_color(0xffffffdd);
     PC_label.stick_to_left();
     state_label.set_text_color(0xED8653FF);

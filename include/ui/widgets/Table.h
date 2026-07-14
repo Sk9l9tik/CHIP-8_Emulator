@@ -112,19 +112,25 @@ private:
 //                    row_sizes[j] = std::max(row_sizes[j],
 //                                            pw->get_size().y + pw->style.padding.left + pw->style.padding.right);
                     col_sizes[i] = std::max(col_sizes[i],
-                                            pw->get_size().x + pw->style.margin.left + pw->style.margin.right);
+                                            pw->get_size().x + pw->style.margin.left + pw->style.margin.right
+                                            //+ pw->style.padding.left + pw->style.padding.right
+                        );
                     row_sizes[j] = std::max(row_sizes[j],
-                                            pw->get_size().y + pw->style.margin.top + pw->style.margin.bottom);
+                                            pw->get_size().y + pw->style.margin.top + pw->style.margin.bottom
+                                            //+ pw->style.padding.top + pw->style.padding.bottom
+                        );
                 }
             }
         }
 
         float new_tx = std::accumulate(col_sizes.begin(),col_sizes.end(), 0.f)
                        + style.margin.left + style.margin.right
+//                       + style.padding.left + style.padding.right
                        + style.gap.horizontal*static_cast<float>(cols_c - 1);
 
         float new_ty = std::accumulate(row_sizes.begin(),row_sizes.end(), 0.f)
                        + style.margin.top + style.margin.bottom
+//                       + style.padding.top + style.padding.bottom
                        + style.gap.vertical*static_cast<float>(rows_c - 1);
 
         size = {new_tx, new_ty };
