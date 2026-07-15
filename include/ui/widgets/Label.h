@@ -40,7 +40,11 @@ public:
     }
 
     void handle_event(const std::optional<sf::Event> &event) override {
-        //
+        if(const auto& ev = event->getIf<sf::Event::MouseButtonPressed>()){
+            if(ev->button == sf::Mouse::Button::Left && background.getGlobalBounds().contains(static_cast<sf::Vector2f>(ev->position))){
+                on_click();
+            }
+        }
     }
 
     void render(sf::RenderTarget &target) override {
@@ -125,6 +129,10 @@ public:
         on_update = std::move(func);
     }
 
+    void set_on_click(std::function<void()> func){
+        on_click = std::move(func);
+    }
+
     void stick_to_left(){
         origin = Origin::Left;
         replace_text();
@@ -151,6 +159,7 @@ private:
     sf::RectangleShape padding_bg;
 
     std::function<void()> on_update = [](){};
+    std::function<void()> on_click  = [](){};
 };
 
 #endif //CHIP_8_EMULATOR_LABEL_H

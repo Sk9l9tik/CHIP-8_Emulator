@@ -288,6 +288,11 @@ void App::update_disassembly_panel(){
             }
         });
 
+        dsms[i]->set_on_click([&, i](){
+            uint32_t mem_pos = 0x200 + 2*i;
+            debugger.toggle_breakpoint(mem_pos);
+        });
+
         disassembly.add_widget(dsms[i].get());
     }
 }
