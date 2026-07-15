@@ -259,7 +259,7 @@ void App::update_disassembly_panel(){
     for(uint32_t i = 0; i < rom_size / 2; i++){
         dsms.push_back(std::make_unique<Label>("0",
                                                sf::Vector2f{disassembly.get_size().x,36.f},
-                                               sf::Vector2f{0.f,40.f * i}));
+                                               sf::Vector2f{0.f,40.f * static_cast<float>(i)}));
 
         dsms[i]->set_char_size(22);
         dsms[i]->set_bg_color(0x2A2A3AFF);
@@ -267,19 +267,24 @@ void App::update_disassembly_panel(){
         dsms[i]->style.padding.left = 10.f;
         dsms[i]->stick_to_left();
         dsms[i]->set_on_update([&, i](){
+            auto breakpoints = debugger.get_breakpoints().all();
+
             uint32_t mem_pos = 0x200 + 2*i;
             auto disasm = debugger.disassemble(mem_pos, 1);
 
-            std::string res = "0x"+utils::int_as_hex_str(disasm[0].address, 4) +
-                              " " +utils::int_as_hex_str(disasm[0].opcode, 4) +
-                              " " +disasm[0].mnemonic;
+            bool bp_set =  breakpoints.contains(disasm[0].address);
+            std::string res = bp_set ? "* " : "";
+
+            res += "0x"+utils::int_as_hex_str(disasm[0].address, 4) +
+                    " " +utils::int_as_hex_str(disasm[0].opcode, 4) +
+                    " " +disasm[0].mnemonic;
 
             dsms[i]->set_string(res);
-            if(debugger.get_cpu_state().PC == disasm[0].address ){ //&& debugger.is_paused()
+            if(debugger.get_cpu_state().PC - 0x2 == disasm[0].address ){ //&& debugger.is_paused()
                 // Оно там так скачет, что будто и смысла нет без паузы
                 dsms[i]->set_bg_color(0x17A62FFF);
             } else {
-                dsms[i]->set_bg_color(0x2A2A3AFF);
+                dsms[i]->set_bg_color(bp_set ? 0xB57200FF  : 0x2A2A3AFF);
             }
         });
 
@@ -349,22 +354,46 @@ void App::setup_debug_buttons(){
 
     debug_buttons[0].set_on_click([&](){
         debugger.resume();
-        debug_buttons[0].lock();
-        debug_buttons[1].unlock();
-        debug_buttons[2].lock();
+//        debug_buttons[0].lock();
+//        debug_buttons[1].unlock();
+//        debug_buttons[2].lock();
     });
     debug_buttons[1].set_on_click([&](){
         debugger.pause();
-        debug_buttons[1].lock();
-        debug_buttons[0].unlock();
-        debug_buttons[2].unlock();
+//        debug_buttons[1].lock();
+//        debug_buttons[0].unlock();
+//        debug_buttons[2].unlock();
     });
+
+    debug_buttons[0].set_on_update([&](){
+        if(debugger.is_paused()){
+            debug_buttons[1].lock();
+            debug_buttons[0].unlock();
+            debug_buttons[2].unlock();
+        } else {
+            debug_buttons[1].unlock();
+            debug_buttons[0].lock();
+            debug_buttons[2].lock();
+        }
+    });
+
+//    debug_buttons[1].set_on_update([&](){
+//        if(debugger.is_paused()){
+//            debug_buttons[1].lock();
+//            debug_buttons[2].unlock();
+//        } else {
+//            debug_buttons[1].unlock();
+//            debug_buttons[2].lock();
+//        }
+//    });
+
     debug_buttons[2].set_on_click([&](){
         debugger.step();
     });
     debug_buttons[3].set_on_click([&](){
-        // ?
+        debugger.toggle_breakpoint(debugger.get_cpu_state().PC - 0x2); // не ну аче)
     });
+
 
 
     for(auto& b : debug_buttons){

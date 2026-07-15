@@ -108,6 +108,7 @@ public:
     }
 
     void update() override {
+        on_update();
         if(state == State::Pressed) while_pressed();
         if(state == State::Hovered) while_hovered();
 
@@ -202,6 +203,9 @@ public:
         while_hovered = std::move(func);
     }
 
+    void set_on_update(std::function<void()> func) {
+        on_update = std::move(func);
+    }
 
     void set_char_size(uint32_t new_size) {
         text.setCharacterSize(new_size);
@@ -282,6 +286,8 @@ protected:
     /* \/ called every frame \/ */
     std::function<void()> while_pressed     = [](){};
     std::function<void()> while_hovered     = [](){};
+
+    std::function<void()> on_update         = [](){};
 };
 
 #endif //CHIP_8_EMULATOR_BUTTON_H
