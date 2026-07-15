@@ -298,7 +298,7 @@ void App::update_disassembly_panel(){
     }
 }
 
-void App::center_current_instruction() {
+void App::track_current_instruction() {
     constexpr float line_height = 40.f; 
 
     uint16_t pc = debugger.get_cpu_state().PC;
@@ -513,7 +513,7 @@ void App::update_cpu(sf::Time cpu_tick_time) {
       debugger.update();
 
       if (!was_paused && debugger.is_paused()) {
-          center_current_instruction();
+          track_current_instruction();
       }
 
       cpu_accumulator -= cpu_tick_time;
@@ -551,7 +551,7 @@ void App::render() {
 
     uint16_t pc = debugger.get_cpu_state().PC;
     if (debugger.is_paused() && pc != last_pc) {
-        center_current_instruction();
+        track_current_instruction();
         last_pc = pc;
     }
 
