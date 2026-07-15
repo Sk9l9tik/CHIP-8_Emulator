@@ -18,7 +18,7 @@ public:
     ~Display() override = default;
 
     void handle_event([[maybe_unused]] const std::optional<sf::Event> &event) override {
-        // MB: check resized event
+        //
     }
 
     void update() override {
@@ -61,7 +61,7 @@ private:
         d_texture.draw(pixels);
         d_texture.display();
         d_sprite.setTexture(d_texture.getTexture());
-        d_sprite.setPosition(pos);
+        d_sprite.setPosition(pos + sf::Vector2f{style.margin.left, style.margin.top});
         d_sprite.setScale({pixel_size, pixel_size});
     }
 

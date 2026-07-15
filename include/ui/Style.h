@@ -3,6 +3,7 @@
 
 class Style{
 public:
+
     struct Margin {
         float top;
         float right;

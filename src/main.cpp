@@ -5,7 +5,6 @@
 int main(int argc, char* argv[]){
     std::string rom_path{(argc >= 2) ? argv[1] : "../assets/roms/Tetris_.ch8"};
 
-
     try{
         App app(rom_path);
         app.run();

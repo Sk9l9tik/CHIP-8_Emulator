@@ -1,10 +1,6 @@
 #include "ui/GUI.h"
 
-GUI::GUI(sf::RenderWindow &window, CHIP_8 &emul, Debugger &debug) : sf_window(window), emulator(emul), debugger(debug) {
-    if (ResourceManager::font_setted) {
-        throw std::runtime_error("Error: set default font.");
-    }
-}
+GUI::GUI(sf::RenderWindow &window, CHIP_8 &emul, Debugger &debug) : sf_window(window), emulator(emul), debugger(debug){}
 
 void GUI::handle_input(const std::optional<sf::Event> &event){
     auto &cpu = emulator.get_cpu();
@@ -33,12 +29,6 @@ void GUI::handle_input(const std::optional<sf::Event> &event){
         case sf::Keyboard::Scancode::Escape:
             sf_window.close();
             break;
-//        case sf::Keyboard::Scancode::F1:
-//            break;
-//        case sf::Keyboard::Scancode::F2:
-//            break;
-//        case sf::Keyboard::Scancode::F3:
-//            break;
         case sf::Keyboard::Scancode::F5:
             debugger.resume();
             break;
@@ -89,11 +79,12 @@ void GUI::update() {
 
 void GUI::add(Widget *widget) {
     widgets.push_back(widget);
-    this->setup_widgets();
 }
 
-void GUI::setup_widgets() {
-
+void GUI::setup() {
+    if(!ResourceManager::font_set) {
+        throw std::runtime_error("Error: set default font.");
+    }
 }
 
 sf::Vector2f GUI::get_size() {

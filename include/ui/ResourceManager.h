@@ -5,9 +5,9 @@
 
 class ResourceManager{
 public:
-    static inline bool font_setted = false;
+    static inline bool font_set = false;
 
-    static void set_font(sf::Font& new_font) { default_font = new_font; font_setted = true; }
+    static void set_font(sf::Font& new_font) { default_font = new_font; font_set = true; }
     static sf::Font& get_font() { return default_font; }
 
     static sf::Texture* load_texture(const std::string& name, sf::Texture texture){
@@ -33,8 +33,6 @@ public:
 private:
     static inline sf::Font default_font;
     static inline std::unordered_map<std::string, sf::Texture> textures;
-
-    //
 };
 
 #endif //CHIP_8_EMULATOR_RESOURCEMANAGER_HPP

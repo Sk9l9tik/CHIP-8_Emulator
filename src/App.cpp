@@ -28,14 +28,16 @@ App::App(const std::string& rom_path_):
     disassembly({1,1}, {1,1})
     {
     load_rom(rom_path);
-
     load_font();
+
+    gui.setup(); // Checks dependencies (is font loaded, or other resources)
 
     setup_sound();
     //GUI
     setup_display();
     setup_keyboard();
     setup_debug_panel();
+    setup_disassembly_panel();
     setup_open_rom_button();
     // SETUP ALL GUI ELEMENTS BEFORE WINDOW CREATION
     create_window();
@@ -47,6 +49,7 @@ void App::load_rom(const std::string &path) {
     try{
         emulator.load_ROM(path);
         rom_path = path;
+        rom_size = std::filesystem::file_size(path);
     } catch (const std::exception& e) {
         throw std::runtime_error(std::string("Failed to load ROM: ") + e.what());
     }
@@ -102,7 +105,7 @@ void App::setup_keyboard() {
     keyboard.set_size({640, 640});
     keyboard.style.gap.vertical = 64./3.;
     keyboard.style.gap.horizontal = 64./3.;
-    keyboard.style.margin = {32};
+    keyboard.style.padding = {32};
 
     ResourceManager::load_texture("btn_keypad_normal", "../assets/sprites/KBButton_Default.png");
     ResourceManager::load_texture("btn_keypad_hovered", "../assets/sprites/KBButton_Hovered.png");
@@ -227,6 +230,11 @@ void App::setup_debug_panel() {
     spec_reg.update();
     gui.add(&spec_reg);
 
+}
+
+void App::setup_disassembly_panel(){
+    auto d_pos = display.get_size();
+
     disassembly_label.set_string("Disassembly");
     disassembly_label.set_char_size(18);
     disassembly_label.set_position({d_pos.x + 10.f, spec_reg.get_size().y + spec_reg.get_position().y + 20.f});
@@ -234,25 +242,30 @@ void App::setup_debug_panel() {
     disassembly_label.set_text_color(0xffffffdd);
     gui.add(&disassembly_label);
 
-    disassembly.set_size ({registers_table.get_size().x, 400});
+    disassembly.set_size({registers_table.get_size().x, 400});
     disassembly.set_position({d_pos.x + 10.f,
-                                 disassembly_label.get_size().y + disassembly_label.get_position().y + 10.f});
+                              disassembly_label.get_size().y + disassembly_label.get_position().y + 10.f});
 
-    for(uint32_t i = 0; i < usable_memory_size / 2; i++){
-        rows[i] = std::make_unique<Table>(2,1);
-        bps[i]  = std::make_unique<Toggle>("0", sf::Vector2f{30.f,30.f}, sf::Vector2f{0.f,0.f});
-        dsms[i] = std::make_unique<Label>("0", sf::Vector2f{disassembly.get_size().x - 36.f ,36.f}, sf::Vector2f{0.f,0.f});
-        bps[i]->set_string(std::to_string(i+1));
+    update_disassembly_panel();
 
-        rows[i]->set_position({0.f, 36.f * i});
+    gui.add(&disassembly);
+}
 
-        /* todo: Настроить breakpoints */
+void App::update_disassembly_panel(){
+    disassembly.clear();
+    dsms.clear();
 
-        dsms[i]->set_char_size(18);
+    for(uint32_t i = 0; i < rom_size / 2; i++){
+        dsms.push_back(std::make_unique<Label>("0",
+                                               sf::Vector2f{disassembly.get_size().x,36.f},
+                                               sf::Vector2f{0.f,36.f * i}));
+
+        dsms[i]->set_char_size(22);
+        dsms[i]->set_bg_color(0x2A2A3AFF);
         dsms[i]->set_text_color(sf::Color::White);
         dsms[i]->stick_to_left();
         dsms[i]->set_on_update([&, i](){
-            uint32_t mem_pos = MEM_START + 2*i;
+            uint32_t mem_pos = 0x200 + 2*i;
             auto disasm = debugger.disassemble(mem_pos, 1);
 
             std::string res = "0x"+utils::int_as_hex_str(disasm[0].address, 4) +
@@ -260,18 +273,16 @@ void App::setup_debug_panel() {
                               " " +disasm[0].mnemonic;
 
             dsms[i]->set_string(res);
+            if(debugger.get_cpu_state().PC == disasm[0].address && debugger.is_paused()){
+                dsms[i]->set_bg_color(0x17A62FFF);
+            } else {
+                dsms[i]->set_bg_color(0x2A2A3AFF);
+            }
         });
 
-
-        rows[i]->add_widget(bps[i].get());
-        rows[i]->add_widget(dsms[i].get());
-
-        disassembly.add_widget(rows[i].get());
+        disassembly.add_widget(dsms[i].get());
     }
-
-    gui.add(&disassembly);
 }
-
 
 void App::setup_open_rom_button() {
     auto d_pos = display.get_size();
@@ -310,6 +321,8 @@ void App::open_rom_dialog() {
         emulator.get_cpu().reset();
         emulator.load_ROM(path);
         rom_path = path;
+        rom_size = std::filesystem::file_size(path);
+        update_disassembly_panel();
         set_window_title(path);
     }
 }

@@ -28,9 +28,7 @@ public:
                 sf::Vector2f{style.padding.left, style.padding.top}
         );
 
-
-
-        utils::center_text(text, background.getGlobalBounds());
+        replace_text();
     }
 
     Label() : Label("", {0.f,0.f}, {0.f,0.f}) {}
@@ -59,7 +57,7 @@ public:
                 sf::Vector2f{style.padding.left + style.padding.right, style.padding.top+style.padding.bottom}
         );
 
-        auto_resize_bg(bg_size_auto);
+        replace_text();
     }
 
     void set_position(sf::Vector2f _pos) override {
@@ -71,7 +69,7 @@ public:
                 sf::Vector2f{style.padding.left, style.padding.top}
             );
 
-        auto_resize_bg(bg_size_auto);
+        replace_text();
     }
 
     void set_bg_color(uint32_t color) {
@@ -86,13 +84,13 @@ public:
 
     void set_char_size(uint32_t new_size){
         text.setCharacterSize(new_size);
-        auto_resize_bg(bg_size_auto);
+        replace_text();
     }
 
     void set_string(const std::string &new_text){
         text.setString(new_text);
 
-        auto_resize_bg(bg_size_auto);
+        replace_text();
     }
 
     void set_text_color(uint32_t color) {
@@ -103,38 +101,23 @@ public:
         text.setFillColor(color);
     }
 
-    void auto_resize_bg(bool auto_resize){
-        bg_size_auto = auto_resize;
-        if(bg_size_auto) {
-            text.setOrigin({0,0});
-            text.setPosition(pos);
-            background.setSize(text.getGlobalBounds().size);
-            background.setPosition(text.getGlobalBounds().position);
-            padding_bg.setSize(
-                    background.getSize()+
-                    sf::Vector2f{style.padding.left + style.padding.right, style.padding.top+style.padding.bottom}
-                );
-
-            size = text.getGlobalBounds().size;
-        } else {
-            background.setSize(size);
-            background.setPosition(pos);
-            padding_bg.setSize(
-                    background.getSize()+
-                    sf::Vector2f{style.padding.left + style.padding.right, style.padding.top+style.padding.bottom}
-            );
-            switch(origin){
-                case Origin::Center:
-                    utils::center_text(text, background.getGlobalBounds());
-                    break;
-                case Origin::Left:
-                    utils::left_text(text, background.getGlobalBounds());
-                    break;
-                case Origin::Right:
-                    utils::right_text(text, background.getGlobalBounds());
-                    break;
-            }
-
+    void replace_text(){
+        background.setSize(size);
+        background.setPosition(pos);
+        padding_bg.setSize(
+                background.getSize()+
+                sf::Vector2f{style.padding.left + style.padding.right, style.padding.top+style.padding.bottom}
+        );
+        switch(origin) {
+            case Origin::Center:
+                utils::center_text(text, background.getGlobalBounds());
+                break;
+            case Origin::Left:
+                utils::left_text(text, background.getGlobalBounds());
+                break;
+            case Origin::Right:
+                utils::right_text(text, background.getGlobalBounds());
+                break;
         }
     }
 
@@ -144,30 +127,24 @@ public:
 
     void stick_to_left(){
         origin = Origin::Left;
-        auto_resize_bg(bg_size_auto);
+        replace_text();
     }
 
     void stick_to_center(){
         origin = Origin::Center;
-        auto_resize_bg(bg_size_auto);
+        replace_text();
     }
 
     void stick_to_right(){
         origin = Origin::Right;
-        auto_resize_bg(bg_size_auto);
-    }
-
-    sf::Vector2f get_size() const override {
-        return size + sf::Vector2f{style.padding.left + style.padding.right, style.padding.top + style.padding.bottom};
+        replace_text();
     }
 private:
-    enum class Origin{ // Works only without auto background size
+    enum class Origin{
         Left,
         Center,
         Right
     } origin = Origin::Center;
-
-    bool bg_size_auto = false;
 
     sf::Text text{ResourceManager::get_font(), "", 24};
     sf::RectangleShape background;

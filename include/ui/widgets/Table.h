@@ -6,7 +6,6 @@
 
 class Table : public Widget{
 public:
-    // TODO: сделать нормальный _table чтобы можно было менять размер
     Table(uint32_t cols, uint32_t rows) : cols_c(cols), rows_c(rows){
         _table.resize(cols*rows);
 
@@ -17,9 +16,7 @@ public:
         set_bg_color(0x313244FF);
     }
 
-    Table(Table& other) : Widget(other), background(other.background), cols_c(other.cols_c), rows_c(other.rows_c) {
-        // А вот виджеты он красть не может
-    }
+    Table(Table& other) : Widget(other), background(other.background), cols_c(other.cols_c), rows_c(other.rows_c) {}
 
     bool add_widget(Widget* widget) {
         if(!widget) return false;
@@ -107,46 +104,43 @@ public:
         background.setFillColor(color);
     }
 
+    //
+    sf::Vector2f get_size() const override {
+        return size;
+    }
+
 private:
     void recount_size(){
         for(uint32_t j = 0; j < rows_c; j++){
             for(uint32_t i = 0; i < cols_c; i++) {
                 auto pw = _table[i+j*cols_c];
                 if (pw) {
-//                    col_sizes[i] = std::max(col_sizes[i],
-//                                            pw->get_size().x + pw->style.padding.top + pw->style.padding.bottom);
-//                    row_sizes[j] = std::max(row_sizes[j],
-//                                            pw->get_size().y + pw->style.padding.left + pw->style.padding.right);
                     col_sizes[i] = std::max(col_sizes[i],
                                             pw->get_size().x + pw->style.margin.left + pw->style.margin.right
-                                            //+ pw->style.padding.left + pw->style.padding.right
                         );
                     row_sizes[j] = std::max(row_sizes[j],
                                             pw->get_size().y + pw->style.margin.top + pw->style.margin.bottom
-                                            //+ pw->style.padding.top + pw->style.padding.bottom
                         );
                 }
             }
         }
 
         float new_tx = std::accumulate(col_sizes.begin(),col_sizes.end(), 0.f)
-                       + style.margin.left + style.margin.right
-//                       + style.padding.left + style.padding.right
+                       + style.padding.left + style.padding.right
                        + style.gap.horizontal*static_cast<float>(cols_c - 1);
 
         float new_ty = std::accumulate(row_sizes.begin(),row_sizes.end(), 0.f)
-                       + style.margin.top + style.margin.bottom
-//                       + style.padding.top + style.padding.bottom
+                       + style.padding.top + style.padding.bottom
                        + style.gap.vertical*static_cast<float>(rows_c - 1);
 
         size = {new_tx, new_ty };
     }
 
     void replace_widgets(){
-        float y = style.margin.top + pos.y;
+        float y = style.padding.top + pos.y;
 
         for(uint32_t j = 0; j < rows_c; j++){
-            float x = style.margin.left + pos.x;
+            float x = style.padding.left + pos.x;
 
             for(uint32_t i = 0; i < cols_c; i++){
                 auto pw = _table[i + j * cols_c];

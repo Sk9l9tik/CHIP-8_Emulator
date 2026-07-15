@@ -42,6 +42,8 @@ private:
     void setup_display();
     void setup_keyboard();
     void setup_debug_panel();
+    void setup_disassembly_panel();
+    void update_disassembly_panel();
     void setup_open_rom_button();
     void create_window();
 
@@ -57,9 +59,6 @@ private:
 
     static sf::SoundBuffer create_beep_buffer();
 
-    static constexpr uint32_t MEM_START = 0x0200;
-    static constexpr uint32_t MEM_END = 0x1000;
-    static constexpr uint32_t usable_memory_size = (MEM_END - MEM_START) / 2; // По сути кол-во строк в Disassembly
     static constexpr char HEX_CHARS[] = "0123456789ABCDEF";
     static constexpr float CPU_HZ = 700.0f;
     static constexpr float TIMER_HZ = 60.0f;
@@ -90,15 +89,15 @@ private:
     Button open_file_btn;
     Label disassembly_label;
     ScrollView disassembly;
-    std::array<std::unique_ptr<Table>, usable_memory_size>  rows;
-    std::array<std::unique_ptr<Toggle>, usable_memory_size> bps;
-    std::array<std::unique_ptr<Label>, usable_memory_size>  dsms;
+    std::vector<std::unique_ptr<Label>>  dsms;
 
 
     sf::Clock cpu_clock;
     sf::Time cpu_accumulator{sf::Time::Zero};
     sf::Time cpu_last_time{sf::Time::Zero};
     sf::Time timer_accumulator{sf::Time::Zero};
+
+    uint32_t rom_size = 0x0;
 };
 
 #endif //CHIP_8_EMULATOR_APP_H
