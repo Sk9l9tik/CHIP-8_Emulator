@@ -299,19 +299,31 @@ void App::update_disassembly_panel(){
 }
 
 void App::track_current_instruction() {
-    constexpr float line_height = 40.f; 
+    constexpr float line_height = 40.f;
+    constexpr float error_rows = 2.f;
 
     uint16_t pc = debugger.get_cpu_state().PC;
 
-    if (pc >= 0x202)
-        pc -= 2;
-
     uint32_t index = (pc - 0x200) / 2;
 
-    float target = index * line_height - disassembly.get_size().y * 0.5f + line_height * 0.5f;
+    float instruction_y = index * line_height;
+
+    float scroll = disassembly.get_scroll();
+    float view_height = disassembly.get_size().y;
+
+    float view_top = scroll;
+    float view_bottom = scroll + view_height;
+
+    float error = error_rows * line_height;
+
+    if (instruction_y >= view_top + error &&
+        instruction_y + line_height <= view_bottom - error) {
+        return;
+    }
+
+    float target = instruction_y - error;
 
     disassembly.set_scroll(target);
-
 }
 
 void App::setup_open_rom_button() {
