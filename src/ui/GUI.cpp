@@ -40,6 +40,19 @@ void GUI::handle_input(const std::optional<sf::Event> &event){
                 debugger.step();
             }
             break;
+        case sf::Keyboard::Scancode::Space:
+            if(debugger.is_paused()){
+                debugger.resume();
+            } else {
+                debugger.pause();
+            }
+            break;
+        case sf::Keyboard::Scancode::F4:
+            debugger.clear_breakpoints();
+            break;
+        case sf::Keyboard::Scancode::F6:
+            debugger.toggle_breakpoint(debugger.get_cpu_state().PC - 0x2);
+            break;
         default:
             break;
     }
