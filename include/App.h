@@ -44,6 +44,7 @@ private:
     void setup_debug_panel();
     void setup_disassembly_panel();
     void update_disassembly_panel();
+    void center_current_instruction();
     void setup_debug_buttons();
     void setup_open_rom_button();
     void create_window();

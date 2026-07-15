@@ -1,5 +1,6 @@
 #include "App.h"
 
+
 App::App(const std::string& rom_path_):
     emulator(),
     debugger(emulator),
@@ -108,9 +109,9 @@ void App::setup_keyboard() {
     keyboard.style.gap.horizontal = 64./3.;
     keyboard.style.padding = {32};
 
-    ResourceManager::load_texture("btn_keypad_normal", "../assets/sprites/KBButton_Default.png");
     ResourceManager::load_texture("btn_keypad_hovered", "../assets/sprites/KBButton_Hovered.png");
     ResourceManager::load_texture("btn_keypad_pressed", "../assets/sprites/KBButton_Pressed.png");
+    ResourceManager::load_texture("btn_keypad_normal", "../assets/sprites/KBButton_Default.png");
     ResourceManager::load_texture("btn_keypad_locked", "../assets/sprites/KBButton_Locked.png");
 
     for(int i = 0; i < 16; i++){
@@ -297,6 +298,22 @@ void App::update_disassembly_panel(){
     }
 }
 
+void App::center_current_instruction() {
+    constexpr float line_height = 40.f; 
+
+    uint16_t pc = debugger.get_cpu_state().PC;
+
+    if (pc >= 0x202)
+        pc -= 2;
+
+    uint32_t index = (pc - 0x200) / 2;
+
+    float target = index * line_height - disassembly.get_size().y * 0.5f + line_height * 0.5f;
+
+    disassembly.set_scroll(target);
+
+}
+
 void App::setup_open_rom_button() {
     auto d_pos = display.get_size();
     //
@@ -438,7 +455,7 @@ void App::create_window() {
     window.create(
             sf::VideoMode(static_cast<sf::Vector2u>(gui.get_size())),
             make_title(rom_path),
-            sf::Style::Close,
+            // sf::Style::Close,
             sf::State::Windowed);
     window.setFramerateLimit(60);
     window.requestFocus();
@@ -491,8 +508,15 @@ void App::handle_events() {
 
 void App::update_cpu(sf::Time cpu_tick_time) {
     while(cpu_accumulator >= cpu_tick_time) {
-        debugger.update();
-        cpu_accumulator -= cpu_tick_time;
+      bool was_paused = debugger.is_paused();
+
+      debugger.update();
+
+      if (!was_paused && debugger.is_paused()) {
+          center_current_instruction();
+      }
+
+      cpu_accumulator -= cpu_tick_time;
     }
 }
 
@@ -522,6 +546,15 @@ void App::update_sound_playback() {
 
 void App::render() {
     window.clear(sf::Color(0x0F0F18FF));
+
+    static uint16_t last_pc = 0x200;
+
+    uint16_t pc = debugger.get_cpu_state().PC;
+    if (debugger.is_paused() && pc != last_pc) {
+        center_current_instruction();
+        last_pc = pc;
+    }
+
     gui.update();
     gui.render();
     update_sound_playback();
