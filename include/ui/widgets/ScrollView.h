@@ -18,9 +18,9 @@ public:
         scrollbar_width = 12.f;
         scrollbar_padding = 4.f;
 
-        scrollbar_color = sf::Color(0x969696EE);
-        scrollbar_hover_color = sf::Color(0xB4B4B4DD);
-        scrollbar_drag_color = sf::Color(0xC8C8C8F0);
+        scrollbar_color = 0x969696EE;
+        scrollbar_hover_color = 0xB4B4B4DD;
+        scrollbar_drag_color = 0xC8C8C8F0;
 
         current_scrollbar_color = scrollbar_color;
         is_dragging = false;
@@ -152,7 +152,7 @@ public:
         view.setSize(size);
         view.setCenter({size.x / 2.f, size.y / 2.f + scroll});
 
-        render_target.clear(sf::Color::Transparent);
+        render_target.clear(sf::Color(bg_color));
         render_target.setView(view);
 
         for (auto* widget : widgets) {
@@ -198,6 +198,14 @@ public:
         render_target.clear(sf::Color::Transparent);
         render_target.display();
 
+    }
+
+    void set_bg_color(uint32_t color){
+        bg_color = color;
+    }
+
+    void set_bg_color(sf::Color color){
+        bg_color = color.toInteger();
     }
 
 private:
@@ -308,14 +316,13 @@ private:
         thumb.setPosition({pos.x + size.x - scrollbar_width - scrollbar_padding,
                            thumb_position});
         thumb.setSize({scrollbar_width, scrollbar_height});
-        thumb.setFillColor(current_scrollbar_color);
+        thumb.setFillColor(sf::Color(current_scrollbar_color));
         thumb.setOutlineThickness(1.f);
         thumb.setOutlineColor(sf::Color(100, 100, 100, 150));
         target.draw(thumb);
     }
 
     float get_scrollbar_height() const {
-        float max_scroll = std::max(0.f, content_size.y - size.y);
         float visible_ratio = size.y / content_size.y;
         float min_height = 20.f;
         return std::max(min_height, size.y * visible_ratio - scrollbar_padding * 2);
@@ -365,14 +372,16 @@ private:
     sf::Vector2f content_size = {0.f,0.f};
     float scroll = 0.f;
 
+    uint32_t bg_color = 0x00000000;
+
     // scrollbar settings
 
     float scrollbar_width;
     float scrollbar_padding;
-    sf::Color scrollbar_color;
-    sf::Color scrollbar_hover_color;
-    sf::Color scrollbar_drag_color;
-    sf::Color current_scrollbar_color;
+    uint32_t scrollbar_color;
+    uint32_t scrollbar_hover_color;
+    uint32_t scrollbar_drag_color;
+    uint32_t current_scrollbar_color;
 
     bool is_dragging;
     float drag_offset;

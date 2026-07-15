@@ -245,7 +245,7 @@ void App::setup_disassembly_panel(){
     disassembly.set_size({registers_table.get_size().x, 400});
     disassembly.set_position({d_pos.x + 10.f,
                               disassembly_label.get_size().y + disassembly_label.get_position().y + 10.f});
-
+    disassembly.set_bg_color(0x313244FF);
     update_disassembly_panel();
 
     gui.add(&disassembly);
@@ -258,11 +258,12 @@ void App::update_disassembly_panel(){
     for(uint32_t i = 0; i < rom_size / 2; i++){
         dsms.push_back(std::make_unique<Label>("0",
                                                sf::Vector2f{disassembly.get_size().x,36.f},
-                                               sf::Vector2f{0.f,36.f * i}));
+                                               sf::Vector2f{0.f,40.f * i}));
 
         dsms[i]->set_char_size(22);
         dsms[i]->set_bg_color(0x2A2A3AFF);
         dsms[i]->set_text_color(sf::Color::White);
+        dsms[i]->style.padding.left = 10.f;
         dsms[i]->stick_to_left();
         dsms[i]->set_on_update([&, i](){
             uint32_t mem_pos = 0x200 + 2*i;

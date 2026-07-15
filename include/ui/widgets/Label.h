@@ -62,8 +62,8 @@ public:
 
     void set_position(sf::Vector2f _pos) override {
         pos = _pos;
-        pos += {style.padding.left, style.padding.top};
-        background.setPosition(pos);
+        _pos += {style.padding.left, style.padding.top};
+        background.setPosition(_pos);
         padding_bg.setPosition(
                 background.getPosition() -
                 sf::Vector2f{style.padding.left, style.padding.top}
@@ -103,7 +103,7 @@ public:
 
     void replace_text(){
         background.setSize(size);
-        background.setPosition(pos);
+        background.setPosition(pos + sf::Vector2f{style.padding.left, style.padding.top});
         padding_bg.setSize(
                 background.getSize()+
                 sf::Vector2f{style.padding.left + style.padding.right, style.padding.top+style.padding.bottom}
