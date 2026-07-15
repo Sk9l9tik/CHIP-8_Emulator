@@ -39,6 +39,7 @@ App::App(const std::string& rom_path_):
     setup_debug_panel();
     setup_disassembly_panel();
     setup_open_rom_button();
+    setup_debug_buttons();
     // SETUP ALL GUI ELEMENTS BEFORE WINDOW CREATION
     create_window();
 
@@ -242,7 +243,7 @@ void App::setup_disassembly_panel(){
     disassembly_label.set_text_color(0xffffffdd);
     gui.add(&disassembly_label);
 
-    disassembly.set_size({registers_table.get_size().x, 400});
+    disassembly.set_size({registers_table.get_size().x - 6.f, 400});
     disassembly.set_position({d_pos.x + 10.f,
                               disassembly_label.get_size().y + disassembly_label.get_position().y + 10.f});
     disassembly.set_bg_color(0x313244FF);
@@ -309,6 +310,67 @@ void App::setup_open_rom_button() {
     gui.add(&open_file_btn);
 }
 
+void App::setup_debug_buttons(){
+    auto k_pos = keyboard.get_position() + keyboard.get_size();
+
+    const float DBG_BTN_HEIGHT = 30.f;
+
+    debug_buttons[0] = {"F5 continue",
+                        {100.f, DBG_BTN_HEIGHT},
+                        {k_pos.x + 10.f, k_pos.y - DBG_BTN_HEIGHT - 10.f}};
+    debug_buttons[1] = {"F9 pause",
+                        {80.f, DBG_BTN_HEIGHT},
+                        {0,0}};
+    debug_buttons[2] = {"F10 step",
+                        {80.f, DBG_BTN_HEIGHT},
+                        {0,0}};
+    debug_buttons[3] = {"F6 toggle bp",
+                        {100.f, DBG_BTN_HEIGHT},
+                        {0,0}};
+
+    for(auto& b : debug_buttons){
+        for(int i = 0; i < 5; i++){
+            b.set_texture("def", static_cast<Button::State>(i));
+        }
+    }
+
+    for(int i = 1; i < 4; i++){
+        float tmp = debug_buttons[i-1].get_size().x;// + debug_buttons[i-1].get_position();
+        debug_buttons[i].set_position(debug_buttons[i-1].get_position() + sf::Vector2f{10.f + tmp,0.f});
+    }
+
+    if(debugger.is_paused()){
+        debug_buttons[1].lock();
+    } else {
+        debug_buttons[0].lock();
+        debug_buttons[2].lock();
+    }
+
+    debug_buttons[0].set_on_click([&](){
+        debugger.resume();
+        debug_buttons[0].lock();
+        debug_buttons[1].unlock();
+        debug_buttons[2].lock();
+    });
+    debug_buttons[1].set_on_click([&](){
+        debugger.pause();
+        debug_buttons[1].lock();
+        debug_buttons[0].unlock();
+        debug_buttons[2].unlock();
+    });
+    debug_buttons[2].set_on_click([&](){
+        debugger.step();
+    });
+    debug_buttons[3].set_on_click([&](){
+        // ?
+    });
+
+
+    for(auto& b : debug_buttons){
+        b.set_char_size(16);
+        gui.add(&b);
+    }
+}
 
 void App::open_rom_dialog() {
 #ifdef _WIN32

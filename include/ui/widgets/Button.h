@@ -127,7 +127,7 @@ public:
                     background.setColor(sf::Color(0xC4B7F0FF));
                     break;
                 case State::Locked:
-                    background.setColor(sf::Color(0x313244FF));
+                    background.setColor(sf::Color(0x4F506EFF));
                     break;
                 default:
                     background.setColor(sf::Color::White);
