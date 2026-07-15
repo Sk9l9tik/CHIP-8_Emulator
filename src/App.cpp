@@ -275,7 +275,8 @@ void App::update_disassembly_panel(){
                               " " +disasm[0].mnemonic;
 
             dsms[i]->set_string(res);
-            if(debugger.get_cpu_state().PC == disasm[0].address && debugger.is_paused()){
+            if(debugger.get_cpu_state().PC == disasm[0].address ){ //&& debugger.is_paused()
+                // Оно там так скачет, что будто и смысла нет без паузы
                 dsms[i]->set_bg_color(0x17A62FFF);
             } else {
                 dsms[i]->set_bg_color(0x2A2A3AFF);
