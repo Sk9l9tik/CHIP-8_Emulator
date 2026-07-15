@@ -57,6 +57,9 @@ private:
 
     static sf::SoundBuffer create_beep_buffer();
 
+    static constexpr uint32_t MEM_START = 0x0200;
+    static constexpr uint32_t MEM_END = 0x1000;
+    static constexpr uint32_t usable_memory_size = (MEM_END - MEM_START) / 2; // По сути кол-во строк в Disassembly
     static constexpr char HEX_CHARS[] = "0123456789ABCDEF";
     static constexpr float CPU_HZ = 700.0f;
     static constexpr float TIMER_HZ = 60.0f;
@@ -85,6 +88,12 @@ private:
     Table spec_reg;
     Label I_label, SP_label, DT_label, ST_label;
     Button open_file_btn;
+    Label disassembly_label;
+    ScrollView disassembly;
+    std::array<std::unique_ptr<Table>, usable_memory_size>  rows;
+    std::array<std::unique_ptr<Toggle>, usable_memory_size> bps;
+    std::array<std::unique_ptr<Label>, usable_memory_size>  dsms;
+
 
     sf::Clock cpu_clock;
     sf::Time cpu_accumulator{sf::Time::Zero};

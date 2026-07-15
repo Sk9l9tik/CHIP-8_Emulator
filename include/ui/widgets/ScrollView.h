@@ -103,7 +103,7 @@ public:
     void set_size(sf::Vector2f _size) override {
         size = _size;
         view.setSize(_size);
-        if(render_target.resize({
+        if(!render_target.resize({
             static_cast<uint32_t>(_size.x),
             static_cast<uint32_t>(_size.y)}
         )){

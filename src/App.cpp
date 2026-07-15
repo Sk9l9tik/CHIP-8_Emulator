@@ -23,7 +23,9 @@ App::App(const std::string& rom_path_):
     SP_label("SP=0x00", {40,40}, {0,0}),
     DT_label("DT=0x00", {40,40}, {0,0}),
     ST_label("ST=0x00", {40,40}, {0,0}),
-    open_file_btn("Open ROM", {130, 50}, {0,0})
+    open_file_btn("Open ROM", {130, 50}, {0,0}),
+    disassembly_label("Disassembly", {100,20}, {0,0}),
+    disassembly({1,1}, {1,1})
     {
     load_rom(rom_path);
 
@@ -38,7 +40,7 @@ App::App(const std::string& rom_path_):
     // SETUP ALL GUI ELEMENTS BEFORE WINDOW CREATION
     create_window();
 
-    debugger.pause();
+    //debugger.pause();
 }
 
 void App::load_rom(const std::string &path) {
@@ -224,38 +226,57 @@ void App::setup_debug_panel() {
     spec_reg.style.gap = {-2.f};
     spec_reg.update();
     gui.add(&spec_reg);
-#define chto
-#ifdef chto
-    // Ща будет очень плохо но я ниче лучше не придумал пока
-    const int mem_size = 2048;
-    // Сколько там памяти точно нам не нужно я не знаю
 
-    //std::array<std::unique_ptr<Table>, mem_size>  rows;
-    //std::array<std::unique_ptr<Toggle>, mem_size> bps;
-    //std::array<std::unique_ptr<Label>, mem_size>  dsms;
+    disassembly_label.set_string("Disassembly");
+    disassembly_label.set_char_size(18);
+    disassembly_label.set_position({d_pos.x + 10.f, spec_reg.get_size().y + spec_reg.get_position().y + 20.f});
+    disassembly_label.stick_to_left();
+    disassembly_label.set_text_color(0xffffffdd);
+    gui.add(&disassembly_label);
 
-    ScrollView disassembly({0,0}, {0,0});
+    disassembly.set_size ({registers_table.get_size().x, 400});
+    disassembly.set_position({d_pos.x + 10.f,
+                                 disassembly_label.get_size().y + disassembly_label.get_position().y + 10.f});
 
-    for(int i = 0; i < mem_size; i++){
-        /* Короче
-         * В теории здесь создается 2к таблиц размером 2 на 1, где слева брейкпойнт
-         * а справа строка типа " 0x0200 3A00 SE VA, 0x00 "
-         * они тут настраиваются, кладутся в ScrollView, он с нужным размером под
-         * блоком регистров будет рисоваться
-         *
-         * ScrollView обновляет, шлет ивенты и рендерит только те объедки, которые
-         * попадают в View, так что те три прикола хоть и будут весить ~7-8мб
-         * но вроде сильно грузить не должны
-         *
-         * ну я надеюсь*/
+    for(uint32_t i = 0; i < usable_memory_size / 2; i++){
+        rows[i] = std::make_unique<Table>(2,1);
+        bps[i]  = std::make_unique<Toggle>("0", sf::Vector2f{30.f,30.f}, sf::Vector2f{0.f,0.f});
+        dsms[i] = std::make_unique<Label>("0", sf::Vector2f{disassembly.get_size().x - 36.f ,36.f}, sf::Vector2f{0.f,0.f});
+        bps[i]->set_string(std::to_string(i+1));
+
+        rows[i]->set_position({0.f, 36.f * i});
+
+        /* todo: Настроить breakpoints */
+
+        dsms[i]->set_char_size(18);
+        dsms[i]->set_text_color(sf::Color::White);
+        dsms[i]->stick_to_left();
+        dsms[i]->set_on_update([&, i](){
+            uint32_t mem_pos = MEM_START + 2*i;
+            auto disasm = debugger.disassemble(mem_pos, 1);
+
+            std::string res = "0x"+utils::int_as_hex_str(disasm[0].address, 4) +
+                              " " +utils::int_as_hex_str(disasm[0].opcode, 4) +
+                              " " +disasm[0].mnemonic;
+
+            dsms[i]->set_string(res);
+        });
+
+
+        rows[i]->add_widget(bps[i].get());
+        rows[i]->add_widget(dsms[i].get());
+
+        disassembly.add_widget(rows[i].get());
     }
-#endif
+
+    gui.add(&disassembly);
 }
+
 
 void App::setup_open_rom_button() {
     auto d_pos = display.get_size();
     //
-    open_file_btn.set_position({d_pos.x + 10, spec_reg.get_size().y + spec_reg.get_position().y + 10});
+    open_file_btn.set_position({d_pos.x + 10, disassembly.get_size().y + disassembly.get_position().y + 10});
 
     sf::RectangleShape rec(open_file_btn.get_size());
     rec.setFillColor(sf::Color::White);
@@ -307,7 +328,7 @@ void App::create_window() {
     window.create(
             sf::VideoMode(static_cast<sf::Vector2u>(gui.get_size())),
             make_title(rom_path),
-            sf::Style::Default,
+            sf::Style::Close,
             sf::State::Windowed);
     window.setFramerateLimit(60);
     window.requestFocus();

@@ -35,9 +35,10 @@ public:
 
     Label() : Label("", {0.f,0.f}, {0.f,0.f}) {}
 
+    explicit Label(const std::string &_text) : Label(_text, {0.f,0.f}, {0.f,0.f}) {}
+
     void update() override {
         on_update();
-
     }
 
     void handle_event(const std::optional<sf::Event> &event) override {
