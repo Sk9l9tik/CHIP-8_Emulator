@@ -56,10 +56,10 @@ void App::load_rom(const std::string &path) {
     }
 }
 
-void App::load_font() {
-    if (!font.openFromFile("../assets/fonts/Roboto-Regular.ttf"))
-        if(!font.openFromFile("../../assets/fonts/Roboto-Regular.ttf"))
-            throw std::runtime_error("Failed to load font: Roboto-Regular.ttf");
+void App::load_font(const std::string& filename) {
+    if (!font.openFromFile("../assets/fonts/" + filename))
+        if(!font.openFromFile("../../assets/fonts/" + filename))
+            throw std::runtime_error("Failed to load font: " + filename);
 
     ResourceManager::set_font(font);
 }
@@ -82,7 +82,7 @@ sf::SoundBuffer App::create_beep_buffer() {
     std::vector<sf::SoundChannel> channelMap = { sf::SoundChannel::Mono };
 
     if (!buffer.loadFromSamples(samples.data(), samples.size(), 1, SAMPLE_RATE, channelMap)) {
-        throw std::runtime_error("Sound system error: Otshlefuy (failed to load beep samples)");
+        throw std::runtime_error("Sound system error: failed to load beep samples");
     }
 
     return buffer;
@@ -196,7 +196,7 @@ void App::setup_debug_panel() {
     registers_table.update();
     registers_table.style.gap ={-2}; // На удивление это работает так, как я и думал
     gui.add(&registers_table);
-    //xd
+
     auto configure_reg_label = [this](Label& l){
         l.style.margin = {3.f};
         l.set_bg_color(0x2A2A3AFF);
@@ -245,7 +245,7 @@ void App::setup_disassembly_panel(){
 
     disassembly.set_size({registers_table.get_size().x - 6.f, 400});
     disassembly.set_position({d_pos.x + 10.f,
-                              disassembly_label.get_size().y + disassembly_label.get_position().y + 10.f});
+                              disassembly_label.get_size().y + disassembly_label.get_position().y + 5.f});
     disassembly.set_bg_color(0x313244FF);
     update_disassembly_panel();
 
@@ -280,7 +280,7 @@ void App::update_disassembly_panel(){
                     " " +disasm[0].mnemonic;
 
             dsms[i]->set_string(res);
-            if(debugger.get_cpu_state().PC - 0x2 == disasm[0].address ) { //&& debugger.is_paused()
+            if(curr_addr == disasm[0].address ) { //&& debugger.is_paused()
                 // Оно там так скачет, что будто и смысла нет без паузы
                 dsms[i]->set_bg_color(0x17A62FFF);
             } else {
@@ -330,7 +330,7 @@ void App::setup_debug_buttons(){
     debug_buttons[2] = {"F10 step",
                         {80.f, DBG_BTN_HEIGHT},
                         {0,0}};
-    debug_buttons[3] = {"F6 toggle bp",
+    debug_buttons[3] = {"toggle bp",
                         {100.f, DBG_BTN_HEIGHT},
                         {0,0}};
 
@@ -391,9 +391,8 @@ void App::setup_debug_buttons(){
         debugger.step();
     });
     debug_buttons[3].set_on_click([&](){
-        debugger.toggle_breakpoint(debugger.get_cpu_state().PC - 0x2); // не ну аче)
+        debugger.toggle_breakpoint(curr_addr); // не ну аче)
     });
-
 
 
     for(auto& b : debug_buttons){
@@ -449,6 +448,7 @@ void App::run(){
     const sf::Time CLOCK_TIME = sf::seconds(1.0f / TIMER_HZ);
 
     while(window.isOpen()){
+        curr_addr = emulator.get_cpu().get_PC();
         // Текущее время работы CPU
 
         sf::Time curr = cpu_clock.getElapsedTime();
@@ -466,8 +466,10 @@ void App::run(){
         timer_accumulator += delta;
 
         handle_events();
+
         update_cpu(CPU_TICK_TIME);
         update_timers(CLOCK_TIME);
+
 
         render();
     }

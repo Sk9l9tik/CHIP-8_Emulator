@@ -37,7 +37,7 @@ public:
 
 private:
     void load_rom(const std::string& path);
-    void load_font();
+    void load_font(const std::string& filename = "Roboto-Regular.ttf");
     void setup_sound();
     void setup_display();
     void setup_keyboard();
@@ -100,6 +100,7 @@ private:
     sf::Time timer_accumulator{sf::Time::Zero};
 
     uint32_t rom_size = 0x0;
+    uint16_t curr_addr = 0x200;
 };
 
 #endif //CHIP_8_EMULATOR_APP_H
