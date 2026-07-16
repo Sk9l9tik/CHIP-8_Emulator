@@ -15,7 +15,7 @@ A modern **CHIP-8 emulator** written in **C++23** with **SFML 3**, featuring a g
 
 * [Overview](#overview)
 * [Features](#features)
-* [Architecture](#architecture-1)
+* [Architecture](#architecture)
 * [Memory Layout](#memory-layout)
 * [Building](#building)
 * [Running](#running)
@@ -25,6 +25,8 @@ A modern **CHIP-8 emulator** written in **C++23** with **SFML 3**, featuring a g
 ---
 
 ## Overview
+
+![CHIP-8 Emulator Demo](assets/screenshots/emu.gif)
 
 **CHIP-8 Emulator** is an educational project implementing a complete CHIP-8 virtual machine emulator in modern **C++23**.
 
@@ -68,7 +70,7 @@ debug/
 ```
 
 | Module    | Description                                   |
-| --------- | --------------------------------------------- |
+|-----------|-----------------------------------------------|
 | **core**  | CPU, memory, timers and instruction execution |
 | **ui**    | Rendering and input                           |
 | **debug** | Debugger and disassembler                     |
@@ -84,7 +86,7 @@ Instead, it stores references to shared objects, allowing the debugger and UI to
 ## Memory Layout
 
 |       Address | Purpose       |
-| ------------: | ------------- |
+|--------------:|---------------|
 | `0x000–0x04F` | Unused        |
 | `0x050–0x09F` | Built-in font |
 | `0x0A0–0x1FF` | Unused        |
@@ -149,7 +151,7 @@ A ROM can also be loaded from the graphical interface while the emulator is runn
 ## Controls
 
 | CHIP-8    | Keyboard  |
-| --------- | --------- |
+|-----------|-----------|
 | `1 2 3 C` | `2 3 4 Z` |
 | `4 5 6 D` | `Q W E X` |
 | `7 8 9 E` | `R A S C` |
@@ -160,7 +162,7 @@ A ROM can also be loaded from the graphical interface while the emulator is runn
 ## Credits
 
 | Avatar                                                       | Contributor                              | Role               |
-| ------------------------------------------------------------ | ---------------------------------------- | ------------------ |
+|--------------------------------------------------------------|------------------------------------------|--------------------|
 | <img src="https://github.com/Sk9l9tik.png" width="50">       | [Sk9l9tik](https://github.com/Sk9l9tik)  | Debugger           |
-| <img src="https://github.com/crw884.png" width="50">         | [crw884](https://github.com/crw884)      | UX/UI, SFML   |
+| <img src="https://github.com/crw884.png" width="50">         | [crw884](https://github.com/crw884)      | UX/UI, SFML        |
 | <img src="https://github.com/SosikuKawiiHog.png" width="50"> | [SKH](https://github.com/SosikuKawiiHog) | Core, Architecture |
