@@ -6,7 +6,6 @@
 #include "core/CHIP_8.h"
 #include "debug/BreakpointManager.h"
 #include "debug/Disassembler.h"
-#include "debug/MemoryViewer.h"
 #include "debug/CPUViewer.h"
 
 
@@ -35,20 +34,18 @@ public:
   [[nodiscard]] DisassembledInstruction get_current_instruction() const;
   [[nodiscard]] std::vector<DisassembledInstruction> disassemble(uint16_t start, uint16_t count) const;
 
-  // void print_disassembled(std::ios_base& (*base)(std::ios_base&), uint16_t start, uint16_t count) const; // 0_-
-
   // MemoryViewer control
   [[nodiscard]] std::vector<uint8_t> memory_range(uint16_t start, uint16_t length) const;
   [[nodiscard]] std::string memory_dump(uint16_t start, uint16_t length) const; 
 
   // CPUViewer control
-  [[nodiscard]] CPUState get_cpu_state() const;
+  [[nodiscard]] CPUState get_cpu_state() const noexcept;
 
 private:
-  CHIP_8& emulator;
-  BreakpointManager breakpoints;
-  Disassembler disassembler;
-  bool paused{};
+  CHIP_8& emulator_;
+  BreakpointManager breakpoints_;
+  Disassembler disassembler_;
+  bool paused_{};
 };
   
 #endif //CHIP_8_DEBUGGER_H

@@ -18,7 +18,7 @@ public:
 
 
 private:  
-  std::unordered_set<uint16_t> breakpoints;
+  std::unordered_set<uint16_t> breakpoints_;
 };
 
 #endif //CHIP_8_BREAKPOINT_MANAGER_H

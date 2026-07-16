@@ -1,7 +1,7 @@
 #include "debug/CPUViewer.h"
 
 
-CPUState CPUViewer::snapshot(const CPU& cpu) {
+CPUState CPUViewer::snapshot(const CPU& cpu) noexcept {
   CPUState state{};
 
   state.PC = cpu.get_PC();
@@ -13,10 +13,10 @@ CPUState CPUViewer::snapshot(const CPU& cpu) {
   state.ST = cpu.get_sound_timer();
 
   for (int i = 0; i < 16; ++i)
-      state.V[i] = cpu.get_register(i);
+    state.V[i] = cpu.get_register(i);
 
   for (int i = 0; i < 16; ++i)
-      state.stack[i] = cpu.get_stack(i);
+    state.stack[i] = cpu.get_stack(i);
 
   for (int i = 0; i < 16; ++i)
     state.keypad[i] = cpu.get_key_state(i) ? 1 : 0;

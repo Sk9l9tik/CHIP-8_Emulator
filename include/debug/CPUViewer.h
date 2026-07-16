@@ -2,7 +2,6 @@
 #define CHIP_8_CPU_VIEWER_H
 
 #include <cstdint>
-#include <vector>
 
 #include "core/CPU.h"
 
@@ -25,7 +24,7 @@ struct CPUState {
 class CPUViewer {
 public:
 
-  [[nodiscard]] static CPUState snapshot(const CPU& cpu); 
+  [[nodiscard]] static CPUState snapshot(const CPU& cpu) noexcept; 
 
 };
 
