@@ -26,7 +26,9 @@ App::App(const std::string& rom_path_):
     ST_label("ST=0x00", {40,40}, {0,0}),
     open_file_btn("Open ROM", {130, 50}, {0,0}),
     disassembly_label("Disassembly", {100,20}, {0,0}),
-    disassembly({1,1}, {1,1})
+    disassembly({1,1}, {1,1}),
+    stack_label("Stack", {100,20}, {0,0}),
+    stack({1,1}, {1,1})
     {
     load_rom(rom_path);
     load_font();
@@ -39,6 +41,7 @@ App::App(const std::string& rom_path_):
     setup_keyboard();
     setup_debug_panel();
     setup_disassembly_panel();
+    setup_stack_panel();
     setup_open_rom_button();
     setup_debug_buttons();
     // SETUP ALL GUI ELEMENTS BEFORE WINDOW CREATION
@@ -83,7 +86,7 @@ sf::SoundBuffer App::create_beep_buffer() {
     std::vector<sf::SoundChannel> channelMap = { sf::SoundChannel::Mono };
 
     if (!buffer.loadFromSamples(samples.data(), samples.size(), 1, SAMPLE_RATE, channelMap)) {
-        throw std::runtime_error("Sound system error: failed to load beep samples");
+        throw std::runtime_error("Sound system error: failed to load BEEP samples");
     }
 
     return buffer;
@@ -172,9 +175,10 @@ void App::setup_debug_panel() {
     d_labels.update();
     gui.add(&d_labels);
 
-    reg_label.set_position({d_pos.x + 10, 60});
+    reg_label.set_position({d_pos.x + 10, 55});
     reg_label.set_char_size(18);
     reg_label.set_text_color(0xffffffdd);
+    reg_label.stick_to_left();
 
     gui.add(&reg_label);
 
@@ -239,7 +243,7 @@ void App::setup_disassembly_panel(){
 
     disassembly_label.set_string("Disassembly");
     disassembly_label.set_char_size(18);
-    disassembly_label.set_position({d_pos.x + 10.f, spec_reg.get_size().y + spec_reg.get_position().y + 20.f});
+    disassembly_label.set_position({d_pos.x + 10.f, spec_reg.get_size().y + spec_reg.get_position().y + 10.f});
     disassembly_label.stick_to_left();
     disassembly_label.set_text_color(0xffffffdd);
     gui.add(&disassembly_label);
@@ -347,7 +351,59 @@ void App::setup_open_rom_button() {
     open_file_btn.set_on_click([this](){
         open_rom_dialog();
     });
-    gui.add(&open_file_btn);
+    //gui.add(&open_file_btn);
+}
+
+void App::setup_stack_panel() {
+    auto d_pos = display.get_size();
+
+    stack_label.set_string("Stack");
+    stack_label.set_char_size(18);
+    stack_label.set_position({d_pos.x + 10.f, disassembly.get_size().y + disassembly.get_position().y + 10.f});
+    stack_label.stick_to_left();
+    stack_label.set_text_color(0xffffffdd);
+    gui.add(&stack_label);
+
+    stack.set_size({registers_table.get_size().x - 6.f, 116});
+    stack.set_position({d_pos.x + 10.f,
+                        stack_label.get_size().y + stack_label.get_position().y + 5.f});
+    stack.set_bg_color(0x313244FF);
+
+    int i = 0;
+    for(auto& lb : stack_vals){
+        lb.set_size(sf::Vector2f{stack.get_size().x,36.f});
+        lb.set_position({0, 40.f*static_cast<float>(i)});
+
+        lb.set_string("[0] 0x200");
+        lb.set_char_size(22);
+        lb.set_bg_color(0x2A2A3AFF);
+        lb.set_text_color(sf::Color::White);
+        lb.style.padding.left = 10.f;
+        lb.stick_to_left();
+
+
+        lb.set_on_update([&, i](){
+            //std::string res = "["+utils::int_as_hex_str(i,1)+"]"; // можно еще так чтобы не [10] было а [A]
+            std::string res = "["+std::to_string(i)+"]";
+
+            auto val = debugger.get_cpu_state().stack[i];
+            res += i > 9 ? " 0x" : "   0x";
+            res += utils::int_as_hex_str(val, 4);
+
+            lb.set_string(res);
+
+            if(val == 0x0){
+                lb.set_text_color(0x7f7f7fff);
+            } else {
+                lb.set_text_color(sf::Color::White);
+            }
+        });
+
+        i++;
+        stack.add_widget(&lb);
+    }
+
+    gui.add(&stack);
 }
 
 void App::setup_debug_buttons(){
@@ -364,7 +420,7 @@ void App::setup_debug_buttons(){
     debug_buttons[2] = {"F10 step",
                         {80.f, DBG_BTN_HEIGHT},
                         {0,0}};
-    debug_buttons[3] = {"toggle bp",
+    debug_buttons[3] = {"Open ROM",
                         {100.f, DBG_BTN_HEIGHT},
                         {0,0}};
 
@@ -425,7 +481,8 @@ void App::setup_debug_buttons(){
         debugger.step();
     });
     debug_buttons[3].set_on_click([&](){
-        debugger.toggle_breakpoint(curr_addr); // не ну аче)
+        //debugger.toggle_breakpoint(curr_addr); // не ну аче)
+        open_rom_dialog();
     });
 
 

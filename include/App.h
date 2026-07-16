@@ -45,6 +45,7 @@ private:
     void setup_disassembly_panel();
     void update_disassembly_panel();
     void track_current_instruction();
+    void setup_stack_panel();
     void setup_debug_buttons();
     void setup_open_rom_button();
     void create_window();
@@ -93,6 +94,9 @@ private:
     ScrollView disassembly;
     std::vector<std::unique_ptr<Label>>  dsms;
     std::array<Button, 4> debug_buttons;
+    Label stack_label;
+    std::array<Label, 16> stack_vals;
+    ScrollView stack;
 
 
     sf::Clock cpu_clock;
