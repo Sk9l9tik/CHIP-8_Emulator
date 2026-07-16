@@ -99,6 +99,7 @@ private:
     Label stack_label;
     std::array<Label, 16> stack_vals;
     ScrollView stack;
+    Button reset_button;
 
 
     sf::Clock cpu_clock;

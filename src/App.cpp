@@ -39,10 +39,10 @@ App::App(const std::string& rom_path_):
     //GUI
     setup_display();
     setup_keyboard();
+    setup_open_rom_button();
     setup_debug_panel();
     setup_disassembly_panel();
     setup_stack_panel();
-    setup_open_rom_button();
     setup_debug_buttons();
     // SETUP ALL GUI ELEMENTS BEFORE WINDOW CREATION
     create_window();
@@ -204,6 +204,8 @@ void App::setup_debug_panel() {
 
     auto configure_reg_label = [this](Label& l){
         l.style.margin = {3.f};
+        l.style.padding.left = 4.f;
+        l.style.padding.right = 5.f;
         l.set_bg_color(0x2A2A3AFF);
         l.set_size(sf::Text(font, "I=0x000", 20).getLocalBounds().size + sf::Vector2f {20.f, 20.f});
         l.set_char_size(20);
@@ -235,6 +237,25 @@ void App::setup_debug_panel() {
     spec_reg.style.gap = {-2.f};
     spec_reg.update();
     gui.add(&spec_reg);
+
+    for(int i = 0; i < 5; i++){
+        reset_button.set_texture("def", static_cast<Button::State>(i));
+    }
+
+    reset_button.set_string("Reset");
+
+    auto reset_pos = spec_reg.get_size() + spec_reg.get_position();
+
+    reset_button.set_char_size(18);
+
+    reset_button.set_position({reset_pos.x + spec_reg.get_size().x * 0.25f, reset_pos.y - spec_reg.get_size().y * (3.f/4.f)});
+    reset_button.set_size({100, 40});
+    reset_button.set_on_click([&](){
+       emulator.get_cpu().reset();
+    });
+
+    gui.add(&reset_button);
+
 
 }
 
@@ -343,15 +364,7 @@ void App::setup_open_rom_button() {
     r_t.draw(rec);
     r_t.display();
     ResourceManager::load_texture("def", r_t.getTexture());
-    for(int i = 0; i < 5; i++){
-        open_file_btn.set_texture("def", static_cast<Button::State>(i));
-    }
 
-    open_file_btn.set_char_size(18);
-    open_file_btn.set_on_click([this](){
-        open_rom_dialog();
-    });
-    //gui.add(&open_file_btn);
 }
 
 void App::setup_stack_panel() {
@@ -444,6 +457,7 @@ void App::setup_debug_buttons(){
 
     debug_buttons[0].set_on_click([&](){
         debugger.resume();
+        emulator.tick();
 //        debug_buttons[0].lock();
 //        debug_buttons[1].unlock();
 //        debug_buttons[2].lock();

@@ -31,6 +31,7 @@ void GUI::handle_input(const std::optional<sf::Event> &event){
             break;
         case sf::Keyboard::Scancode::F5:
             debugger.resume();
+            emulator.tick();
             break;
         case sf::Keyboard::Scancode::F9:
             debugger.pause();
@@ -43,6 +44,7 @@ void GUI::handle_input(const std::optional<sf::Event> &event){
         case sf::Keyboard::Scancode::Space:
             if(debugger.is_paused()){
                 debugger.resume();
+                emulator.tick();
             } else {
                 debugger.pause();
             }
