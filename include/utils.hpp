@@ -1,7 +1,6 @@
 #ifndef CHIP_8_EMULATOR_UTILS_HPP
 #define CHIP_8_EMULATOR_UTILS_HPP
 
-// Весь winapi в namespace utils был 0_o
 #if defined(_WIN32)
 #include <windows.h>
 #else

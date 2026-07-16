@@ -24,7 +24,7 @@ public:
 
         current_scrollbar_color = scrollbar_color;
         is_dragging = false;
-
+        drag_offset = 0.f;
     }
 
     bool add_widget(Widget* widget) {
@@ -50,7 +50,7 @@ public:
         // Scroll bar events
         if (auto pressed = event->getIf<sf::Event::MouseButtonPressed>()) {
             if (pressed->button == sf::Mouse::Button::Left) {
-                sf::Vector2f mouse_pos = static_cast<sf::Vector2f>(pressed->position);
+                auto mouse_pos = static_cast<sf::Vector2f>(pressed->position);
 
                 if (is_mouse_over_scrollbar(mouse_pos)) {
                     is_dragging = true;
@@ -85,7 +85,7 @@ public:
         }
 
         if (auto moved = event->getIf<sf::Event::MouseMoved>()) {
-            sf::Vector2f mouse_pos = static_cast<sf::Vector2f>(moved->position);
+            auto mouse_pos = static_cast<sf::Vector2f>(moved->position);
 
             if (!is_dragging) {
                 if (is_mouse_over_scrollbar(mouse_pos)) {
@@ -142,7 +142,7 @@ public:
     void render(sf::RenderTarget &target) override {
         if (widgets.empty()) return;
 
-        if (render_target.getSize() != sf::Vector2u(size.x, size.y)) {
+        if (render_target.getSize() != sf::Vector2u(size)) {
             if (!render_target.resize({
                 static_cast<unsigned int>(size.x),
                 static_cast<unsigned int>(size.y)
@@ -295,7 +295,7 @@ private:
         return event;
     }
 
-    // SCROLLBAR чет он чуть ли не сложнее самого класса вышел
+    // SCROLLBAR
     void render_scrollbar(sf::RenderTarget &target) {
         float max_scroll = std::max(0.f, content_size.y - size.y);
 

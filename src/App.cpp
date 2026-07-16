@@ -199,7 +199,7 @@ void App::setup_debug_panel() {
         registers_table.add_widget(&l);
     }
     registers_table.update();
-    registers_table.style.gap ={-2}; // На удивление это работает так, как я и думал
+    registers_table.style.gap = {-2};
     gui.add(&registers_table);
 
     auto configure_reg_label = [this](Label& l){
@@ -306,8 +306,7 @@ void App::update_disassembly_panel(){
                     " " +disasm[0].mnemonic;
 
             dsms[i]->set_string(res);
-            if(curr_addr == disasm[0].address ) { //&& debugger.is_paused()
-                // Оно там так скачет, что будто и смысла нет без паузы
+            if(curr_addr == disasm[0].address ) {
                 dsms[i]->set_bg_color(0x17A62FFF);
             } else {
                 dsms[i]->set_bg_color(bp_set ? 0xB57200FF  : 0x2A2A3AFF);
@@ -331,7 +330,7 @@ void App::track_current_instruction() {
 
     uint32_t index = (pc - 0x200) / 2;
 
-    float instruction_y = index * line_height;
+    float instruction_y = static_cast<float>(index) * line_height;
 
     float scroll = disassembly.get_scroll();
     float view_height = disassembly.get_size().y;
@@ -396,7 +395,7 @@ void App::setup_stack_panel() {
 
 
         lb.set_on_update([&, i](){
-            //std::string res = "["+utils::int_as_hex_str(i,1)+"]"; // можно еще так чтобы не [10] было а [A]
+            //std::string res = "["+utils::int_as_hex_str(i,1)+"]"; // можно еще так, чтобы не [10] было, а [A]
             std::string res = "["+std::to_string(i)+"]";
 
             auto val = debugger.get_cpu_state().stack[i];
@@ -651,7 +650,7 @@ std::optional<sf::Event> App::correct_mouse_in_view(const std::optional<sf::Even
 
     sf::Vector2f mouse_pos = window.mapPixelToCoords(mouse_pixel, window.getView());
 
-    if(auto e = event->getIf<sf::Event::MouseMoved>()){
+    if(event->is<sf::Event::MouseMoved>()){
         return sf::Event(sf::Event::MouseMoved(
                 sf::Vector2i(static_cast<int>(mouse_pos.x), static_cast<int>(mouse_pos.y))
         ));

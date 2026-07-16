@@ -16,10 +16,6 @@ public:
         Pressed,
     };
 
-    /* Transparent button constructor
-     * To make it look better, you need to set 4 textures for all main states
-     * And also set size, position and text settings n everything
-     * */
     explicit Button(const std::string& btn_text)
             : text(ResourceManager::get_font(), btn_text, 12)
     {
@@ -56,7 +52,6 @@ public:
         state = State::Normal;
     }
 
-    // Copy constructor
     Button(const Button& other)
             : Widget(other), bounds(other.bounds),
               textures(other.textures),
@@ -68,7 +63,6 @@ public:
               while_pressed(other.while_pressed)
               {}
 
-    // Default constructor
     Button() : Button("") {}
 
     ~Button() override = default;
@@ -221,7 +215,6 @@ public:
         text.setFillColor(sf::Color(color));
     }
 
-    // анфортунатули, без этого никак
     void set_state(State s){
         State old = state;
         state = s;

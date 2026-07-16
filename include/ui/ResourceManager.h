@@ -11,7 +11,7 @@ public:
     static sf::Font& get_font() { return default_font; }
 
     static sf::Texture* load_texture(const std::string& name, sf::Texture texture){
-        return &(textures[name] = std::move(texture)); // 0_0
+        return &(textures[name] = std::move(texture));
     }
 
     static sf::Texture* load_texture(const std::string& name, const std::string& filename) {

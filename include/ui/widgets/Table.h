@@ -104,11 +104,9 @@ public:
         background.setFillColor(color);
     }
 
-    //
     sf::Vector2f get_size() const override {
         return size;
     }
-
 private:
     void recount_size(){
         std::fill(col_sizes.begin(), col_sizes.end(), 0.f);

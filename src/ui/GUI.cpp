@@ -63,26 +63,26 @@ void GUI::handle_input(const std::optional<sf::Event> &event){
 
 void GUI::handle_event(const std::optional<sf::Event> &event) {
     if(auto resized = event->getIf<sf::Event::Resized>()){
-        sf::Vector2u windowSize = sf_window.getSize();
-        float windowWidth = static_cast<float>(windowSize.x);
-        float windowHeight = static_cast<float>(windowSize.y);
-        float windowAspectRatio = windowWidth / windowHeight;
+        sf::Vector2u window_size = sf_window.getSize();
+        float window_width = static_cast<float>(window_size.x);
+        float window_height = static_cast<float>(window_size.y);
+        float window_aspect_ratio = window_width / window_height;
 
-        float viewportX = 0.f;
-        float viewportY = 0.f;
-        float viewportWidth = 1.f;
-        float viewportHeight = 1.f;
+        float viewport_x = 0.f;
+        float viewport_y =0.f;
+        float viewport_width = 1.f;
+        float viewport_height = 1.f;
 
-        if (windowAspectRatio > 1052.f/960.f) {
-            viewportWidth = 1052.f/960.f / windowAspectRatio;
-            viewportX = (1.f - viewportWidth) / 2.f;
+        if (window_aspect_ratio > 1052.f / 960.f) {
+            viewport_width = 1052.f / 960.f / window_aspect_ratio;
+            viewport_x = (1.f - viewport_width) / 2.f;
         } else {
-            viewportHeight = windowAspectRatio / (1052.f/ 960.f);
-            viewportY = (1.f - viewportHeight) / 2.f;
+            viewport_height = window_aspect_ratio / (1052.f / 960.f);
+            viewport_y = (1.f - viewport_height) / 2.f;
         }
 
         auto view = sf_window.getView();
-        view.setViewport(sf::FloatRect({viewportX, viewportY}, {viewportWidth, viewportHeight}));
+        view.setViewport(sf::FloatRect({viewport_x, viewport_y}, {viewport_width, viewport_height}));
         sf_window.setView(view);
 
         for(auto& el: widgets){
