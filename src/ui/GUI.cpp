@@ -61,8 +61,28 @@ void GUI::handle_input(const std::optional<sf::Event> &event){
 
 void GUI::handle_event(const std::optional<sf::Event> &event) {
     if(auto resized = event->getIf<sf::Event::Resized>()){
-        sf::FloatRect visible_area({0.f, 0.f}, sf::Vector2f(resized->size));
-        sf_window.setView(sf::View(visible_area));
+        sf::Vector2u windowSize = sf_window.getSize();
+        float windowWidth = static_cast<float>(windowSize.x);
+        float windowHeight = static_cast<float>(windowSize.y);
+        float windowAspectRatio = windowWidth / windowHeight;
+
+        float viewportX = 0.f;
+        float viewportY = 0.f;
+        float viewportWidth = 1.f;
+        float viewportHeight = 1.f;
+
+        if (windowAspectRatio > 1052.f/960.f) {
+            viewportWidth = 1052.f/960.f / windowAspectRatio;
+            viewportX = (1.f - viewportWidth) / 2.f;
+        } else {
+            viewportHeight = windowAspectRatio / (1052.f/ 960.f);
+            viewportY = (1.f - viewportHeight) / 2.f;
+        }
+
+        auto view = sf_window.getView();
+        view.setViewport(sf::FloatRect({viewportX, viewportY}, {viewportWidth, viewportHeight}));
+        sf_window.setView(view);
+
         for(auto& el: widgets){
             el->update();
         }

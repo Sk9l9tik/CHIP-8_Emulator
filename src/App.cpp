@@ -571,7 +571,7 @@ void App::handle_events() {
     {
         if (event->is<sf::Event::Closed>())
             window.close();
-        gui.handle_event(event);
+        gui.handle_event(correct_mouse_in_view(event));
     }
 }
 
@@ -628,4 +628,39 @@ void App::render() {
     gui.render();
     update_sound_playback();
     window.display();
+}
+
+std::optional<sf::Event> App::correct_mouse_in_view(const std::optional<sf::Event>& event){
+    if (!event.has_value()) return std::nullopt;
+
+    sf::Vector2i mouse_pixel = sf::Mouse::getPosition(window);
+
+    sf::Vector2f mouse_pos = window.mapPixelToCoords(mouse_pixel, window.getView());
+
+    if(auto e = event->getIf<sf::Event::MouseMoved>()){
+        return sf::Event(sf::Event::MouseMoved(
+                sf::Vector2i(static_cast<int>(mouse_pos.x), static_cast<int>(mouse_pos.y))
+        ));
+    }
+    if(auto e = event->getIf<sf::Event::MouseButtonPressed>()){
+        return sf::Event(sf::Event::MouseButtonPressed(
+                e->button,
+                sf::Vector2i(static_cast<int>(mouse_pos.x), static_cast<int>(mouse_pos.y))
+        ));
+    }
+    if(auto e = event->getIf<sf::Event::MouseButtonReleased>()){
+        return sf::Event(sf::Event::MouseButtonReleased(
+                e->button,
+                sf::Vector2i(static_cast<int>(mouse_pos.x), static_cast<int>(mouse_pos.y))
+        ));
+    }
+    if(auto e = event->getIf<sf::Event::MouseWheelScrolled>()){
+        return sf::Event(sf::Event::MouseWheelScrolled(
+                e->wheel,
+                e->delta,
+                sf::Vector2i(static_cast<int>(mouse_pos.x), static_cast<int>(mouse_pos.y))
+        ));
+    }
+
+    return event;
 }

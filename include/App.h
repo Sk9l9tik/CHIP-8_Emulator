@@ -50,6 +50,8 @@ private:
     void setup_open_rom_button();
     void create_window();
 
+    std::optional<sf::Event> correct_mouse_in_view(const std::optional<sf::Event>& event);
+
     void handle_events();
     void update_cpu(sf::Time cpu_tick_time);
     void update_timers(sf::Time clock_time);
