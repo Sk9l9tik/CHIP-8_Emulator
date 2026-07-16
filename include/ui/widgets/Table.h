@@ -111,6 +111,9 @@ public:
 
 private:
     void recount_size(){
+        std::fill(col_sizes.begin(), col_sizes.end(), 0.f);
+        std::fill(row_sizes.begin(), row_sizes.end(), 0.f);
+
         for(uint32_t j = 0; j < rows_c; j++){
             for(uint32_t i = 0; i < cols_c; i++) {
                 auto pw = _table[i+j*cols_c];

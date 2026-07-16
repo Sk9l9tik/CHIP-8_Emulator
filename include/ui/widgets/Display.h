@@ -33,6 +33,10 @@ public:
         pixel_size = p_size;
     }
 
+    float get_pixel_size() const{
+        return pixel_size;
+    }
+
     void set_colors(uint32_t true_c, uint32_t false_c){
         false_color = false_c;
         true_color = true_c;
