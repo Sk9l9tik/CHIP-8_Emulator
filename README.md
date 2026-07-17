@@ -20,6 +20,7 @@ A modern **CHIP-8 emulator** written in **C++23** with **SFML 3**, featuring a g
 * [Building](#building)
 * [Running](#running)
 * [Controls](#controls)
+* [ROM](#ROM)
 * [Credits](#credits)
 
 ---
@@ -156,6 +157,14 @@ A ROM can also be loaded from the graphical interface while the emulator is runn
 | `4 5 6 D` | `Q W E X` |
 | `7 8 9 E` | `R A S C` |
 | `A 0 B F` | `D 1 F V` |
+
+---
+
+## ROM
+
+ROM for the release were taken from here. Make sure to check other ROMs!
+
+https://github.com/Timendus/chip8-test-suite
 
 ---
 
