@@ -44,7 +44,7 @@ public:
         replace_widgets();
 
         return true;
-    } // Set widget to [x+y*cols] cell
+    }
 
     uint32_t get_cols_c() const {
         return cols_c;
@@ -85,8 +85,9 @@ public:
             target.draw(bg_sprite);
         }
         for (auto& el : _table) {
-            if(el != nullptr)
+            if(el != nullptr) {
                 el->render(target);
+            }
         }
     }
 
