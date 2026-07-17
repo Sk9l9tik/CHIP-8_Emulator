@@ -162,7 +162,10 @@ public:
         }
 
         render_target.display();
-        sf::Sprite sprite(render_target.getTexture());
+        auto render_texture = render_target.getTexture();
+        render_texture.setSmooth(true);
+
+        sf::Sprite sprite(render_texture);
         sprite.setPosition(pos);
 
         target.draw(sprite);

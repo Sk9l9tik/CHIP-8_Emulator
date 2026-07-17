@@ -65,6 +65,9 @@ void App::load_font(const std::string& filename) {
         if(!font.openFromFile("../../assets/fonts/" + filename))
             throw std::runtime_error("Failed to load font: " + filename);
 
+
+    font.setSmooth(true);
+
     ResourceManager::set_font(font);
 }
 
@@ -289,7 +292,7 @@ void App::update_disassembly_panel(){
 
         dsms[i]->set_char_size(22);
         dsms[i]->set_bg_color(0x2A2A3AFF);
-        dsms[i]->set_text_color(sf::Color::White);
+        dsms[i]->set_text_color(0xffffffdd);
         dsms[i]->style.padding.left = 10.f;
         dsms[i]->stick_to_left();
         dsms[i]->set_on_update([&, i](){
@@ -405,9 +408,9 @@ void App::setup_stack_panel() {
             lb.set_string(res);
 
             if(val == 0x0){
-                lb.set_text_color(0x7f7f7fff);
+                lb.set_text_color(0x7f7f7fdd);
             } else {
-                lb.set_text_color(sf::Color::White);
+                lb.set_text_color(0xffffffdd);
             }
         });
 

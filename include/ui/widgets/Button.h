@@ -64,7 +64,6 @@ public:
               {}
 
     Button& operator=(const Button&) = default;
-
     Button(Button&&) = default;
     Button& operator=(Button&&) = default;
 
