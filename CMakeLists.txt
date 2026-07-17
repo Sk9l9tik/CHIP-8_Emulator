@@ -36,9 +36,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     find_package(nfd QUIET)
     if(NOT nfd_FOUND)
         FetchContent_Declare(
-            nfd
-            GIT_REPOSITORY https://github.com/btzy/nativefiledialog-extended.git
-            GIT_TAG v1.2.1
+                nfd
+                GIT_REPOSITORY https://github.com/btzy/nativefiledialog-extended.git
+                GIT_TAG v1.2.1
         )
         FetchContent_MakeAvailable(nfd)
     endif()
@@ -49,25 +49,25 @@ file(GLOB_RECURSE DEBUG_SRC src/debug/*.cpp)
 file(GLOB_RECURSE UI_SRC src/ui/*.cpp)
 
 add_executable(chip8_emu
-    ${CORE_SRC}
-    ${DEBUG_SRC}
-    ${UI_SRC}
-    src/App.cpp
-    src/main.cpp
+        ${CORE_SRC}
+        ${DEBUG_SRC}
+        ${UI_SRC}
+        src/App.cpp
+        src/main.cpp
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  target_link_options(chip8_emu PRIVATE $<$<CONFIG:RELEASE>: -static-libgcc -static-libstdc++>)
+    target_link_options(chip8_emu PRIVATE $<$<CONFIG:RELEASE>: -static-libgcc -static-libstdc++>)
 else()
-  target_link_options(chip8_emu PRIVATE $<$<CONFIG:RELEASE>: -static>)
+    target_link_options(chip8_emu PRIVATE $<$<CONFIG:RELEASE>: -static>)
 endif()
 
 target_include_directories(chip8_emu PRIVATE ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(chip8_emu PRIVATE sfml-graphics sfml-window sfml-audio sfml-system)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  target_link_libraries(chip8_emu PRIVATE nfd)
-  target_compile_definitions(chip8_emu PRIVATE HAVE_NFD)
+    target_link_libraries(chip8_emu PRIVATE nfd)
+    target_compile_definitions(chip8_emu PRIVATE HAVE_NFD)
 endif()
 
 # Rabota? No
@@ -91,12 +91,12 @@ if(BUILD_TESTS)
     file(GLOB_RECURSE TEST_UI_SRC tests/ui/*.cpp)
 
     add_executable(chip8_tests
-        ${TEST_CORE_SRC}
-        ${TEST_DEBUG_SRC}
-        ${TEST_UI_SRC}
-        ${CORE_SRC}
-        ${DEBUG_SRC}
-        # ${UI_SRC}
+            ${TEST_CORE_SRC}
+            ${TEST_DEBUG_SRC}
+            ${TEST_UI_SRC}
+            ${CORE_SRC}
+            ${DEBUG_SRC}
+            # ${UI_SRC}
     )
 
     target_include_directories(chip8_tests PRIVATE ${PROJECT_SOURCE_DIR}/include)
