@@ -10,7 +10,7 @@ option(BUILD_TESTS "Build the test suite" ON)
 
 set(COMPILE_FLAGS -Wall -Wextra -Wpedantic)
 
-find_package(SFML 3 COMPONENTS graphics audio QUIET)
+find_package(SFML 3 COMPONENTS Graphics Audio QUIET)
 if(SFML_FOUND)
     message(STATUS "Using system SFML: ${SFML_DIR}")
 else()
@@ -63,7 +63,7 @@ else()
 endif()
 
 target_include_directories(chip8_emu PRIVATE ${PROJECT_SOURCE_DIR}/include)
-target_link_libraries(chip8_emu PRIVATE sfml-graphics sfml-audio)
+target_link_libraries(chip8_emu PRIVATE sfml-graphics sfml-window sfml-audio sfml-system)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   target_link_libraries(chip8_emu PRIVATE nfd)
