@@ -63,6 +63,11 @@ public:
               while_pressed(other.while_pressed)
               {}
 
+    Button& operator=(const Button&) = default;
+
+    Button(Button&&) = default;
+    Button& operator=(Button&&) = default;
+
     Button() : Button("") {}
 
     ~Button() override = default;

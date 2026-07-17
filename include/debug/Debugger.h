@@ -44,7 +44,6 @@ public:
 private:
   CHIP_8& emulator_;
   BreakpointManager breakpoints_;
-  Disassembler disassembler_;
   bool paused_{};
 };
   

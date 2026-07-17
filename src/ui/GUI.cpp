@@ -1,5 +1,6 @@
 #include "ui/GUI.h"
 
+
 GUI::GUI(sf::RenderWindow &window, CHIP_8 &emul, Debugger &debug) : sf_window(window), emulator(emul), debugger(debug){}
 
 void GUI::handle_input(const std::optional<sf::Event> &event){
@@ -62,7 +63,7 @@ void GUI::handle_input(const std::optional<sf::Event> &event){
 }
 
 void GUI::handle_event(const std::optional<sf::Event> &event) {
-    if(auto resized = event->getIf<sf::Event::Resized>()){
+    if(auto _ = event->getIf<sf::Event::Resized>()){
         sf::Vector2u window_size = sf_window.getSize();
         float window_width = static_cast<float>(window_size.x);
         float window_height = static_cast<float>(window_size.y);
