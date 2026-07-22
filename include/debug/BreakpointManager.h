@@ -9,8 +9,8 @@
 class BreakpointManager {
 public:
   void add(uint16_t addr); 
-  void remove(uint16_t arrd);
-  void toggle(uint16_t arrd);
+  void remove(uint16_t addr);
+  void toggle(uint16_t addr);
   bool has(uint16_t addr) const;
   void clear();
 
